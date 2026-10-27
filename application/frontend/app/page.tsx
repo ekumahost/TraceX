@@ -68,7 +68,7 @@ export default function Home() {
           <div className='wrap relative'>
             <div className='max-w-[900px]'>
               <span className={clsx('eyebrow eyebrow--gold transition-all duration-1000', ready ? 'opacity-100' : 'translate-y-4 opacity-0')}>
-                Blockchain forensics · Built in Nigeria
+                Blockchain forensics · Built in Enugu
               </span>
               <h1 className='display lines mt-7 text-[clamp(48px,8.4vw,128px)]'>
                 <span className='line'><span>Follow the</span></span>
@@ -292,7 +292,7 @@ export default function Home() {
             </p>
           </div>
           <div className='text-[13px] text-dim md:text-right'>
-            <p>Built by <span className='text-cream'>Okokoh Benjamin</span> · Nigeria</p>
+            <p>Built by <span className='text-cream'>Okokoh Benjamin</span> · Enugu</p>
             <a href={HACKATHON} target='_blank' rel='noreferrer' className='mt-1 inline-flex items-center gap-1 hover:text-cream'>
               Meta AI Developer Hackathon 2026 <ArrowUpRight className='h-3.5 w-3.5' />
             </a>
