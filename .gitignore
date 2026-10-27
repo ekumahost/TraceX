@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.next/
+.env
+.env.local
+__pycache__/
+*.pyc
+.DS_Store
+postgres_data/
+.venv/
+*.log
+next-env.d.ts
+*.tsbuildinfo
