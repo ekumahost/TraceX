@@ -45,9 +45,9 @@ A `{"provider":"meta","text":"..."}` response means it's working. A `502` lists 
 # terminal 1 - backend API on http://localhost:4000
 cd application/backend && npm install && npm run dev
 
-# terminal 2 - frontend on http://localhost:3000
+# terminal 2 - frontend on http://localhost:3300
 cd application/frontend && npm install && npm run dev
 ```
-Open http://localhost:3000 and click **Sample case** (or go to `/investigate?q=sample`).
+Open http://localhost:3300 and click **Sample case** (or go to `/investigate?q=sample`).
 If the backend runs somewhere else, set `NEXT_PUBLIC_API_URL` in `application/frontend/.env.local`.
 Until the on-chain fetcher is built, every search opens the labelled sample case.
