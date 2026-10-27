@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root { --background: 240 10% 3.9%; --foreground: 0 0% 98%; --border: 240 3.7% 15.9%; }
+body { background: #0a0a0f; color: white; font-family: Inter, system-ui, sans-serif; }
+.tracex-grid { background-image: radial-gradient(circle at 1px 1px, rgba(109,91,255,0.15) 1px, transparent 0); background-size: 40px 40px; }
+.glass { backdrop-filter: blur(16px); background: rgba(18,18,26,0.8); border: 1px solid rgba(109,91,255,0.2); }
