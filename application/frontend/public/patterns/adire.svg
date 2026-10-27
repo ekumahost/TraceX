@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Adire eleko-inspired tile: concentric circles, dotted rows, ladders and zigzags -->
+  <g fill="none" stroke="#9a8dff" stroke-width="1.6" stroke-linecap="round">
+    <circle cx="30" cy="30" r="22"/><circle cx="30" cy="30" r="14"/><circle cx="30" cy="30" r="6"/>
+    <path d="M66 10l8 10 8-10 8 10 8-10 8 10 8-10"/>
+    <path d="M66 26l8 10 8-10 8 10 8-10 8 10 8-10"/>
+    <path d="M66 48h50M66 56h50M74 48v8M86 48v8M98 48v8M110 48v8"/>
+    <path d="M8 66h50M8 112h50M8 66v46M58 66v46"/>
+    <path d="M8 66l50 46M58 66L8 112"/>
+    <path d="M70 70c10 0 10 10 20 10s10-10 20-10M70 86c10 0 10 10 20 10s10-10 20-10M70 102c10 0 10 10 20 10s10-10 20-10"/>
+  </g>
+  <g fill="#9a8dff">
+    <circle cx="66" cy="40" r="1.6"/><circle cx="76" cy="40" r="1.6"/><circle cx="86" cy="40" r="1.6"/><circle cx="96" cy="40" r="1.6"/><circle cx="106" cy="40" r="1.6"/><circle cx="116" cy="40" r="1.6"/>
+    <circle cx="33" cy="80" r="2"/><circle cx="33" cy="98" r="2"/><circle cx="20" cy="89" r="2"/><circle cx="46" cy="89" r="2"/>
+  </g>
+</svg>

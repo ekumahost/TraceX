@@ -1,0 +1,48 @@
+export type EntityType = 'source' | 'wallet' | 'exchange' | 'mixer' | 'bridge' | 'contract';
+
+export type Severity = 'high' | 'medium' | 'low';
+
+export interface TraceNode {
+  id: string; // address
+  label?: string;
+  type: EntityType;
+  hop: number;
+  risk: number; // 0-100
+}
+
+export interface TraceEdge {
+  id: string;
+  from: string;
+  to: string;
+  txHash: string;
+  value: number; // in `asset` units
+  asset: string;
+  timestamp: string; // ISO
+  hop: number;
+}
+
+export interface Risk {
+  type: string; // mixer | peel_chain | velocity | bridge | exchange_hop ...
+  severity: Severity;
+  title?: string;
+  detail?: string;
+  tx?: string;
+  address?: string;
+  count?: number;
+}
+
+export interface TraceCase {
+  input: string;
+  network: string;
+  nodes: TraceNode[];
+  edges: TraceEdge[];
+  risks: Risk[];
+  sample?: boolean; // synthetic data, not a live trace
+}
+
+export type Provider = 'meta' | 'fireworks' | 'baseten';
+
+export interface AIAnswer {
+  provider: Provider;
+  text: string;
+}
