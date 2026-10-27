@@ -28,11 +28,14 @@ services:
   backend:
     build: ./backend
     ports:
-      - "3001:3001"
+      - "4000:4000"
     depends_on:
       - postgres
       - redis
       - analysis-engine
+    env_file:
+      - path: ./backend/.env
+        required: false
     environment:
       - DATABASE_URL=postgresql://tracex:tracex_dev@postgres:5432/tracex
       - REDIS_URL=redis://redis:6379

@@ -14,7 +14,8 @@ const pkg = {
     dotenv: '^16.4.5',
     ethers: '^6.12.0',
     axios: '^1.6.8',
-    zod: '^3.23.8'
+    zod: '^3.23.8',
+    openai: '^4.67.0'
   },
   devDependencies: {
     typescript: '^5.4.5',

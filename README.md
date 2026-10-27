@@ -48,7 +48,7 @@ Demo (25%): Interactive graph + AI explanation + PDF export.
 Technical Depth (20%): BFS fund tracing, multi-source aggregation, NetworkX heuristics, React Flow visualization.
 
 ## Run Locally
-See application/README.md for full setup. Quick:
+See application/README.md for full setup, including **setting the AI API keys** (required for Llama explanations). Quick:
 ```
 cd application/frontend && node generate-package.js && npm install && npm run dev
 cd ../backend && node generate-package.js && npm install && npm run dev
