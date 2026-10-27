@@ -38,6 +38,8 @@ export interface TraceCase {
   edges: TraceEdge[];
   risks: Risk[];
   sample?: boolean; // synthetic data, not a live trace
+  source?: string; // data provider for live traces
+  incomplete?: string[]; // wallets whose transfers couldn't be loaded
 }
 
 export type Provider = 'meta' | 'fireworks' | 'baseten';

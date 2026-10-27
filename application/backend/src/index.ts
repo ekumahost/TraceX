@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { explainTraceUnified, askQuestionUnified, isProvider } from './lib/ai-unified';
+import { traceCase } from './services/trace';
+import { InputError, NotFoundError } from './types';
 
 dotenv.config();
 const app = express();
@@ -16,14 +18,22 @@ app.get('/', (req, res) => {
 
 app.post('/api/trace', async (req, res) => {
   const { input, hops = 5 } = req.body;
-  if (!input) return res.status(400).json({ error: 'input required' });
-  res.json({
-    input,
-    hops,
-    graph: { nodes: [], edges: [] },
-    heuristics: [],
-    message: 'Trace logic to be implemented - see technical-design.md'
-  });
+  if (!input || typeof input !== 'string') return res.status(400).json({ error: 'input required' });
+  try {
+    const t = await traceCase(input, Number(hops) || 5);
+    res.json({
+      input: t.input,
+      network: t.network,
+      hops,
+      source: t.source,
+      incomplete: t.incomplete,
+      graph: { nodes: t.nodes, edges: t.edges },
+      heuristics: t.risks,
+    });
+  } catch (e: any) {
+    const status = e instanceof InputError ? 400 : e instanceof NotFoundError ? 404 : 502;
+    res.status(status).json({ error: e.message });
+  }
 });
 
 app.post('/api/explain', async (req, res) => {

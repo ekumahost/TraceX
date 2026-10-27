@@ -50,4 +50,15 @@ cd application/frontend && npm install && npm run dev
 ```
 Open http://localhost:3300 and click **Sample case** (or go to `/investigate?q=sample`).
 If the backend runs somewhere else, set `NEXT_PUBLIC_API_URL` in `application/frontend/.env.local`.
-Until the on-chain fetcher is built, every search opens the labelled sample case.
+Paste a tx hash, wallet address or ENS name to run a live trace on Ethereum mainnet.
+
+## Blockchain data
+Live traces follow ETH, USDT, USDC, DAI and WETH forward in time from the starting point
+(largest 4 transfers per wallet, up to 40 wallets), stopping at exchanges, mixers, bridges and contracts.
+
+Data comes from the first of these that is configured in `application/backend/.env`:
+1. `ALCHEMY_API_KEY` - https://dashboard.alchemy.com
+2. `ETHERSCAN_API_KEY` - free at https://etherscan.io/myapikey (recommended for demos)
+3. Blockscout's public API - no key needed, but slow and quickly rate-limited
+
+If a live trace fails, the app shows the labelled sample case and the reason.

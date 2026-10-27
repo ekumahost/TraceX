@@ -13,21 +13,22 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   return data as T;
 }
 
-// Returns null when the backend can't produce a real trace yet (offline or empty graph)
-export async function fetchTrace(input: string, hops = 5): Promise<TraceCase | null> {
+export async function fetchTrace(input: string, hops = 5): Promise<{ data: TraceCase } | { error: string }> {
   try {
     const data = await post<any>('/api/trace', { input, hops });
-    const nodes = data.graph?.nodes ?? [];
-    if (!nodes.length) return null;
     return {
-      input,
-      network: data.network ?? 'Ethereum',
-      nodes,
-      edges: data.graph.edges ?? [],
-      risks: data.heuristics ?? data.risks ?? [],
+      data: {
+        input: data.input ?? input,
+        network: data.network ?? 'Ethereum',
+        nodes: data.graph?.nodes ?? [],
+        edges: data.graph?.edges ?? [],
+        risks: data.heuristics ?? [],
+        source: data.source,
+        incomplete: data.incomplete ?? [],
+      },
     };
-  } catch {
-    return null;
+  } catch (e: any) {
+    return { error: /(Failed to fetch|NetworkError|Load failed)/i.test(e.message) ? 'the TraceX backend isn’t reachable' : e.message };
   }
 }
 

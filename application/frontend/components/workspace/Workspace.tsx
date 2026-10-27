@@ -30,7 +30,7 @@ export function Workspace({ query }: { query: string }) {
   const isSample = !query || query === 'sample';
   const [stage, setStage] = useState(0); // 0 fetch · 1 graph · 2 heuristics · 3 ready
   const [data, setData] = useState<TraceCase | null>(null);
-  const [fellBack, setFellBack] = useState(false);
+  const [failReason, setFailReason] = useState<string | null>(null); // live trace failed, showing sample
   const [revealHop, setRevealHop] = useState(-1);
   const [selection, setSelection] = useState<Selection>(null);
   const [focusNonce, setFocusNonce] = useState(0);
@@ -41,12 +41,12 @@ export function Workspace({ query }: { query: string }) {
   // load the case: live trace when the backend has one, otherwise the labelled sample
   useEffect(() => {
     const id = ++run.current;
-    setStage(0); setData(null); setRevealHop(-1); setSelection(null); setFellBack(false); setTab('brief');
+    setStage(0); setData(null); setRevealHop(-1); setSelection(null); setFailReason(null); setTab('brief');
     (async () => {
       const [live] = await Promise.all([isSample ? null : fetchTrace(query), wait(isSample ? 700 : 900)]);
       if (id !== run.current) return;
-      const c = live ?? SAMPLE_CASE;
-      setFellBack(!isSample && !live);
+      const c = live && 'data' in live ? live.data : SAMPLE_CASE;
+      setFailReason(live && 'error' in live ? live.error : null);
       setStage(1); await wait(550);
       if (id !== run.current) return;
       setStage(2); await wait(550);
@@ -76,7 +76,11 @@ export function Workspace({ query }: { query: string }) {
     }
   }, []);
 
-  useEffect(() => { if (data) explain(data); }, [data, explain]);
+  useEffect(() => {
+    if (!data) return;
+    if (data.edges.length) explain(data);
+    else setBrief({ status: 'error', error: 'No outgoing transfers were found from this starting point, so there is nothing to explain yet.' });
+  }, [data, explain]);
 
   const select = useCallback((s: Selection) => { setSelection(s); if (s) setTab('evidence'); }, []);
   const cite = useCallback((s: Selection) => { setSelection(s); setFocusNonce((n) => n + 1); }, []);
@@ -98,7 +102,7 @@ export function Workspace({ query }: { query: string }) {
     URL.revokeObjectURL(url);
   };
 
-  const steps = [isSample || fellBack ? 'Loading sample case' : 'Fetching on-chain transfers', 'Building fund-flow graph', 'Running heuristics'];
+  const steps = [isSample ? 'Loading sample case' : 'Fetching on-chain transfers', 'Building fund-flow graph', 'Running heuristics'];
 
   return (
     <div className='flex h-[100dvh] flex-col bg-ink'>
@@ -117,7 +121,7 @@ export function Workspace({ query }: { query: string }) {
           <Info className='h-4 w-4 flex-none' />
           <span>
             <strong className='font-display text-[11px] uppercase tracking-[.16em] text-gold'>Sample case</strong> · synthetic data for demonstration.
-            {fellBack && <> Live tracing for <span className='mono'>{short(query, 10, 6)}</span> isn’t connected yet.</>}
+            {failReason && <> The live trace for <span className='mono'>{short(query, 10, 6)}</span> failed: {failReason}.</>}
           </span>
         </div>
       )}
@@ -136,6 +140,7 @@ export function Workspace({ query }: { query: string }) {
               <div className='w-[290px] text-center'>
                 <Mark className='loader-mark mx-auto !h-16 !w-16' />
                 <p className='mt-5 font-serif text-[20px] italic text-violet-hi'>Following the money…</p>
+                {!isSample && stage === 0 && <p className='mt-2 text-[12.5px] text-dim'>Live traces can take up to a minute on the free data tier.</p>}
                 <ul className='mt-6 space-y-2.5 text-left'>
                   {steps.map((s, i) => (
                     <li key={s} className={clsx('flex items-center gap-3 text-[13.5px] transition-colors', i < stage ? 'text-cream' : i === stage ? 'text-cream' : 'text-dim')}>
@@ -150,6 +155,13 @@ export function Workspace({ query }: { query: string }) {
           {data && (
             <div className='pointer-events-none absolute left-4 top-4 flex flex-wrap gap-2'>
               <span className='chip bg-[rgba(7,7,13,.8)]'>Case <span className='mono normal-case tracking-normal text-cream'>{short(data.input, 8, 6)}</span></span>
+              {data.source && <span className='chip bg-[rgba(7,7,13,.8)]'>Data · {data.source}</span>}
+              {!!data.incomplete?.length && <span className='chip tone-medium bg-[rgba(7,7,13,.8)]'>{data.incomplete.length} wallet{data.incomplete.length > 1 ? 's' : ''} not loaded</span>}
+            </div>
+          )}
+          {data && !data.edges.length && (
+            <div className='pointer-events-none absolute inset-x-0 bottom-16 text-center text-[13.5px] text-muted'>
+              No outgoing transfers of ETH, USDT, USDC, DAI or WETH found from this starting point.
             </div>
           )}
         </section>

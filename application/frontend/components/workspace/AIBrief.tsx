@@ -64,7 +64,9 @@ export function AIBrief({ data, state, onRetry, onCite }: { data: TraceCase; sta
                 ? 'No AI provider key is set on the backend yet.'
                 : state.error}
           </p>
-          <p className='mt-2 text-[12.5px] text-dim'>Add META_API_KEY to application/backend/.env to enable Muse Spark.</p>
+          {/key missing|credentials missing/i.test(state.error) && (
+            <p className='mt-2 text-[12.5px] text-dim'>Add META_API_KEY to application/backend/.env to enable Muse Spark.</p>
+          )}
           <button type='button' onClick={onRetry} className='btn btn--ghost btn--sm mt-4'><RefreshCw /> Retry</button>
         </div>
         <div className='mt-6 flex items-center justify-between'>
