@@ -18,6 +18,7 @@ export interface Chain {
   nativeUsd: number; // rough price, only for ranking transfers of different assets
   rpc: string; // free public node, used when no RPC_URL / Alchemy key
   alchemy?: string; // Alchemy network subdomain
+  internal?: boolean; // Alchemy reports internal (contract-to-address) ETH transfers on this chain
   keyless: { name: string; base: string }[]; // free Etherscan-compatible APIs
   labels?: string; // Blockscout v2 API for address name tags
   explorer: string;
@@ -31,7 +32,7 @@ const stable = (symbol: string, decimals = 6): Token => ({ symbol, decimals, usd
 export const CHAINS: Record<ChainId, Chain> = {
   ethereum: {
     id: 'ethereum', name: 'Ethereum', chainId: 1, native: 'ETH', nativeUsd: ETH_USD,
-    rpc: 'https://ethereum-rpc.publicnode.com', alchemy: 'eth-mainnet',
+    rpc: 'https://ethereum-rpc.publicnode.com', alchemy: 'eth-mainnet', internal: true,
     keyless: [
       { name: 'Blockscout', base: 'https://eth.blockscout.com/api' },
       { name: 'Routescan', base: 'https://api.routescan.io/v2/network/mainnet/evm/1/etherscan/api' },
@@ -47,7 +48,7 @@ export const CHAINS: Record<ChainId, Chain> = {
   },
   base: {
     id: 'base', name: 'Base', chainId: 8453, native: 'ETH', nativeUsd: ETH_USD,
-    rpc: 'https://base-rpc.publicnode.com', alchemy: 'base-mainnet',
+    rpc: 'https://base-rpc.publicnode.com', alchemy: 'base-mainnet', internal: true,
     keyless: [],
     explorer: 'https://basescan.org',
     tokens: {
@@ -96,7 +97,7 @@ export const CHAINS: Record<ChainId, Chain> = {
   },
   polygon: {
     id: 'polygon', name: 'Polygon', chainId: 137, native: 'POL', nativeUsd: POL_USD,
-    rpc: 'https://polygon-bor-rpc.publicnode.com', alchemy: 'polygon-mainnet',
+    rpc: 'https://polygon-bor-rpc.publicnode.com', alchemy: 'polygon-mainnet', internal: true,
     keyless: [],
     explorer: 'https://polygonscan.com',
     tokens: {

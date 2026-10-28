@@ -1,5 +1,5 @@
 // JSON fetch with timeout, retry on rate limits / 5xx, and a short in-memory cache
-// (stands in for Redis until it's wired up).
+// (no database or Redis needed - traces are computed on demand).
 
 const TTL = 10 * 60_000;
 const cache = new Map<string, { at: number; data: unknown }>();

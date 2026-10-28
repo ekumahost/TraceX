@@ -2,6 +2,7 @@ import { AbiCoder, JsonRpcProvider, formatUnits } from 'ethers';
 import type { Transfer } from '../types';
 import { NotFoundError } from '../types';
 import { CHAINS, CHAIN_ORDER, type Chain } from './chains';
+import { transfersInTxViaAlchemy } from './sources';
 
 // RPC_URL (Ethereum only) wins, then Alchemy, then the chain's free public node
 const providers = new Map<string, JsonRpcProvider>();
@@ -73,6 +74,9 @@ async function readTxTransfers(chain: Chain, hash: string): Promise<Transfer[]> 
   if (receipt?.status === 0) throw new NotFoundError('Transaction failed on-chain, so no value moved');
 
   const base = { hash, timestamp: block!.timestamp, blockNumber: tx.blockNumber };
+  // Alchemy sees internal transfers too (ETH moved by contracts); fall back to value + token logs
+  const viaAlchemy = await transfersInTxViaAlchemy(chain, hash, tx.blockNumber).catch(() => null);
+  if (viaAlchemy?.length) return viaAlchemy;
   const out: Transfer[] = [];
   if (tx.value > 0n && tx.to) {
     out.push({ ...base, from: tx.from.toLowerCase(), to: tx.to.toLowerCase(), value: Number(formatUnits(tx.value, 18)), asset: chain.native });

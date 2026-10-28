@@ -91,7 +91,7 @@ Phase3: Real-time monitoring alerts collaborative investigations mobile app, Mod
 ## 10. TEAM
 Team Name: TraceX AI
 Builder: Okokoh Benjamin - Full-stack Blockchain + AI - Built entire platform frontend, fetcher, Modal integration, Fireworks + Baseten AI layer, docs
-Location: Port Harcourt, Nigeria
+Location: Enugu, Nigeria
 GitHub: ekumahost
 
 ## 11. FEEDBACK FROM YOUR EXPERIENCE USING META PRODUCTS (PASTE THIS FOR PORTAL)

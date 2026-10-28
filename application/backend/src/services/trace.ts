@@ -11,13 +11,14 @@ import { runAnalysis } from './analysis';
  * Follows the money forward from a transaction or wallet, breadth-first.
  * - only transfers made after the funds arrived (money moves forward in time)
  * - each wallet expanded once, so loops can't run forever
- * - the largest few transfers per wallet, dust ignored, hard cap on graph size
+ * - each wallet's largest few destinations (all transfers to them), dust ignored, hard cap on graph size
  * - stops at exchanges, mixers, bridges and contracts: past them the trail isn't one wallet's
  */
 
 export const MAX_HOPS = 20;
 const MAX_NODES = 40;
-const CHILDREN = 4;
+const CHILDREN = 4; // destinations followed per wallet
+const PER_WALLET = 12; // transfers drawn per wallet
 const STOP = new Set(['exchange', 'mixer', 'bridge', 'contract']);
 
 // transfers worth less than this (at rough prices) are ignored as dust
@@ -118,10 +119,13 @@ export async function traceCase(input: string, hops = 5, chainId?: string): Prom
       }
 
       source = res.source;
-      const picked = res.transfers
-        .filter((t) => t.to !== f.address && usd(t) >= DUST_USD)
-        .sort((a, b) => usd(b) - usd(a))
-        .slice(0, CHILDREN);
+      // the biggest few destinations by total value, with every transfer to them - six 100 ETH
+      // deposits into a mixer should show as 600 ETH, not get cut to the top four
+      const real = res.transfers.filter((t) => t.to !== f.address && usd(t) >= DUST_USD);
+      const totals = new Map<string, number>();
+      for (const t of real) totals.set(t.to, (totals.get(t.to) ?? 0) + usd(t));
+      const top = new Set([...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, CHILDREN).map(([to]) => to));
+      const picked = real.filter((t) => top.has(t.to)).sort((a, b) => usd(b) - usd(a)).slice(0, PER_WALLET);
       for (const t of picked) {
         if (nodes.size >= MAX_NODES && !nodes.has(t.to)) break;
         const isNew = !nodes.has(t.to);

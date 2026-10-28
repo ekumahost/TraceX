@@ -61,34 +61,58 @@ function etherscanCompatible(name: string, base: string, extra: string, chain: C
   };
 }
 
+// Alchemy's Transfers API. Includes internal transfers (ETH sent by contracts and smart wallets)
+// on the chains that support them - drainers and multisigs move funds that way.
+async function alchemyPage(key: string, chain: Chain, params: Record<string, unknown>): Promise<{ transfers: Transfer[]; pageKey?: string }> {
+  const native = chain.internal ? ['external', 'internal'] : ['external'];
+  const d = await fetchJson<any>(`https://${chain.alchemy}.g.alchemy.com/v2/${key}`, {
+    method: 'POST',
+    cache: false,
+    body: {
+      jsonrpc: '2.0', id: 1, method: 'alchemy_getAssetTransfers',
+      params: [{ toBlock: 'latest', category: [...native, 'erc20'], withMetadata: true, excludeZeroValue: true, ...params }],
+    },
+  });
+  if (d.error) throw new Error(`Alchemy: ${d.error.message}`);
+  const transfers = (d.result?.transfers ?? [])
+    .filter((t: any) => t.to && t.value != null && (t.category !== 'erc20' || chain.tokens[t.rawContract?.address?.toLowerCase()]))
+    .map((t: any): Transfer => ({
+      hash: t.hash, from: t.from.toLowerCase(), to: t.to.toLowerCase(), value: Number(t.value),
+      asset: t.category === 'erc20' ? chain.tokens[t.rawContract.address.toLowerCase()].symbol : chain.native,
+      timestamp: Math.floor(Date.parse(t.metadata.blockTimestamp) / 1000), blockNumber: parseInt(t.blockNum, 16),
+    }));
+  return { transfers, pageKey: d.result?.pageKey };
+}
+
+const alchemyTransfers = async (key: string, chain: Chain, params: Record<string, unknown>) =>
+  (await alchemyPage(key, chain, params)).transfers;
+
 function alchemy(key: string, chain: Chain): Source {
-  const url = `https://${chain.alchemy}.g.alchemy.com/v2/${key}`;
   return {
     name: 'Alchemy',
-    async outgoing(address, q) {
-      const a = address.toLowerCase();
-      const d = await fetchJson<any>(url, {
-        method: 'POST',
-        cache: false,
-        body: {
-          jsonrpc: '2.0', id: 1, method: 'alchemy_getAssetTransfers',
-          params: [{
-            fromBlock: '0x' + (q.fromBlock ?? 0).toString(16), toBlock: 'latest', fromAddress: a,
-            category: ['external', 'erc20'], withMetadata: true, excludeZeroValue: true,
-            maxCount: '0x' + PAGE.toString(16), order: q.recent ? 'desc' : 'asc',
-          }],
-        },
-      });
-      if (d.error) throw new Error(`Alchemy: ${d.error.message}`);
-      return (d.result?.transfers ?? [])
-        .filter((t: any) => t.to && t.value != null && (t.category === 'external' || chain.tokens[t.rawContract?.address?.toLowerCase()]))
-        .map((t: any): Transfer => ({
-          hash: t.hash, from: a, to: t.to.toLowerCase(), value: Number(t.value),
-          asset: t.category === 'external' ? chain.native : chain.tokens[t.rawContract.address.toLowerCase()].symbol,
-          timestamp: Math.floor(Date.parse(t.metadata.blockTimestamp) / 1000), blockNumber: parseInt(t.blockNum, 16),
-        }));
-    },
+    outgoing: (address, q) => alchemyTransfers(key, chain, {
+      fromBlock: '0x' + (q.fromBlock ?? 0).toString(16), fromAddress: address.toLowerCase(),
+      maxCount: '0x' + PAGE.toString(16), order: q.recent ? 'desc' : 'asc',
+    }),
   };
+}
+
+// Every transfer inside one transaction, internal ones included. Null when Alchemy isn't configured.
+export async function transfersInTxViaAlchemy(chain: Chain, hash: string, blockNumber: number): Promise<Transfer[] | null> {
+  const key = process.env.ALCHEMY_API_KEY;
+  if (!key || !chain.alchemy) return null;
+  const block = '0x' + blockNumber.toString(16);
+  const mine = (ts: Transfer[]) => ts.filter((t) => t.hash.toLowerCase() === hash.toLowerCase());
+  // a busy block has thousands of transfers - page through a few
+  let found: Transfer[] = [];
+  let pageKey: string | undefined;
+  for (let page = 0; page < 5; page++) {
+    const res = await alchemyPage(key, chain, { fromBlock: block, toBlock: block, maxCount: '0x3e8', ...(pageKey ? { pageKey } : {}) });
+    found = found.concat(mine(res.transfers));
+    pageKey = res.pageKey;
+    if (!pageKey) break;
+  }
+  return found;
 }
 
 export function sources(chain: Chain): Source[] {

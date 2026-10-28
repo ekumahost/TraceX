@@ -38,7 +38,7 @@ Application is in application/ folder:
 - Analysis: Python FastAPI + NetworkX + web3.py
 - Blockchain: Alchemy + Etherscan + Covalent
 - AI: Meta Model API - Muse Spark / Llama 3.3-70B (evidence-backed reasoning with tx citations), Meta AI, Muse Code, Muse Image
-- DB: Postgres + Redis + Neo4j (Phase 2)
+- Storage: none needed - traces are computed on demand with a short in-memory cache (a database for saved investigations is optional, later)
 - Infra: Docker Compose, Vercel, Fly.io
 
 ## Why TraceX for Meta Hackathon?

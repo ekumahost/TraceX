@@ -1,45 +1,21 @@
-version: '3.8'
+# Runs the backend and the analysis engine locally. No database: traces are computed on demand
+# and the backend keeps a short in-memory cache. (A database for saved investigations is a
+# possible later addition, not needed today.)
 services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: tracex
-      POSTGRES_USER: tracex
-      POSTGRES_PASSWORD: tracex_dev
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-
   analysis-engine:
     build: ./analysis-engine
     ports:
       - "8100:8000"
-    environment:
-      - PYTHON_ENV=development
-    volumes:
-      - ./analysis-engine:/app
 
   backend:
     build: ./backend
     ports:
       - "4000:4000"
     depends_on:
-      - postgres
-      - redis
       - analysis-engine
     env_file:
       - path: ./backend/.env
         required: false
     environment:
-      - DATABASE_URL=postgresql://tracex:tracex_dev@postgres:5432/tracex
-      - REDIS_URL=redis://redis:6379
+      # use the local engine; remove this line to use the Modal URL from backend/.env instead
       - ANALYSIS_ENGINE_URL=http://analysis-engine:8000
-
-volumes:
-  postgres_data:
