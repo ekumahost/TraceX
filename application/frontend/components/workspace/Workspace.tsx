@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
-import { Check, Download, FileText, Info, Loader2 } from 'lucide-react';
+import { Check, Download, FileText, Info, Loader2, Search, X } from 'lucide-react';
 import type { TraceCase } from '@/lib/types';
 import { explainCase, fetchTrace } from '@/lib/api';
 import { SAMPLE_CASE } from '@/lib/sample-case';
@@ -16,13 +16,15 @@ import { AIBrief, type BriefState } from './AIBrief';
 import { ChatPanel } from './ChatPanel';
 import { EvidencePanel } from './EvidencePanel';
 import { Timeline } from './Timeline';
+import { RecoveryKit } from './RecoveryKit';
 
-type Tab = 'brief' | 'ask' | 'evidence' | 'timeline';
+type Tab = 'brief' | 'ask' | 'evidence' | 'timeline' | 'recovery';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'brief', label: 'AI brief' },
   { id: 'ask', label: 'Ask' },
   { id: 'evidence', label: 'Evidence' },
   { id: 'timeline', label: 'Timeline' },
+  { id: 'recovery', label: 'Recovery Kit' },
 ];
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -37,6 +39,7 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
   const [focusNonce, setFocusNonce] = useState(0);
   const [tab, setTab] = useState<Tab>('brief');
   const [brief, setBrief] = useState<BriefState>({ status: 'loading' });
+  const [mobileSearch, setMobileSearch] = useState(false);
   const run = useRef(0);
 
   // load the case: live trace when the backend has one, otherwise the labelled sample
@@ -118,11 +121,20 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
         <Link href='/' aria-label='TraceX home' className='flex-none'><Wordmark size='sm' /></Link>
         <div className='mx-auto hidden w-full max-w-[560px] md:block'><SearchConsole compact initial={query} initialChain={chain} /></div>
         <div className='ml-auto flex flex-none items-center gap-2 md:ml-0'>
+          <button type='button' onClick={() => setMobileSearch((v) => !v)} className='btn btn--ghost btn--sm md:hidden' aria-label={mobileSearch ? 'Close search' : 'New trace'} aria-expanded={mobileSearch}>
+            {mobileSearch ? <X /> : <Search />}
+          </button>
           <span className='chip hidden lg:inline-flex'><span className='dot dot--live tone-clean' /> {data?.network ?? 'Ethereum'}</span>
           <button type='button' onClick={openReport} disabled={!data} className='btn btn--sm' title='Printable evidence report - save as PDF'><FileText /> <span className='hidden sm:inline'>Report</span></button>
           <button type='button' onClick={exportCase} disabled={!data} className='btn btn--ghost btn--sm' title='Download the case as JSON' aria-label='Download JSON'><Download /> <span className='hidden lg:inline'>JSON</span></button>
         </div>
       </header>
+
+      {mobileSearch && (
+        <div className='flex-none border-b border-line p-3 md:hidden'>
+          <SearchConsole compact initial={query} initialChain={chain} autoFocus />
+        </div>
+      )}
 
       {data?.sample && (
         <div className='flex flex-none items-center gap-3 border-b border-[rgba(240,180,76,.25)] bg-[rgba(240,180,76,.07)] px-5 py-2 text-[12.5px] text-gold-soft'>
@@ -191,8 +203,10 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
               <ChatPanel data={data} onCite={cite} />
             ) : tab === 'evidence' ? (
               <EvidencePanel data={data} selection={selection} onSelect={cite} />
-            ) : (
+            ) : tab === 'timeline' ? (
               <Timeline data={data} selection={selection} onSelect={cite} />
+            ) : (
+              <RecoveryKit data={data} />
             )}
           </div>
         </aside>

@@ -1,18 +1,24 @@
-# Feedback from your experience using Meta products - TraceX AI by Okokoh Benjamin
-Built for Meta AI Developer Hackathon 2026 - https://cerebralvalley.ai/e/meta-ai-developer-hackathon
-Tagline: AI-powered blockchain forensics that traces cryptocurrency flows, investigates suspicious transactions, and turns on-chain data into evidence-backed intelligence.
+# Meta Product Feedback — Personal Draft
 
-We built TraceX AI entirely with Meta ecosystem + Fireworks + Modal + Baseten and loved experience but want to share candid feedback - Built by Okokoh Benjamin in Enugu, Nigeria:
+This form asks for feedback from the builder's own experience. Do not submit a first-person claim below unless it is true for you. Add concrete examples from products you personally used, and remove any items that do not match your experience.
 
-What We Loved:
-1. Meta AI Desktop App as IDE Assistant is powerful: Using Meta AI as coding partner inside our actual project folder (/Applications/WEBSITE/TraceX) accelerated us from idea to architecture to code in hours. It understood blockchain + AI vision and suggested right stack (Next.js + Python FastAPI + Llama) and how to integrate Fireworks, Modal, Baseten.
-2. Muse Spark / Llama via Meta Model API + Fireworks + Baseten incredibly capable for evidence-backed reasoning: Prompting with structured JSON and forcing citation of tx hashes produced accurate hallucination-free explanations - critical for financial investigations. Standard mode pricing fair, Fireworks 160 tokens/sec makes demo wow factor with $0.90/M output (4x cheaper than Meta Standard $4.25/M), Baseten dedicated gives reliability for compliance use-case with $100 + 2M TPM, Modal serverless eliminates DevOps with auto-scaling 0->many and sub-second cold starts.
-3. Muse Code agentic coding: Helped plan multi-step tasks like building React Flow graph components and Python heuristics engine and wiring 3 partner platforms (Fireworks, Modal, Baseten). Felt like senior engineer pair-programming with Okokoh Benjamin.
+## Experience to describe
 
-Pain Points & Suggestions:
-1. Files/Finder Integration is Difficult to Discover and Enable: This was biggest friction. We wanted to point Meta AI to generate code directly into /Applications/WEBSITE/TraceX, but Files connection is hidden under Settings -> Apps -> Files, not in System Settings. Error message says user has not connected Files but doesn't guide new users. We wasted time thinking it was macOS permission issue. Suggestion: Add onboarding tooltip in chat when user mentions local path like /Applications/... - auto-prompt Do you want to connect your files? Here's how. Also allow connecting directly from approval card, not just Settings.
-2. Folder Linking & Write Approval Flow: When writing many files (package.json, components), each write needs individual approval, and JSON files with double quotes sometimes fail to write due to escaping, forcing us to use generator scripts (generate-package.js). Suggestion: Batch approvals for scaffolding a project folder, and fix JSON escaping for package.json writes.
-3. API Credits & Model Discovery: $150 credits generous, but discovering which model to use (Spark vs Wonder vs Glimmer) and geographic availability confusing. We are in Nigeria and had to check Model API Geographic Use Policy separately. Also discovering Fireworks $25, Modal $100, Baseten $100 + 2M TPM credits and how they work together not clear in one place. Suggestion: Show credits usage real-time inside Meta AI chat and suggest best model for task and when to use Fireworks for speed vs Baseten for reliability vs Modal for Python workloads with one unified dashboard for hackathon.
-4. Documentation Gap for Multi-Model Pipelines + Partner Tools: Docs show how to call one model, but not best practices for chaining deterministic data -> heuristics (Modal) -> Llama (Fireworks/Baseten/Meta) with citation enforcement and fallback. Suggestion: Add hackathon recipe: Evidence-backed AI pattern - how to prevent hallucination with structured data + Partner integration guide.
+- Which Meta products did you use while building TraceX? (For example, Meta Model API / Muse Spark, Muse Code, or another product.)
+- What task did you try, and what worked well?
+- What was confusing or slow? Include the step or screen where it happened.
+- Did you use the API in the running product, or only during development?
+- What should Meta improve for developers in your region?
 
-Overall: Despite friction, Meta AI products + Fireworks + Modal + Baseten enabled Okokoh Benjamin to build TraceX AI - platform that would normally need team of 5 and months - in 10 days. Combination of Meta AI chat + Muse Code + Llama API + Fireworks fast inference + Modal serverless + Baseten dedicated is superpower for indie hackers in Nigeria. Fixing Files onboarding would make it 10x better. We must win this hackathon! Built by Okokoh Benjamin for https://cerebralvalley.ai/e/meta-ai-developer-hackathon - AI-powered blockchain forensics that traces cryptocurrency flows, investigates suspicious transactions, and turns on-chain data into evidence-backed intelligence.
+## Application facts you can reference
+
+TraceX's backend contains a Muse Spark integration through the Meta Model API. It sends a bounded blockchain graph and deterministic findings to request an explanation. The prompt asks for evidence-grounded answers, but this does not guarantee correctness. The app can show a matching transaction citation in its evidence UI.
+
+The backend also contains optional Fireworks and Baseten integrations. The presence of integration code alone does not mean either provider was configured or tested. Describe them as personal experience only if you actually used them.
+
+## Optional structure
+
+1. **What I tried:** [Describe the product and task you personally completed.]
+2. **What worked:** [Give one concrete example.]
+3. **What could improve:** [Describe the friction and its impact.]
+4. **Suggestion:** [Offer one actionable product change.]

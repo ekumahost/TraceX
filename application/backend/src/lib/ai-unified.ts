@@ -67,13 +67,3 @@ export function explainTraceUnified(graphJson: any, heuristics: any, preferred: 
 export function askQuestionUnified(question: string, graphJson: any, preferred: Provider = defaultProvider()) {
   return runWithFallback(askers, preferred, [question, graphJson]);
 }
-
-// For submission: Mention you use all 3
-export const AI_INFRA_DESCRIPTION = `
-TraceX uses Meta models via 3 production paths:
-1. Meta Model API Standard ($150 credits) - Muse Spark, primary
-2. Fireworks AI - Llama 3.3 70B - fastest at 160 tokens/sec, $0.90/M output ($25 credits + workshop)
-3. Baseten dedicated - Llama 3.3 70B, 99.9% uptime for compliance ($100 + 2M TPM)
-Analysis engine runs serverless on Modal with auto-scaling 0->many ($100 credits)
-Official partners from https://cerebralvalley.ai/e/meta-ai-developer-hackathon
-`;

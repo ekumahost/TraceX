@@ -96,6 +96,7 @@ export default function ReportPage() {
             </div>
           </div>
         </div>
+        <p className='mt-3 text-[11px] text-[#55536b]'>Rule-based indicator for this trace, not a probability or proof of wrongdoing.</p>
 
         <Section title={`Findings · ${data.risks.length}`}>
           {data.risks.length ? (

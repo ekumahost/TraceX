@@ -1,22 +1,20 @@
-# TraceX AI — AI-powered blockchain forensics that traces cryptocurrency flows, investigates suspicious transactions, and turns on-chain data into evidence-backed intelligence.
+# TraceX AI — Trace cryptocurrency flows, inspect wallet-safety signals, and verify on-chain evidence.
 
-**Built for the Meta AI Developer Hackathon 2026** — https://cerebralvalley.ai/e/meta-ai-developer-hackathon
+Built for the [Meta Global AI Developer Hackathon 2026](https://cerebralvalley.ai/e/meta-ai-developer-hackathon).
 
-> This project is an official submission to the Meta Global AI Developer Hackathon 2026 (Cerebral Valley), competing for the $1M prize pool. Built with Meta AI products: Muse Spark / Llama 3.3, Meta AI, Muse Code, Muse Image, and open-weight models.
-
-![Meta AI Hackathon](https://img.shields.io/badge/Meta%20AI%20Hackathon-2026-blueviolet?style=for-the-badge) ![Built with Llama](https://img.shields.io/badge/Built%20with-Llama%203.3-6d5bff?style=for-the-badge) ![Muse Code](https://img.shields.io/badge/Muse%20Code-Agentic-00e5ff?style=for-the-badge)
+![Meta AI Hackathon](https://img.shields.io/badge/Meta%20AI%20Hackathon-2026-blueviolet?style=for-the-badge) ![Muse Spark](https://img.shields.io/badge/AI-Muse%20Spark-6d5bff?style=for-the-badge)
 
 ## Vision
-Trace crypto transactions, investigate suspicious fund movements, and understand where money goes on-chain — with evidence-backed AI.
+Trace cryptocurrency transfers, investigate suspicious fund movements, and inspect possible address-poisoning attempts with evidence links.
 
-TraceX combines deterministic blockchain data retrieval + graph analysis + Meta AI interpretation to produce transparent, citable investigation reports.
+TraceX combines on-chain data retrieval, bounded graph analysis, deterministic heuristics, and a Meta Model API explanation path. Model prompts ask for evidence-grounded explanations; reviewers should verify generated claims against linked on-chain records.
 
 ## Hackathon Submission Info
 - **Event:** Meta AI Developer Hackathon 2026 - https://cerebralvalley.ai/e/meta-ai-developer-hackathon
-- **Track:** Indie Developer Track
+- **Track:** Indie developer
 - **Theme:** Build for Your World
 - **Folder:** /Applications/WEBSITE/TraceX
-- **Docs:** docs/requirements.md, docs/technical-design.md, docs/hackathon-submission.md
+- **Docs:** docs/hackathon-submission.md, docs/demo-script.md, docs/technical-design.md
 
 ## Quick Start
 The project structure lives in /Applications/WEBSITE/TraceX
@@ -24,42 +22,53 @@ The project structure lives in /Applications/WEBSITE/TraceX
 Docs are in docs/ folder:
 - requirements.md - Vision + use cases
 - technical-design.md - Architecture + stack
-- hackathon-submission.md - All answers for submission day + feedback on Meta products
-- meta-feedback.md - Answer for "Provide feedback from your experience using Meta products"
+- hackathon-submission.md - Implementation summary, limitations, and submission-day checks
+- meta-feedback.md - Personal feedback draft; verify and personalize before submitting
 
 Application is in application/ folder:
 - frontend/ - Next.js 14 amazing investigative UI (React Flow + Tailwind)
 - backend/ - TypeScript API
 - analysis-engine/ - Python FastAPI + NetworkX heuristics
+- Wallet Shield - read-only scan of recent indexed transfers for poisoning patterns
+- Recovery Kit - generates editable, citation-checked exchange and police-report drafts in English, Nigerian Pidgin, Igbo, Yoruba, or Hausa; never sends them
+- Cross-chain follow - planned Ethereum-to-Base, Optimism, and Arbitrum bridge tracing; not yet implemented
+
+## Safety features and status
+- **Poisoning Shield (available):** scans a bounded amount of Alchemy-indexed wallet history for look-alike counterparties, zero-value transfers, and unverified-token activity. It reports scan coverage and links evidence; a clean scan is not proof of safety.
+- **Recovery Kit (available):** asks Muse Spark for editable exchange-preservation and police incident-report drafts using trace evidence. The API checks that each draft cites a transaction in the case and rejects unrecognized addresses. Review all generated text; it is not legal advice and TraceX does not send requests.
+- **Cross-chain follow (planned):** the intended first scope is canonical Ethereum L1 bridge transfers to Base, Optimism, or Arbitrum. This is not currently available, and no cross-chain graph or automatic destination-chain tracing is claimed.
 
 ## Stack
 - Frontend: Next.js 14 + TypeScript + Tailwind + shadcn + React Flow + Framer Motion
 - Backend: Express TypeScript
 - Analysis: Python FastAPI + NetworkX + web3.py
-- Blockchain: Alchemy + Etherscan + Covalent
-- AI: Meta Model API - Muse Spark / Llama 3.3-70B (evidence-backed reasoning with tx citations), Meta AI, Muse Code, Muse Image
-- Storage: none needed - traces are computed on demand with a short in-memory cache (a database for saved investigations is optional, later)
+- Blockchain: Alchemy recommended; Etherscan V2 and selected keyless explorers are alternatives
+- AI: Muse Spark via Meta Model API by default; Fireworks and Baseten are optional fallback providers
+- Storage: investigations are computed on demand; the app does not currently save user cases to a database
 - Infra: Docker Compose, Vercel, Fly.io
 
-## Why TraceX for Meta Hackathon?
-Impact (30%): Makes investigations accessible to 400M+ crypto users who cannot afford Chainalysis, critical in emerging markets.
-Meta AI Tooling (25%): Multi-model pipeline - deterministic graph JSON -> heuristics -> Llama reasoning with citation enforcement to prevent hallucination. Built entirely with Meta AI desktop + Muse Code.
-Demo (25%): Interactive graph + AI explanation + PDF export.
-Technical Depth (20%): BFS fund tracing, multi-source aggregation, NetworkX heuristics, React Flow visualization.
+## Hackathon fit
+The public event page describes the indie developer track in terms of creativity, technical ambition, and whether the project works. TraceX focuses on a concrete wallet-safety and investigation workflow, bounded graph traversal, deterministic analysis, and a working user-facing demo. No unofficial judging percentages or impact estimates are claimed.
 
 ## Run Locally
-See application/README.md for full setup, including **setting the AI API keys** (required for Llama explanations). Quick:
+See [application/README.md](./application/README.md) for provider setup and full instructions. Run the frontend and backend in separate terminals:
 ```
-cd application/frontend && node generate-package.js && npm install && npm run dev
-cd ../backend && node generate-package.js && npm install && npm run dev
-cd ../analysis-engine && pip install -r requirements.txt && uvicorn app.main:app --reload
+cd application/frontend && npm install && npm run dev
+cd application/backend && npm install && npm run dev
+```
+
+The optional Python analysis service can be started separately:
+```
+cd application/analysis-engine
+pip install -r requirements-dev.txt
+uvicorn app.main:api --reload --port 8100
 ```
 
 ## Links
 - Hackathon: https://cerebralvalley.ai/e/meta-ai-developer-hackathon
 - Submission Portal: https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit
-- Live Demo: [INSERT VERCEL LINK]
-- Demo Video: [INSERT YOUTUBE LINK]
-- GitHub: [INSERT GITHUB LINK]
+- Live Demo: not published yet
+- Demo Video: not published yet
+- GitHub: https://github.com/ekumahost/TraceX
 
-Built with ❤️ for Meta AI Developer Hackathon 2026. Let's win.
+Built for the Meta AI Developer Hackathon 2026.

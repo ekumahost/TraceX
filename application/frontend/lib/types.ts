@@ -44,6 +44,7 @@ export interface TraceCase {
   score?: number; // case score from the analysis engine
   engine?: string; // which detector engine ran
   incomplete?: string[]; // wallets whose transfers couldn't be loaded
+  hops?: number; // requested maximum trace depth
 }
 
 export type Provider = 'meta' | 'fireworks' | 'baseten';
@@ -51,4 +52,40 @@ export type Provider = 'meta' | 'fireworks' | 'baseten';
 export interface AIAnswer {
   provider: Provider;
   text: string;
+}
+
+export type PoisonKind = 'lookalike' | 'fake_token' | 'zero_transfer';
+
+export interface PoisonFinding {
+  kind: PoisonKind;
+  imposter: string;
+  mimics?: string;
+  tx: string;
+  value: number;
+  asset: string;
+  timestamp: string;
+  detail: string;
+}
+
+export interface ShieldResult {
+  address: string;
+  chain: string;
+  explorer: string;
+  source: 'Alchemy';
+  counterparties: number;
+  scanned: number;
+  scanLimitPerDirection: number;
+  truncated: boolean;
+  findingCount: number;
+  findingsTruncated: boolean;
+  findings: PoisonFinding[];
+  imposters: string[];
+}
+
+export type RecoveryLanguage = 'english' | 'pidgin' | 'igbo' | 'yoruba' | 'hausa';
+
+export interface RecoveryDocuments {
+  provider: 'meta';
+  freezeRequest: string;
+  policeReport: string;
 }

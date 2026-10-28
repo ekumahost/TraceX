@@ -1,14 +1,10 @@
 /**
  * Baseten Integration for TraceX AI
- * Mission-critical model deployment for Llama 3.3 70B
- * $100 credits + 2M TPM rate limits - official partner
- * https://cerebralvalley.ai/e/meta-ai-developer-hackathon
+ * Optional Llama 3.3 70B explanation provider; configure both credentials to enable it.
  * 
  * Setup:
- * 1. Go to https://app.baseten.co/overview
- * 2. Deploy Model -> Llama 3.3 70B Instruct
- * 3. Get model_id (8 chars like abcd1234)
- * 4. Get API key
+ * 1. Deploy a compatible model in Baseten
+ * 2. Set BASETEN_MODEL_ID and BASETEN_API_KEY in the backend environment
  */
 
 export async function explainWithBaseten(graphJson: any, heuristics: any) {
@@ -64,6 +60,5 @@ function extractText(data: any): string | undefined {
 }
 
 export async function generateReportWithBaseten(traceData: any) {
-  // For PDF report generation that needs 99.9% uptime
   return explainWithBaseten(traceData.graph, traceData.heuristics);
 }

@@ -18,16 +18,16 @@ const HACKATHON = 'https://cerebralvalley.ai/e/meta-ai-developer-hackathon';
 const STEPS: { n: string; title: string; symbol: AdinkraName; copy: string }[] = [
   { n: '01', title: 'Trace', symbol: 'nkyinkyim', copy: 'Paste a tx hash, wallet or ENS name on any of seven EVM chains. TraceX pulls real on-chain transfers and follows the money hop by hop - up to 20 deep, without walking in circles.' },
   { n: '02', title: 'Detect', symbol: 'nyansapo', copy: 'Deterministic heuristics flag mixers, peel chains, high-velocity hops, bridges and exchange cash-outs - and score the case 0 to 100.' },
-  { n: '03', title: 'Explain', symbol: 'mateMasie', copy: 'Meta’s Muse Spark reads the graph and the flags and writes a plain-English brief, instructed to cite the transaction hash behind every claim.' },
-  { n: '04', title: 'Prove', symbol: 'eban', copy: 'Click any citation to land on the transfer. Ask follow-up questions. Export the evidence bundle for your report, exchange or police filing.' },
+  { n: '03', title: 'Explain', symbol: 'mateMasie', copy: 'Muse Spark reads the graph and deterministic flags, with instructions to ground its plain-English brief in the trace.' },
+  { n: '04', title: 'Verify', symbol: 'eban', copy: 'Open matching transaction citations, ask follow-up questions, and export the case data or a printable report.' },
 ];
 
 const DETECTORS = [
   { title: 'Mixer interaction', tone: 'high', copy: 'Deposits into known mixing pools, and the fresh wallets that withdraw from them.' },
-  { title: 'Peel chain', tone: 'medium', copy: 'A large balance passed wallet to wallet, shaving small amounts off at every step.' },
-  { title: 'High velocity', tone: 'medium', copy: 'Funds that cross many hops in minutes - the signature of a drain being laundered.' },
+  { title: 'Peel-chain pattern', tone: 'medium', copy: 'A large balance passes wallet to wallet while smaller amounts split off.' },
+  { title: 'Rapid movement', tone: 'medium', copy: 'Funds cross several hops in a short time - a pattern that may merit closer review.' },
   { title: 'Exchange cash-out', tone: 'medium', copy: 'Value arriving at exchange deposit addresses, where KYC records can unlock identity.' },
-  { title: 'Exchange hopping', tone: 'medium', copy: 'Funds that leave one exchange and land at another - a classic way to break the trail.' },
+  { title: 'Exchange movement', tone: 'medium', copy: 'Transfers connect known exchange addresses; attribution requires records beyond the chain.' },
   { title: 'Bridge exit', tone: 'low', copy: 'Funds leaving for another chain, so the trail can be picked up on the other side.' },
 ] as const;
 
@@ -54,6 +54,7 @@ export default function Home() {
             <a href='#method' className='nav-link'>Method</a>
             <a href='#case' className='nav-link'>Inside a case</a>
             <a href='#meta' className='nav-link'>Meta AI</a>
+            <Link href='/shield' className='nav-link'>Wallet shield</Link>
           </nav>
           <Link href='/investigate?q=sample' className='btn btn--sm'>Open a case <ArrowRight /></Link>
         </div>
@@ -81,6 +82,9 @@ export default function Home() {
               </p>
               <div className={clsx('mt-10 max-w-[760px] transition-all delay-500 duration-1000', ready ? 'opacity-100' : 'translate-y-6 opacity-0')}>
                 <SearchConsole />
+                <Link href='/shield' className='mt-4 inline-flex items-center gap-2 text-[13px] text-gold-soft transition-colors hover:text-white'>
+                  Check a wallet for address-poisoning attempts <ArrowRight className='h-4 w-4' />
+                </Link>
               </div>
             </div>
           </div>
@@ -193,10 +197,10 @@ export default function Home() {
             <div className='lg:sticky lg:top-28 lg:self-start'>
               <span className='eyebrow reveal' data-reveal>Detectors</span>
               <h2 className='display reveal reveal-d1 mt-6 text-[clamp(34px,4.4vw,60px)]' data-reveal>
-                The patterns <span className='serif text-gold'>launderers</span> can’t hide
+                Patterns that merit <span className='serif text-gold'>a closer look</span>
               </h2>
               <p className='reveal reveal-d2 mt-6 max-w-[42ch] text-muted' data-reveal>
-                Detection is deterministic code, not guesswork - so the AI only ever explains facts the engine can show you.
+                Detection is deterministic code, not guesswork. AI explanations are generated from the returned graph and flags; verify each cited transfer against its on-chain record.
               </p>
               <div className='reveal reveal-d3 mt-10 flex items-center gap-4' data-reveal>
                 <Adinkra name='hwehwemudua' className='h-11 w-11 text-gold' />

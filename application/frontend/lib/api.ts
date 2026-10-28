@@ -1,4 +1,4 @@
-import type { AIAnswer, Provider, TraceCase } from './types';
+import type { AIAnswer, Provider, RecoveryDocuments, RecoveryLanguage, ShieldResult, TraceCase } from './types';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -29,6 +29,7 @@ export async function fetchTrace(input: string, chain = 'auto', hops = 5): Promi
         score: data.score,
         engine: data.engine,
         incomplete: data.incomplete ?? [],
+        hops: data.hops ?? hops,
       },
     };
   } catch (e: any) {
@@ -36,7 +37,21 @@ export async function fetchTrace(input: string, chain = 'auto', hops = 5): Promi
   }
 }
 
+export function scanWallet(address: string, chain: string) {
+  return post<ShieldResult>('/api/shield', { address, chain });
+}
+
 const graphPayload = (c: TraceCase) => ({ nodes: c.nodes, edges: c.edges, input: c.input, network: c.network });
+
+export function generateRecoveryKit(c: TraceCase, exchange: string, language: RecoveryLanguage) {
+  return post<RecoveryDocuments>('/api/recovery-kit', {
+    input: c.input,
+    chain: c.chain ?? 'auto',
+    hops: c.hops ?? 5,
+    exchange,
+    language,
+  });
+}
 
 export function explainCase(c: TraceCase) {
   return post<AIAnswer>('/api/explain', { graph: graphPayload(c), heuristics: c.risks });

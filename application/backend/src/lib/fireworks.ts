@@ -2,10 +2,7 @@ import OpenAI from 'openai';
 
 /**
  * Fireworks AI Integration for TraceX AI
- * Fastest inference for Llama 3.3 70B - 160 tokens/sec, $0.90/M output
- * $25 credits + workshop from Sinan Ozdemir
- * Official partner: https://cerebralvalley.ai/e/meta-ai-developer-hackathon
- * 
+ * Optional Llama 3.3 70B provider; configure FIREWORKS_API_KEY to enable it.
  * Model: accounts/fireworks/models/llama-v3p3-70b-instruct
  * Base URL: https://api.fireworks.ai/inference/v1
  */

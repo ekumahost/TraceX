@@ -1,0 +1,30 @@
+# Render blueprint for the TraceX backend: New + -> Blueprint -> pick this repo.
+# Secrets are entered in the Render dashboard (sync: false), never committed.
+services:
+  - type: web
+    name: tracex-backend
+    runtime: docker
+    dockerContext: ./application/backend
+    dockerfilePath: ./application/backend/Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: "4000"
+      - key: META_API_KEY
+        sync: false
+      - key: META_MODEL
+        value: muse-spark-1.3
+      - key: META_REASONING_EFFORT
+        value: low
+      - key: ALCHEMY_API_KEY
+        sync: false
+      - key: ETHERSCAN_API_KEY
+        sync: false
+      - key: ANALYSIS_ENGINE_URL
+        value: https://ifihear--tracex-analysis-engine-web.us-east.modal.run
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: TRACE_LIMIT_PER_HOUR
+        value: "30"
+      - key: AI_LIMIT_PER_HOUR
+        value: "60"

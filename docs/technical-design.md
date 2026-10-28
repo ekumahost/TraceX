@@ -1,144 +1,67 @@
-# TraceX AI - Technical Design Document
-Version: 0.1.0 | Date: 2026-10-27
+# TraceX — Implemented Architecture
 
-## 1. Tech Stack Recommendation
+This document describes the current code, not the longer-term product roadmap.
 
-### Why this stack?
-We need: amazing UI + heavy blockchain data fetching + deterministic graph analysis + AI reasoning + real-time interactivity.
+## System overview
 
-**Recommended:**
-- **Frontend: Next.js 14 (App Router) + TypeScript + Tailwind + shadcn/ui + Framer Motion**
-  Reason: Best for amazing UI, server components, fast, great for data viz. React Flow for graph.
-
-- **Backend API: Next.js API routes + tRPC or Next.js + NestJS (TypeScript)**
-  Reason: Single language for velocity. For MVP, Next.js API routes are enough. For scale, separate NestJS service.
-
-- **Analysis Engine: Python FastAPI + web3.py + NetworkX**
-  Reason: Python is king for graph algorithms, heuristics, risk scoring. Keep deterministic analysis isolated and callable via API.
-
-- **Databases:**
-  - PostgreSQL + TimescaleDB: tx cache, investigations, user data
-  - Redis: cache for Etherscan/Alchemy responses, rate limiting
-  - Neo4j (optional Phase 2) or in-memory graph: for complex fund flow graph queries. MVP can use Postgres + NetworkX in-memory.
-
-- **Blockchain Data Providers (Multi-source for evidence):**
-  - Alchemy / Infura: node RPC (eth_getTransaction, traces)
-  - Etherscan API: labels, internal txs, token transfers
-  - Covalent / Moralis: enriched token transfers
-  - The Graph (optional): for protocol-specific flows
-
-- **AI Layer:**
-  - Meta AI API / Llama 3.x via API: for interpretation, summarization, natural language Q&A over trace
-  - Prompting strategy: Provide deterministic JSON trace + ask AI to explain, not to hallucinate data
-
-- **Visualization:**
-  - React Flow or Cytoscape.js: transaction graph (nodes = wallets, edges = transfers)
-  - D3.js for timeline + value flow
-  - Recharts for risk distribution
-
-- **Infra:**
-  - Docker + Docker Compose
-  - Vercel (frontend) + Fly.io / Railway (backend + Python engine)
-
-### Languages Summary
-- **TypeScript (Primary - 70%)**: UI, API orchestration, blockchain fetching
-- **Python (Secondary - 30%)**: Heuristics, graph analysis, risk engine
-- **SQL/Cypher**: Querying
-
-## 2. Architecture
-
-```
-[User Input: tx hash / address] 
-   ↓
-[Next.js Frontend - TraceX UI]
-   ↓
-[API Gateway - Next.js API / NestJS]
-   ├─→ [Blockchain Fetcher Service] → Alchemy + Etherscan + Covalent (aggregated, cached in Redis/Postgres)
-   ├─→ [Python Analysis Engine] → builds graph, runs heuristics, scores risk
-   └─→ [AI Interpreter - Meta AI] → receives graph JSON + heuristics → returns natural language explanation + report
-   ↓
-[Response: Graph JSON + Timeline + AI Summary]
-   ↓
-[React Flow Graph + Evidence Panel + PDF Export]
+```text
+Next.js frontend (port 3300)
+  ├─ trace, shield, and Recovery Kit requests
+  ├─ interactive graph, evidence, and timeline
+  └─ report and JSON export
+             │
+             ▼
+Express/TypeScript API (port 4000)
+  ├─ read-only chain data providers
+  ├─ bounded graph traversal and local transfer cache
+  ├─ deterministic analysis (TypeScript fallback)
+  ├─ optional FastAPI/NetworkX analysis service
+  └─ Muse Spark via Meta Model API (optional Fireworks/Baseten fallbacks)
 ```
 
-### Data Flow for "Trace tx 0xabc..."
-1. Parse input → detect chain, type (tx, address, ENS)
-2. Fetcher: get tx receipt, internal traces, token transfers, from/to, value
-3. Recursive fetch: for each output address, fetch next outgoing transfers (BFS up to N hops)
-4. Build directed graph: Node {address, label, risk, firstSeen}, Edge {from, to, value, token, txHash, timestamp, block}
-5. Python engine: run heuristics (mixer check against known list, peel chain detection, velocity check)
-6. AI: prompt with graph summary + heuristics → generate human-readable narrative
-7. Frontend renders graph + report
+## Frontend
 
-## 3. Folder Structure (Target: /Applications/WEBSITE/TraceX)
+The Next.js 14 App Router frontend is written in TypeScript and styled with Tailwind. React Flow renders the investigation graph. The workspace includes a case summary, graph, AI brief, follow-up questions, evidence panel, and timeline. Wallet Shield is a separate read-only flow for checking recent indexed wallet history.
 
-```
-TraceX/
-├── docs/
-│   ├── requirements.md
-│   ├── technical-design.md
-│   └── architecture.png
-├── application/
-│   ├── frontend/          # Next.js 14
-│   │   ├── app/
-│   │   ├── components/    # graph, timeline, search, report
-│   │   ├── lib/           # blockchain clients
-│   │   └── ...
-│   ├── backend/           # API + orchestration
-│   │   ├── src/
-│   │   │   ├── fetchers/  # alchemy, etherscan adapters
-│   │   │   ├── graph/     # graph builder
-│   │   │   └── ai/        # meta ai client
-│   │   └── ...
-│   ├── analysis-engine/   # Python FastAPI
-│   │   ├── app/
-│   │   │   ├── heuristics.py
-│   │   │   ├── risk.py
-│   │   │   └── graph.py
-│   │   └── requirements.txt
-│   └── docker-compose.yml
-└── README.md
-```
+The report page uses the browser print dialog; users can choose “Save as PDF.” JSON case export is available from the investigation workspace. The sample case is synthetic and labelled in the UI.
 
-## 4. Key Modules
+## API and chain data
 
-### 4.1 Blockchain Adapters (TypeScript)
-- `AlchemyClient.getTransaction(hash)`
-- `EtherscanClient.getInternalTxs(address)`
-- `LabelResolver.resolve(address)` → returns {label: 'Binance', type: 'exchange'}
+The Express API exposes `/api/chains`, `/api/trace`, `/api/shield`, `/api/recovery-kit`, `/api/explain`, and `/api/ask`. API keys are read by the backend and are not sent to the browser. Per-IP request limits are held in memory for a single backend instance.
 
-### 4.2 Graph Builder
-- BFS with limits: maxHops, maxNodes=200, minValue filter
-- Avoid loops via visited set
+The chain adapter supports Ethereum, Base, BNB Chain, Arbitrum, Optimism, Polygon, and Robinhood Chain. Alchemy is the recommended source; Etherscan V2 and selected keyless explorers can be used as alternatives for traces. Live traces include native assets and a small set of configured tokens, not every token on each network.
 
-### 4.3 Heuristics Engine (Python)
-- mixer_list = [Tornado Cash addresses]
-- peel_chain: many small outs from one in
-- exchange_hopping: quickly moves through CEXs
+The trace builder follows transfers forward in time using breadth-first traversal. It avoids expanding a wallet more than once, stops at labelled entities and contracts, follows up to 20 hops, and caps a case at 40 nodes. Results are therefore bounded views, not complete transaction histories.
 
-### 4.4 AI Prompt Template
-```
-You are TraceX investigator. Given this deterministic trace:
-{graph_json}
-Heuristics: {heuristics}
-Explain in plain English what happened, cite tx hashes, highlight suspicious patterns, suggest next steps. Never invent data.
-```
+Wallet Shield uses Alchemy's transfer API to inspect up to two pages of incoming and outgoing records. It compares transfers against counterparties with verified value activity and reports lookalike addresses, zero-value transfers, and unverified tokens using familiar asset names. The response indicates when Alchemy returned another page beyond the scan limit. The scan does not establish intent or prove a wallet safe.
 
-## 5. UI Design Direction (Amazing UI)
-- Dark mode, slate background, neon blue/purple accents (cyber investigation)
-- Left: Search + Filters, Center: Interactive Graph (React Flow), Right: Entity Inspector + AI Chat
-- Bottom: Timeline slider
-- Animations: Framer Motion for node expansion
-- Inspiration: Arkham Intel + Linear + Chainalysis Reactor
+The Recovery Kit re-runs a live trace on the backend instead of trusting a client-supplied graph, then asks Muse Spark for an exchange-preservation request and police incident-report draft. Drafts are restricted to transaction hashes and addresses in that trace; this does not verify translation quality or make the text legally suitable. The user reviews and sends drafts manually. The sample case is not eligible.
 
-## 6. Security
-- No private keys
-- Rate limit blockchain APIs
-- Validate all addresses/tx hashes (regex)
-- Sanitize AI output
+Automatic cross-chain continuation from Ethereum to Base, Optimism, or Arbitrum remains planned and is not implemented.
 
-## 7. Roadmap
-Phase 1 MVP: ETH + 5 hops + graph + AI summary + PDF
-Phase 2: Multi-chain, Neo4j, user accounts, saved investigations
-Phase 3: Real-time monitoring, alerts, Bitcoin support
+## Deterministic analysis
+
+The backend runs the TypeScript detectors by default. When `ANALYSIS_ENGINE_URL` is set, it calls the Python FastAPI service, which uses NetworkX; if the service fails, the backend logs the failure and falls back to TypeScript. The Python and TypeScript implementations are checked against shared fixtures.
+
+Detectors look for known mixer interactions, peel-chain-shaped movement, rapid multi-hop activity, exchange interactions, and bridge transfers. The 0–100 case score is derived from rule severities. It is an indicator for the observed graph, not a calibrated probability or legal conclusion. Entity labels are incomplete and vary by chain.
+
+## AI explanation
+
+Muse Spark via the Meta Model API is the default explanation and question-answer provider. Fireworks and Baseten can be configured as optional fallbacks for explanations; Baseten is not used for follow-up Q&A. Provider selection is server-side through `AI_PROVIDER`.
+
+The model receives the graph and deterministic findings and is instructed to stay grounded in them and cite transactions. This instruction is not an enforcement mechanism. The UI links transaction hashes only when they match an edge in the current case, and users should verify the model's claims in the explorer.
+
+## Local development
+
+- Frontend: `cd application/frontend && npm install && npm run dev`
+- Backend: `cd application/backend && npm install && npm run dev`
+- Python analysis: `cd application/analysis-engine && .venv/bin/uvicorn app.main:api --port 8100`
+
+See [application/README.md](../application/README.md) for environment variables, provider setup, and test commands.
+
+## Current boundaries
+
+- No user accounts, saved investigations, or database-backed case history.
+- Graphs and Shield scans are bounded by configured node, hop, and provider-page limits.
+- Labels and supported token lists are curated and incomplete.
+- Model output can contain unsupported claims; citations and source transactions must be checked.

@@ -1,22 +1,30 @@
 # TraceX AI
 
-AI-powered blockchain forensics that traces cryptocurrency flows, investigates suspicious transactions, and turns on-chain data into evidence-backed intelligence. Built for the Meta AI Developer Hackathon 2026.
+TraceX is a read-only blockchain investigation and wallet-safety app. It turns supported EVM transfers into a bounded graph, runs deterministic pattern checks, and uses Muse Spark through the Meta Model API to explain the evidence. Wallet Shield scans recent indexed history for address-poisoning patterns such as lookalike addresses and unverified tokens. The Recovery Kit can draft exchange and police incident-report documents from a live trace in English, Nigerian Pidgin, Igbo, Yoruba, or Hausa.
 
-**Official Hackathon Submission for:** https://cerebralvalley.ai/e/meta-ai-developer-hackathon
+Automatic cross-chain follow-through from Ethereum to Base, Optimism, and Arbitrum is a proposed feature only; it is not implemented in the current demo.
 
-> This project is an official submission to the Meta Global AI Developer Hackathon 2026 (Cerebral Valley), competing for the $1M prize pool. Built with Meta AI products: Muse Spark / Llama 3.3, Meta AI, Muse Code, Muse Image, and open-weight models.
+## Hackathon fit
 
-## Tagline for Portal
-AI-powered blockchain forensics that traces cryptocurrency flows, investigates suspicious transactions, and turns on-chain data into evidence-backed intelligence. Built for the Meta AI Developer Hackathon 2026.
+- **Event:** [Meta Global AI Developer Hackathon](https://cerebralvalley.ai/e/meta-ai-developer-hackathon)
+- **Track:** Indie developer
+- **Theme:** Build for Your World
+- **Public indie-track criteria:** Creativity, technical ambition, and whether the project works.
 
-## Links
-- Hackathon Event: https://cerebralvalley.ai/e/meta-ai-developer-hackathon
-- Submission Portal: https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit
-- Project Folder: /Applications/WEBSITE/TraceX
+## Project
 
-## Why This Wins
-We solve a real $4B/year problem with a multi-model Meta AI pipeline that goes beyond basic integration: deterministic blockchain data -> Python heuristics -> Llama reasoning with citation enforcement.
+- [Main README](../README.md) — setup and project overview.
+- [Application guide](../application/README.md) — local run instructions and provider setup.
+- [Submission draft](./hackathon-submission.md) — implementation summary, demo links, and limitations.
+- [Demo script](./demo-script.md) — recording outline.
+- [Demo cases](./demo-cases.md) — prepared cases; verify again before recording.
 
-## For Submission Day
-All answers are ready in docs/hackathon-submission.md
-Feedback for "Provide feedback from your experience using Meta products" is in docs/meta-feedback.md
+## Important accuracy notes
+
+- The Meta Model API / Muse Spark integration is the default AI path. Fireworks and Baseten are optional fallback providers; only describe them as tested if they were configured and exercised.
+- The Python analysis service is optional and is selected with `ANALYSIS_ENGINE_URL`; otherwise the backend uses its TypeScript implementation.
+- Model prompts request evidence-grounded answers but do not guarantee that every generated claim is correct.
+- Recovery Kit re-runs the live trace server-side and checks every distinct case transaction hash in both drafts. It does not send documents or validate translation quality.
+- Cross-chain bridge matching is not yet available; do not describe it as a working feature.
+- Scores are deterministic rule-based indicators, not calibrated probabilities.
+- Live demo and video links belong here only after they have been published and checked.

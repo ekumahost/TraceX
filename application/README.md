@@ -1,8 +1,7 @@
 # TraceX Application
-This folder will contain:
-- frontend/ - Next.js 14 amazing investigative UI
-- backend/ - TypeScript API orchestration
-- analysis-engine/ - Python FastAPI deterministic analysis
+- `frontend/` - Next.js investigative UI
+- `backend/` - TypeScript API and blockchain data orchestration
+- `analysis-engine/` - optional Python FastAPI deterministic analysis service
 
 ## Tech Stack
 - Frontend: Next.js 14 + TypeScript + Tailwind + shadcn/ui + React Flow
@@ -91,3 +90,13 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 Put the deployed URL in `application/backend/.env` as `ANALYSIS_ENGINE_URL` and restart the backend.
 If you change the detectors, update both copies and regenerate the parity fixtures:
 `cd application/backend && npx tsx ../analysis-engine/tests/export_fixture.ts`.
+
+## Wallet Shield
+Open `/shield` to check a wallet for possible address-poisoning patterns. The scanner compares recent Alchemy-indexed incoming and outgoing transfers against verified counterparties and flags lookalike addresses, zero-value transfers, and unverified tokens named like supported assets.
+
+Wallet Shield requires `ALCHEMY_API_KEY` with the selected network enabled. It reads public on-chain activity only; it does not request wallet access or private keys. The scan inspects up to 2,000 indexed transfers per direction, and the UI reports when the provider indicates that more history was available. No findings do not prove a wallet is safe.
+
+## Recovery Kit
+The investigation workspace has a Recovery Kit tab for a live trace. It re-runs the trace server-side, then uses Muse Spark to generate editable exchange-preservation and police incident-report drafts in English, Nigerian Pidgin, Igbo, Yoruba, or Hausa. Each draft must cite a transaction in that server-generated case; generated addresses outside the case are rejected. The documents are never sent automatically, and people must review details, translation, and citations before using them. Configure `META_API_KEY`; optional alternate providers are not used for Recovery Kit generation.
+
+Cross-chain follow-through from Ethereum to Base, Optimism, and Arbitrum is a planned feature, not currently available.

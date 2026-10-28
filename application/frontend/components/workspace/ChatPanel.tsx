@@ -43,7 +43,7 @@ export function ChatPanel({ data, onCite }: { data: TraceCase; onCite: (s: Selec
         {!msgs.length && (
           <div className='pt-4 text-center'>
             <Adinkra name='mateMasie' className='mx-auto h-10 w-10 text-gold' />
-            <p className='mx-auto mt-4 max-w-[30ch] font-serif text-[19px] italic text-white/80'>Ask anything about this trail. Answers cite the transactions.</p>
+            <p className='mx-auto mt-4 max-w-[30ch] font-serif text-[19px] italic text-white/80'>Ask about this trail. Check any linked transaction citations against the source.</p>
             <div className='mt-6 flex flex-col gap-2'>
               {SUGGESTIONS.map((s) => (
                 <button key={s} type='button' onClick={() => ask(s)} className='rounded-lg border border-line bg-panel-2 px-4 py-3 text-left text-[13.5px] text-muted transition-colors hover:border-[var(--line-v)] hover:text-cream'>

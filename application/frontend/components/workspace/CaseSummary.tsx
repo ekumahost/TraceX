@@ -53,6 +53,7 @@ export function CaseSummary({ data, onSelect }: { data: TraceCase; onSelect: (s:
           </span>
         </div>
         <div className='mt-4'><RiskGauge score={score} /></div>
+        <p className='mt-2 text-center text-[11px] leading-relaxed text-dim'>Rule-based indicator for this trace, not a probability or proof of wrongdoing.</p>
       </div>
 
       <dl className='grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-[var(--line)] text-center'>

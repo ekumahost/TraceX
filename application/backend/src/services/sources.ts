@@ -148,3 +148,49 @@ export async function outgoing(chain: Chain, address: string, q: OutgoingQuery):
   const keyed = process.env.ALCHEMY_API_KEY || process.env.ETHERSCAN_API_KEY;
   throw new Error(`Couldn't fetch ${chain.name} transfers - ${errors.join('; ')}${keyed ? '' : ` (${hint})`}`);
 }
+
+// Raw Alchemy transfers with no asset filtering - the Poisoning Shield needs to see the
+// spam: fake tokens and zero-value transfers are exactly what it's looking for.
+export interface RawTransfer {
+  hash: string; from: string; to: string; value: number; asset: string; category: string;
+  contract?: string; timestamp: number;
+}
+
+export interface RawTransfersResult {
+  transfers: RawTransfer[];
+  truncated: boolean;
+}
+
+const RAW_TRANSFER_PAGE_SIZE = 1000;
+
+export async function rawTransfers(chain: Chain, params: Record<string, unknown>, pages = 2): Promise<RawTransfersResult> {
+  const key = process.env.ALCHEMY_API_KEY;
+  if (!key || !chain.alchemy) throw new Error(`The Poisoning Shield needs ALCHEMY_API_KEY with ${chain.name} enabled`);
+  const out: RawTransfer[] = [];
+  let pageKey: string | undefined;
+  for (let page = 0; page < pages; page++) {
+    const d = await fetchJson<any>(`https://${chain.alchemy}.g.alchemy.com/v2/${key}`, {
+      method: 'POST',
+      cache: false,
+      body: {
+        jsonrpc: '2.0', id: 1, method: 'alchemy_getAssetTransfers',
+        params: [{
+          fromBlock: '0x0', toBlock: 'latest', category: ['external', 'erc20'], withMetadata: true,
+          excludeZeroValue: false, maxCount: `0x${RAW_TRANSFER_PAGE_SIZE.toString(16)}`, order: 'desc', ...params, ...(pageKey ? { pageKey } : {}),
+        }],
+      },
+    });
+    if (d.error) throw new Error(`Alchemy: ${d.error.message}`);
+    for (const t of d.result?.transfers ?? []) {
+      if (!t.from || !t.to) continue;
+      out.push({
+        hash: t.hash, from: t.from.toLowerCase(), to: t.to.toLowerCase(), value: Number(t.value ?? 0),
+        asset: t.asset ?? '?', category: t.category, contract: t.rawContract?.address?.toLowerCase(),
+        timestamp: Math.floor(Date.parse(t.metadata.blockTimestamp) / 1000),
+      });
+    }
+    pageKey = d.result?.pageKey;
+    if (!pageKey) break;
+  }
+  return { transfers: out, truncated: Boolean(pageKey) };
+}

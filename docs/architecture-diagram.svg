@@ -1,0 +1,32 @@
+<svg width="1200" height="700" xmlns="http://www.w3.org/2000/svg" style="background:#0a0a0f">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6d5bff"/><stop offset="100%" stop-color="#00e5ff"/></linearGradient>
+  </defs>
+  <text x="600" y="40" text-anchor="middle" fill="#00e5ff" font-family="Inter, sans-serif" font-size="28" font-weight="800">TraceX AI Architecture</text>
+  <text x="600" y="70" text-anchor="middle" fill="#8b7aff" font-family="Inter, sans-serif" font-size="14">Built for Meta AI Developer Hackathon 2026 - https://cerebralvalley.ai/e/meta-ai-developer-hackathon</text>
+  <rect x="20" y="120" width="140" height="120" rx="16" fill="none" stroke="#00e5ff" stroke-width="2"/>
+  <text x="90" y="160" text-anchor="middle" fill="#00e5ff" font-size="14" font-weight="700">User Input</text>
+  <text x="90" y="185" text-anchor="middle" fill="#fff" font-size="11">tx hash / wallet / ENS</text>
+  <rect x="200" y="120" width="140" height="120" rx="16" fill="none" stroke="#a78bfa" stroke-width="2"/>
+  <text x="270" y="160" text-anchor="middle" fill="#a78bfa" font-size="14" font-weight="700">Next.js Frontend</text>
+  <text x="270" y="185" text-anchor="middle" fill="#fff" font-size="11">React Flow + Tailwind</text>
+  <rect x="380" y="110" width="140" height="140" rx="16" fill="rgba(109,91,255,0.15)" stroke="#6d5bff" stroke-width="2"/>
+  <text x="450" y="160" text-anchor="middle" fill="#8b7aff" font-size="16" font-weight="700">API Gateway</text>
+  <text x="450" y="185" text-anchor="middle" fill="#fff" font-size="10">Routes & orchestrates</text>
+  <rect x="560" y="120" width="150" height="120" rx="16" fill="none" stroke="#00e5ff" stroke-width="2"/>
+  <text x="635" y="150" text-anchor="middle" fill="#00e5ff" font-size="12" font-weight="700">Blockchain Fetcher</text>
+  <text x="635" y="170" text-anchor="middle" fill="#fff" font-size="9">Alchemy + Etherscan</text>
+  <rect x="740" y="120" width="150" height="120" rx="16" fill="none" stroke="#a78bfa" stroke-width="2"/>
+  <text x="815" y="150" text-anchor="middle" fill="#a78bfa" font-size="12" font-weight="700">Python Engine</text>
+  <text x="815" y="170" text-anchor="middle" fill="#fff" font-size="9">FastAPI + NetworkX</text>
+  <rect x="920" y="120" width="150" height="120" rx="16" fill="none" stroke="#6d5bff" stroke-width="2"/>
+  <text x="995" y="150" text-anchor="middle" fill="#6d5bff" font-size="12" font-weight="700">Meta AI Layer</text>
+  <text x="995" y="170" text-anchor="middle" fill="#fff" font-size="9">Llama 3.3 via Spark</text>
+  <rect x="400" y="350" width="200" height="100" rx="16" fill="rgba(0,229,255,0.1)" stroke="#00e5ff" stroke-width="2"/>
+  <text x="500" y="390" text-anchor="middle" fill="#00e5ff" font-size="14" font-weight="700">Response</text>
+  <text x="500" y="410" text-anchor="middle" fill="#fff" font-size="10">Graph JSON + Timeline + AI Summary</text>
+  <rect x="650" y="340" width="280" height="120" rx="16" fill="none" stroke="#a78bfa" stroke-width="2"/>
+  <text x="790" y="380" text-anchor="middle" fill="#a78bfa" font-size="13" font-weight="700">React Flow Graph + Evidence + PDF</text>
+  <text x="790" y="405" text-anchor="middle" fill="#fff" font-size="10">Interactive graph - Evidence details - Export PDF</text>
+  <text x="600" y="650" text-anchor="middle" fill="#00e5ff" font-size="11" font-family="monospace">Built for https://cerebralvalley.ai/e/meta-ai-developer-hackathon — AI-powered blockchain forensics</text>
+</svg>
