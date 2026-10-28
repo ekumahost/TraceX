@@ -4,7 +4,7 @@ Hackathon: https://cerebralvalley.ai/e/meta-ai-developer-hackathon
 Deadline: Nov 4, 2026 - 9pm ET (Nov 5, 2am WAT Nigeria)
 Tagline: AI-powered blockchain forensics that traces cryptocurrency flows, investigates suspicious transactions, and turns on-chain data into evidence-backed intelligence. Built for the Meta AI Developer Hackathon 2026.
 
-## Status - updated Oct 28 (end of Day 2)
+## Status - updated Wed Oct 28
 
 ### Done
 | Area | What works | Where |
@@ -31,37 +31,40 @@ Tagline: AI-powered blockchain forensics that traces cryptocurrency flows, inves
 
 ## Remaining plan
 
-### Day 3 - Wed Oct 29 - Labels + demo cases + honest docs
+### Today - Wed Oct 28 - Labels + demo cases + honest docs
 - Per-chain seed labels: major exchange hot wallets and bridges on Base, BNB, Arbitrum, Optimism, Polygon, Robinhood (each address verified)
 - Find 2 real demo cases (clean + suspicious), trace them end to end, save the hashes
 - Submission doc accuracy pass (item 6) + add multi-chain and Robinhood Chain
 - Commit the uncommitted docs
 
-### Day 4 - Thu Oct 30 - PDF report
+### Thu Oct 29 - PDF report
 - Evidence report: case summary, score, flags with tx hashes, graph image, transfer table, AI brief, sample/live label
 - Export button offers PDF + JSON
 
-### Day 5 - Fri Oct 31 - Deploy
+### Fri Oct 30 - Deploy
 - Backend Dockerfile + deploy (Render/Railway/Fly) with env vars; restrict CORS to the frontend URL
 - Frontend to Vercel with `NEXT_PUBLIC_API_URL`
 - Simple per-IP rate limit on `/api/trace` and the AI endpoints
 - Test the live URLs from a phone and an incognito window
 
-### Day 6 - Sat Nov 1 - Polish + repo
+### Sat Oct 31 - Polish + repo
 - Optional: Fireworks key so the fallback is real and tested
 - Mobile search in workspace, loading/error states pass
 - README (badges, screenshots, live link), LICENSE MIT, updated architecture diagram showing Modal + Meta Model API + 7 chains
 - Make repo public
 
-### Day 7 - Sun Nov 2 - Demo video (most important)
+### Sun Nov 1 - Demo video (most important)
 - Follow `docs/demo-script.md`: hook → paste suspicious case → graph builds → flags → Muse Spark brief with citations → Ask → evidence → architecture (Modal, Meta Model API, multi-chain) → impact
 - Record, caption, upload unlisted to YouTube
 
-### Day 8 - Mon Nov 3 - Portal + final test
+### Mon Nov 2 - Buffer
+- Re-record or fix anything the video exposed; spare day for slippage
+
+### Tue Nov 3 - Portal + final test
 - Fill the portal from `docs/hackathon-submission.md` and the feedback field from `docs/meta-feedback.md`
 - Test every link (live demo, GitHub, video) from incognito and mobile
 
-### Day 9 - Tue Nov 4 - Submit
+### Wed Nov 4 - Submit
 - Submit by 8pm ET (1am WAT) - one hour buffer before the 9pm ET deadline
 - Then share on X / LinkedIn
 
