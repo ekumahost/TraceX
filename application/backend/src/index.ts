@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { explainTraceUnified, askQuestionUnified, isProvider } from './lib/ai-unified';
 import { traceCase } from './services/trace';
+import { CHAINS, CHAIN_ORDER } from './services/chains';
 import { InputError, NotFoundError } from './types';
 
 dotenv.config();
@@ -16,14 +17,20 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', service: 'tracex-backend', version: '0.1.0' });
 });
 
+app.get('/api/chains', (_req, res) => {
+  res.json(CHAIN_ORDER.map((id) => ({ id, name: CHAINS[id].name, native: CHAINS[id].native })));
+});
+
 app.post('/api/trace', async (req, res) => {
-  const { input, hops = 5 } = req.body;
+  const { input, hops = 5, chain } = req.body;
   if (!input || typeof input !== 'string') return res.status(400).json({ error: 'input required' });
   try {
-    const t = await traceCase(input, Number(hops) || 5);
+    const t = await traceCase(input, Number(hops) || 5, typeof chain === 'string' ? chain : undefined);
     res.json({
       input: t.input,
       network: t.network,
+      chain: t.chain.id,
+      explorer: t.chain.explorer,
       hops,
       source: t.source,
       incomplete: t.incomplete,

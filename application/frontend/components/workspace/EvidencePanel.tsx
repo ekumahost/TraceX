@@ -22,7 +22,7 @@ function CopyField({ label, value, href }: { label: string; value: string; href?
           {copied ? <Check className='h-4 w-4 text-risk-clean' /> : <Copy className='h-4 w-4' />}
         </button>
         {href && (
-          <a href={href} target='_blank' rel='noreferrer' className='text-dim hover:text-cyan' aria-label='Open on Etherscan'>
+          <a href={href} target='_blank' rel='noreferrer' className='text-dim hover:text-cyan' aria-label='Open in block explorer'>
             <ExternalLink className='h-4 w-4' />
           </a>
         )}
@@ -46,7 +46,7 @@ function TransferRow({ e, data, dir, onSelect }: { e: TraceEdge; data: TraceCase
 }
 
 export function EvidencePanel({ data, selection, onSelect }: { data: TraceCase; selection: Selection; onSelect: (s: Selection) => void }) {
-  const scan = !data.sample;
+  const scan = !data.sample && data.explorer ? data.explorer : null;
 
   if (!selection) {
     return (
@@ -87,7 +87,7 @@ export function EvidencePanel({ data, selection, onSelect }: { data: TraceCase; 
             <div className='h-full rounded-full transition-all duration-700' style={{ width: `${n.risk}%`, background: tone }} />
           </div>
         </div>
-        <CopyField label='Address' value={n.id} href={scan ? `https://etherscan.io/address/${n.id}` : undefined} />
+        <CopyField label='Address' value={n.id} href={scan ? `${scan}/address/${n.id}` : undefined} />
         {flags.map((r, i) => (
           <div key={i} className={clsx('rounded-lg border p-3.5', `tone-${r.severity}`)} style={{ borderColor: 'color-mix(in srgb, var(--tone) 35%, transparent)' }}>
             <div className='font-display text-[12px] font-bold' style={{ color: 'var(--tone)' }}>{RISK_TITLE[r.type] ?? r.type}</div>
@@ -126,7 +126,7 @@ export function EvidencePanel({ data, selection, onSelect }: { data: TraceCase; 
           </button>
         )).flatMap((el, i) => (i === 0 ? [el, <ArrowRight key='arrow' className='h-4 w-4 text-cyan' />] : [el]))}
       </div>
-      <CopyField label='Transaction hash' value={e.txHash} href={scan ? `https://etherscan.io/tx/${e.txHash}` : undefined} />
+      <CopyField label='Transaction hash' value={e.txHash} href={scan ? `${scan}/tx/${e.txHash}` : undefined} />
       {flags.map((r, i) => (
         <div key={i} className={clsx('rounded-lg border p-3.5', `tone-${r.severity}`)} style={{ borderColor: 'color-mix(in srgb, var(--tone) 35%, transparent)' }}>
           <div className='font-display text-[12px] font-bold' style={{ color: 'var(--tone)' }}>{RISK_TITLE[r.type] ?? r.type} · evidence</div>

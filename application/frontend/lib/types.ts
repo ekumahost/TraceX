@@ -38,6 +38,8 @@ export interface TraceCase {
   edges: TraceEdge[];
   risks: Risk[];
   sample?: boolean; // synthetic data, not a live trace
+  chain?: string; // backend chain id, e.g. 'base'
+  explorer?: string; // block explorer base URL for this chain
   source?: string; // data provider for live traces
   score?: number; // case score from the analysis engine
   engine?: string; // which detector engine ran

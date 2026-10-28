@@ -16,7 +16,7 @@ import { caseScore, caseStats, short } from '@/lib/format';
 const HACKATHON = 'https://cerebralvalley.ai/e/meta-ai-developer-hackathon';
 
 const STEPS: { n: string; title: string; symbol: AdinkraName; copy: string }[] = [
-  { n: '01', title: 'Trace', symbol: 'nkyinkyim', copy: 'Paste a tx hash, wallet or ENS name. TraceX pulls real on-chain transfers and follows the money hop by hop - up to 20 deep, without walking in circles.' },
+  { n: '01', title: 'Trace', symbol: 'nkyinkyim', copy: 'Paste a tx hash, wallet or ENS name on any of six EVM chains. TraceX pulls real on-chain transfers and follows the money hop by hop - up to 20 deep, without walking in circles.' },
   { n: '02', title: 'Detect', symbol: 'nyansapo', copy: 'Deterministic heuristics flag mixers, peel chains, high-velocity hops, bridges and exchange cash-outs - and score the case 0 to 100.' },
   { n: '03', title: 'Explain', symbol: 'mateMasie', copy: 'Meta’s Muse Spark reads the graph and the flags and writes a plain-English brief, instructed to cite the transaction hash behind every claim.' },
   { n: '04', title: 'Prove', symbol: 'eban', copy: 'Click any citation to land on the transfer. Ask follow-up questions. Export the evidence bundle for your report, exchange or police filing.' },
@@ -27,6 +27,7 @@ const DETECTORS = [
   { title: 'Peel chain', tone: 'medium', copy: 'A large balance passed wallet to wallet, shaving small amounts off at every step.' },
   { title: 'High velocity', tone: 'medium', copy: 'Funds that cross many hops in minutes - the signature of a drain being laundered.' },
   { title: 'Exchange cash-out', tone: 'medium', copy: 'Value arriving at exchange deposit addresses, where KYC records can unlock identity.' },
+  { title: 'Exchange hopping', tone: 'medium', copy: 'Funds that leave one exchange and land at another - a classic way to break the trail.' },
   { title: 'Bridge exit', tone: 'low', copy: 'Funds leaving for another chain, so the trail can be picked up on the other side.' },
 ] as const;
 
@@ -85,7 +86,7 @@ export default function Home() {
           </div>
 
           <div className='wrap absolute inset-x-0 bottom-8 hidden items-end justify-between text-[12px] text-dim md:flex'>
-            <span className='flex items-center gap-2'><span className='dot dot--live tone-clean' /> Ethereum mainnet</span>
+            <span className='flex items-center gap-2'><span className='dot dot--live tone-clean' /> Ethereum · Base · BNB Chain · Arbitrum · Optimism · Polygon</span>
             <a href={HACKATHON} target='_blank' rel='noreferrer' className='flex items-center gap-1.5 hover:text-cream'>
               Built for the Meta AI Developer Hackathon 2026 <ArrowUpRight className='h-3.5 w-3.5' />
             </a>
@@ -232,7 +233,7 @@ export default function Home() {
 
             <div className='mt-20 grid gap-px overflow-hidden rounded-xl border border-line bg-[var(--line)] md:grid-cols-5'>
               {[
-                { k: 'On-chain data', v: 'Alchemy · Etherscan' },
+                { k: 'On-chain data', v: '6 EVM chains · Alchemy · Etherscan' },
                 { k: 'Fund-flow graph', v: 'BFS, loop-safe, 20 hops' },
                 { k: 'Heuristics', v: 'Python · NetworkX on Modal' },
                 { k: 'Explanation', v: 'Muse Spark · Meta Model API', hi: true },
@@ -251,10 +252,11 @@ export default function Home() {
 
         {/* ---------------- numbers ---------------- */}
         <section className='py-[clamp(90px,10vw,140px)]'>
-          <div className='wrap grid gap-12 sm:grid-cols-3'>
+          <div className='wrap grid gap-12 sm:grid-cols-2 lg:grid-cols-4'>
             {[
+              { end: 6, label: 'EVM chains', note: 'Ethereum, Base, BNB, Arbitrum, Optimism, Polygon' },
               { end: 20, label: 'hops deep', note: 'breadth-first, never in circles' },
-              { end: 5, label: 'detectors', note: 'deterministic, explainable' },
+              { end: 6, label: 'detectors', note: 'deterministic, run on Modal' },
               { end: 3, label: 'Meta model paths', note: 'Meta Model API, Fireworks, Baseten' },
             ].map((s, i) => (
               <div key={s.label} className={clsx('reveal border-t border-line pt-8', `reveal-d${i}`)} data-reveal>

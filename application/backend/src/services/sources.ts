@@ -1,11 +1,11 @@
 import { formatUnits } from 'ethers';
 import type { Transfer } from '../types';
 import { fetchJson } from './http';
-import { TOKENS } from './tokens';
+import type { Chain } from './chains';
 
 /**
- * Where outgoing transfers come from. Alchemy and Etherscan when their keys are set,
- * then Blockscout, which is free and keyless - so tracing works with no setup at all.
+ * Where outgoing transfers come from, per chain. Alchemy and Etherscan V2 (one key each covers
+ * every supported chain) when configured, then the chain's free keyless explorers if it has any.
  */
 
 export interface OutgoingQuery {
@@ -22,7 +22,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const PAGE = 100;
 
 // Etherscan's account API, also served keyless by Blockscout
-function etherscanCompatible(name: string, base: string, extra: string): Source {
+function etherscanCompatible(name: string, base: string, extra: string, chain: Chain): Source {
   async function call(action: 'txlist' | 'tokentx', address: string, q: OutgoingQuery) {
     const url = `${base}?${extra}module=account&action=${action}&address=${address}&startblock=${q.fromBlock ?? 0}&endblock=99999999&page=1&offset=${PAGE}&sort=${q.recent ? 'desc' : 'asc'}`;
     for (let attempt = 0; attempt < 4; attempt++) {
@@ -44,13 +44,13 @@ function etherscanCompatible(name: string, base: string, extra: string): Source 
       const native: Transfer[] = txs
         .filter((t) => t.from?.toLowerCase() === a && t.to && t.isError === '0' && t.value !== '0')
         .map((t) => ({
-          hash: t.hash, from: a, to: t.to.toLowerCase(), value: Number(formatUnits(t.value, 18)), asset: 'ETH',
+          hash: t.hash, from: a, to: t.to.toLowerCase(), value: Number(formatUnits(t.value, 18)), asset: chain.native,
           timestamp: +t.timeStamp, blockNumber: +t.blockNumber,
         }));
       const erc20: Transfer[] = tokens
-        .filter((t) => t.from?.toLowerCase() === a && t.to && TOKENS[t.contractAddress?.toLowerCase()])
+        .filter((t) => t.from?.toLowerCase() === a && t.to && chain.tokens[t.contractAddress?.toLowerCase()])
         .map((t) => {
-          const token = TOKENS[t.contractAddress.toLowerCase()];
+          const token = chain.tokens[t.contractAddress.toLowerCase()];
           return {
             hash: t.hash, from: a, to: t.to.toLowerCase(), value: Number(formatUnits(t.value, token.decimals)), asset: token.symbol,
             timestamp: +t.timeStamp, blockNumber: +t.blockNumber,
@@ -61,8 +61,8 @@ function etherscanCompatible(name: string, base: string, extra: string): Source 
   };
 }
 
-function alchemy(key: string): Source {
-  const url = `https://eth-mainnet.g.alchemy.com/v2/${key}`;
+function alchemy(key: string, chain: Chain): Source {
+  const url = `https://${chain.alchemy}.g.alchemy.com/v2/${key}`;
   return {
     name: 'Alchemy',
     async outgoing(address, q) {
@@ -81,33 +81,36 @@ function alchemy(key: string): Source {
       });
       if (d.error) throw new Error(`Alchemy: ${d.error.message}`);
       return (d.result?.transfers ?? [])
-        .filter((t: any) => t.to && t.value != null && (t.category === 'external' || TOKENS[t.rawContract?.address?.toLowerCase()]))
+        .filter((t: any) => t.to && t.value != null && (t.category === 'external' || chain.tokens[t.rawContract?.address?.toLowerCase()]))
         .map((t: any): Transfer => ({
           hash: t.hash, from: a, to: t.to.toLowerCase(), value: Number(t.value),
-          asset: t.category === 'external' ? 'ETH' : TOKENS[t.rawContract.address.toLowerCase()].symbol,
+          asset: t.category === 'external' ? chain.native : chain.tokens[t.rawContract.address.toLowerCase()].symbol,
           timestamp: Math.floor(Date.parse(t.metadata.blockTimestamp) / 1000), blockNumber: parseInt(t.blockNum, 16),
         }));
     },
   };
 }
 
-export function sources(): Source[] {
+export function sources(chain: Chain): Source[] {
   const list: Source[] = [];
-  if (process.env.ALCHEMY_API_KEY) list.push(alchemy(process.env.ALCHEMY_API_KEY));
+  if (process.env.ALCHEMY_API_KEY && chain.alchemy) list.push(alchemy(process.env.ALCHEMY_API_KEY, chain));
   if (process.env.ETHERSCAN_API_KEY) {
-    list.push(etherscanCompatible('Etherscan', 'https://api.etherscan.io/v2/api', `chainid=1&apikey=${process.env.ETHERSCAN_API_KEY}&`));
+    list.push(etherscanCompatible('Etherscan', 'https://api.etherscan.io/v2/api', `chainid=${chain.chainId}&apikey=${process.env.ETHERSCAN_API_KEY}&`, chain));
   }
-  list.push(etherscanCompatible('Blockscout', 'https://eth.blockscout.com/api', ''));
+  for (const k of chain.keyless) list.push(etherscanCompatible(k.name, k.base, '', chain));
   return list;
 }
 
 const memo = new Map<string, { at: number; data: Transfer[] }>();
 
 // First source that answers wins; falls through to the next on failure
-export async function outgoing(address: string, q: OutgoingQuery): Promise<{ transfers: Transfer[]; source: string }> {
+export async function outgoing(chain: Chain, address: string, q: OutgoingQuery): Promise<{ transfers: Transfer[]; source: string }> {
+  const list = sources(chain);
+  const hint = `add a free ALCHEMY_API_KEY (or ETHERSCAN_API_KEY) to application/backend/.env to trace ${chain.name}`;
+  if (!list.length) throw new Error(`No data source for ${chain.name} - ${hint}`);
   const errors: string[] = [];
-  for (const s of sources()) {
-    const key = `${s.name}|${address}|${q.fromBlock ?? ''}|${q.recent ? 'r' : ''}`;
+  for (const s of list) {
+    const key = `${chain.id}|${s.name}|${address}|${q.fromBlock ?? ''}|${q.recent ? 'r' : ''}`;
     const hit = memo.get(key);
     if (hit && Date.now() - hit.at < 10 * 60_000) return { transfers: hit.data, source: s.name };
     try {
@@ -118,5 +121,6 @@ export async function outgoing(address: string, q: OutgoingQuery): Promise<{ tra
       errors.push(e.message);
     }
   }
-  throw new Error(`Couldn't fetch transfers - ${errors.join('; ')}`);
+  const keyed = process.env.ALCHEMY_API_KEY || process.env.ETHERSCAN_API_KEY;
+  throw new Error(`Couldn't fetch ${chain.name} transfers - ${errors.join('; ')}${keyed ? '' : ` (${hint})`}`);
 }

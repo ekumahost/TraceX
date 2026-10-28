@@ -13,13 +13,15 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   return data as T;
 }
 
-export async function fetchTrace(input: string, hops = 5): Promise<{ data: TraceCase } | { error: string }> {
+export async function fetchTrace(input: string, chain = 'auto', hops = 5): Promise<{ data: TraceCase } | { error: string }> {
   try {
-    const data = await post<any>('/api/trace', { input, hops });
+    const data = await post<any>('/api/trace', { input, hops, chain });
     return {
       data: {
         input: data.input ?? input,
         network: data.network ?? 'Ethereum',
+        chain: data.chain,
+        explorer: data.explorer,
         nodes: data.graph?.nodes ?? [],
         edges: data.graph?.edges ?? [],
         risks: data.heuristics ?? [],

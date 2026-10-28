@@ -26,7 +26,7 @@ const TABS: { id: Tab; label: string }[] = [
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export function Workspace({ query }: { query: string }) {
+export function Workspace({ query, chain = 'auto' }: { query: string; chain?: string }) {
   const isSample = !query || query === 'sample';
   const [stage, setStage] = useState(0); // 0 fetch · 1 graph · 2 heuristics · 3 ready
   const [data, setData] = useState<TraceCase | null>(null);
@@ -43,7 +43,7 @@ export function Workspace({ query }: { query: string }) {
     const id = ++run.current;
     setStage(0); setData(null); setRevealHop(-1); setSelection(null); setFailReason(null); setTab('brief');
     (async () => {
-      const [live] = await Promise.all([isSample ? null : fetchTrace(query), wait(isSample ? 700 : 900)]);
+      const [live] = await Promise.all([isSample ? null : fetchTrace(query, chain), wait(isSample ? 700 : 900)]);
       if (id !== run.current) return;
       const c = live && 'data' in live ? live.data : SAMPLE_CASE;
       setFailReason(live && 'error' in live ? live.error : null);
@@ -53,7 +53,7 @@ export function Workspace({ query }: { query: string }) {
       if (id !== run.current) return;
       setData(c); setStage(3);
     })();
-  }, [query, isSample]);
+  }, [query, chain, isSample]);
 
   // grow the graph hop by hop
   useEffect(() => {
@@ -109,7 +109,7 @@ export function Workspace({ query }: { query: string }) {
       {/* top bar */}
       <header className='flex h-16 flex-none items-center gap-4 border-b border-line px-4 sm:px-5'>
         <Link href='/' aria-label='TraceX home' className='flex-none'><Wordmark size='sm' /></Link>
-        <div className='mx-auto hidden w-full max-w-[560px] md:block'><SearchConsole compact initial={query} /></div>
+        <div className='mx-auto hidden w-full max-w-[560px] md:block'><SearchConsole compact initial={query} initialChain={chain} /></div>
         <div className='ml-auto flex flex-none items-center gap-2 md:ml-0'>
           <span className='chip hidden lg:inline-flex'><span className='dot dot--live tone-clean' /> {data?.network ?? 'Ethereum'}</span>
           <button type='button' onClick={exportCase} disabled={!data} className='btn btn--ghost btn--sm'><Download /> <span className='hidden sm:inline'>Export</span></button>

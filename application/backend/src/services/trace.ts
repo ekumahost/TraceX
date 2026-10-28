@@ -2,7 +2,8 @@ import type { Risk, TraceEdge, TraceNode, Transfer } from '../types';
 import { InputError, NotFoundError } from '../types';
 import { limiter } from './http';
 import { classify } from './labels';
-import { resolveEns, transfersInTx } from './rpc';
+import { findTxChain, resolveEns, transfersInTx } from './rpc';
+import { getChain, usdWeight, type Chain } from './chains';
 import { outgoing } from './sources';
 import { runAnalysis } from './analysis';
 
@@ -19,14 +20,13 @@ const MAX_NODES = 40;
 const CHILDREN = 4;
 const STOP = new Set(['exchange', 'mixer', 'bridge', 'contract']);
 
-// rough USD weights, used only to rank transfers of different assets against each other
-const WEIGHT: Record<string, number> = { ETH: 2500, WETH: 2500, USDT: 1, USDC: 1, DAI: 1 };
+// transfers worth less than this (at rough prices) are ignored as dust
 const DUST_USD = 25;
-const usd = (t: Transfer) => t.value * (WEIGHT[t.asset] ?? 0);
 
 export interface TraceResult {
   input: string;
   network: string;
+  chain: Chain;
   nodes: TraceNode[];
   edges: TraceEdge[];
   risks: Risk[];
@@ -44,14 +44,18 @@ export function inputKind(input: string): 'tx' | 'wallet' | 'ens' {
   throw new InputError('Enter a 0x transaction hash, a 0x wallet address or an ENS name');
 }
 
-export async function traceCase(input: string, hops = 5): Promise<TraceResult> {
+export async function traceCase(input: string, hops = 5, chainId?: string): Promise<TraceResult> {
   const maxHops = Math.max(1, Math.min(MAX_HOPS, Math.floor(hops)));
   const kind = inputKind(input);
+  // a tx hash can be found on whichever chain it lives on; wallets need a chain (default Ethereum)
+  const chain = kind === 'tx' && (!chainId || chainId === 'auto') ? await findTxChain(input.trim()) : getChain(chainId);
+  // rough USD value, used only to rank transfers of different assets against each other
+  const usd = (t: Transfer) => t.value * usdWeight(chain, t.asset);
   const nodes = new Map<string, TraceNode>();
   const edges: TraceEdge[] = [];
   const edgeIds = new Set<string>();
   const run = limiter(4);
-  let source = 'Ethereum RPC';
+  let source = `${chain.name} RPC`;
   const incomplete: string[] = [];
 
   const addNode = (id: string, hop: number) => {
@@ -71,8 +75,11 @@ export async function traceCase(input: string, hops = 5): Promise<TraceResult> {
   let frontier: Frontier[] = [];
 
   if (kind === 'tx') {
-    const moved = (await transfersInTx(input.trim())).filter((t) => usd(t) > 0);
-    if (!moved.length) throw new NotFoundError('This transaction moved no ETH, USDT, USDC, DAI or WETH');
+    const moved = (await transfersInTx(chain, input.trim())).filter((t) => usd(t) > 0);
+    if (!moved.length) {
+      const assets = [chain.native, ...new Set(Object.values(chain.tokens).map((t) => t.symbol))].join(', ');
+      throw new NotFoundError(`This transaction moved none of the assets TraceX follows on ${chain.name} (${assets})`);
+    }
     const origin = moved[0].from;
     addNode(origin, 0);
     for (const t of moved) {
@@ -97,8 +104,8 @@ export async function traceCase(input: string, hops = 5): Promise<TraceResult> {
       const node = nodes.get(f.address)!;
       // look up who it is and what it sent at the same time - both are slow on free APIs
       const [entity, res] = await Promise.all([
-        classify(f.address),
-        outgoing(f.address, f.fromBlock == null ? { recent: true } : { fromBlock: f.fromBlock }).catch((e: Error) => e),
+        classify(chain, f.address),
+        outgoing(chain, f.address, f.fromBlock == null ? { recent: true } : { fromBlock: f.fromBlock }).catch((e: Error) => e),
       ]);
       if (node.type !== 'source') node.type = entity.type;
       node.label ??= entity.label;
@@ -127,7 +134,7 @@ export async function traceCase(input: string, hops = 5): Promise<TraceResult> {
 
   // label the leaves too - an exchange at the edge of the graph is the most important node
   await Promise.all([...nodes.values()].filter((n) => !expanded.has(n.id)).map((n) => run(async () => {
-    const entity = await classify(n.id);
+    const entity = await classify(chain, n.id);
     if (n.type !== 'source') n.type = entity.type;
     n.label ??= entity.label;
   })));
@@ -136,5 +143,5 @@ export async function traceCase(input: string, hops = 5): Promise<TraceResult> {
 
   const list = [...nodes.values()];
   const { risks, score, engine } = await runAnalysis(list, edges);
-  return { input: input.trim(), network: 'Ethereum', nodes: list, edges, risks, score, engine, source, incomplete };
+  return { input: input.trim(), network: chain.name, chain, nodes: list, edges, risks, score, engine, source, incomplete };
 }

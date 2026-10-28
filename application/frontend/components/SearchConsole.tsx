@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Search } from 'lucide-react';
 import clsx from 'clsx';
+import { CHAINS } from '@/lib/chains';
 
 export function detectInput(v: string): 'tx' | 'wallet' | 'ens' | null {
   const s = v.trim();
@@ -14,13 +15,14 @@ export function detectInput(v: string): 'tx' | 'wallet' | 'ens' | null {
 
 const KIND_LABEL = { tx: 'Transaction', wallet: 'Wallet', ens: 'ENS name' } as const;
 
-export function SearchConsole({ initial = '', compact = false, autoFocus = false }: { initial?: string; compact?: boolean; autoFocus?: boolean }) {
+export function SearchConsole({ initial = '', initialChain = 'auto', compact = false, autoFocus = false }: { initial?: string; initialChain?: string; compact?: boolean; autoFocus?: boolean }) {
   const router = useRouter();
   const [value, setValue] = useState(initial === 'sample' ? '' : initial);
+  const [chain, setChain] = useState(initialChain);
   const [error, setError] = useState('');
   const kind = detectInput(value);
 
-  const go = (q: string) => router.push(`/investigate?q=${encodeURIComponent(q)}`);
+  const go = (q: string) => router.push(`/investigate?q=${encodeURIComponent(q)}${q !== 'sample' && chain !== 'auto' ? `&chain=${chain}` : ''}`);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +46,19 @@ export function SearchConsole({ initial = '', compact = false, autoFocus = false
             aria-label='Transaction hash, wallet address or ENS name'
           />
           {kind && <span className='chip tone-low hidden sm:inline-flex'>{KIND_LABEL[kind]}</span>}
+          <select
+            value={chain}
+            onChange={(e) => setChain(e.target.value)}
+            aria-label='Chain'
+            title='Transaction hashes are found on any supported chain automatically; wallets default to Ethereum'
+            className={clsx(
+              'flex-none cursor-pointer rounded-md border border-line-2 bg-panel-2 font-display font-semibold uppercase tracking-[.12em] text-muted outline-none hover:text-cream focus:border-[var(--line-v)]',
+              compact ? 'px-2 py-1.5 text-[10px]' : 'hidden px-3 py-2.5 text-[11px] sm:block',
+            )}
+          >
+            <option value='auto'>Auto chain</option>
+            {CHAINS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
           <button type='submit' className={clsx('btn', compact && 'btn--sm')} aria-label={compact ? 'Trace' : 'Investigate'}>
             <span className={compact ? undefined : 'hidden sm:inline'}>{compact ? 'Trace' : 'Investigate'}</span> <ArrowRight />
           </button>
