@@ -5,6 +5,10 @@ import { ArrowDownLeft, ArrowRight, ArrowUpRight, Check, Copy, ExternalLink, Mou
 import type { TraceCase, TraceEdge } from '@/lib/types';
 import { fmtTime, fmtValue, riskTone, RISK_TITLE, short, TYPE_LABEL } from '@/lib/format';
 import type { Selection } from './TraceGraph';
+import { ChainMark } from './ChainMarks';
+import { CHAINS } from '@/lib/chains';
+
+const explorerFor = (id?: string) => CHAINS.find((chain) => chain.id === id)?.explorer;
 
 const TONE = { high: 'var(--red)', medium: 'var(--amber)', low: 'var(--cyan)', clean: 'var(--green)' };
 
@@ -37,7 +41,7 @@ function TransferRow({ e, data, dir, onSelect }: { e: TraceEdge; data: TraceCase
     <button type='button' onClick={() => onSelect({ kind: 'edge', id: e.id })} className='flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-panel-2'>
       {dir === 'in' ? <ArrowDownLeft className='h-4 w-4 flex-none text-risk-clean' /> : <ArrowUpRight className='h-4 w-4 flex-none text-risk-medium' />}
       <div className='min-w-0 flex-1'>
-        <div className='truncate text-[13px] text-cream'>{other?.label ?? short(other?.id ?? '', 8, 6)}</div>
+        <div className='flex items-center gap-1.5 truncate text-[13px] text-cream'><ChainMark chain={other?.chain ?? e.chain ?? data.chain} className='h-4 min-w-4 px-1 text-[7px]' />{other?.label ?? short(other?.address ?? other?.id ?? '', 8, 6)}</div>
         <div className='mono text-[11px] text-dim'>{short(e.txHash, 8, 6)}</div>
       </div>
       <div className='mono text-right text-[12.5px] text-cream'>{fmtValue(e.value, e.asset)}</div>
@@ -46,8 +50,6 @@ function TransferRow({ e, data, dir, onSelect }: { e: TraceEdge; data: TraceCase
 }
 
 export function EvidencePanel({ data, selection, onSelect }: { data: TraceCase; selection: Selection; onSelect: (s: Selection) => void }) {
-  const scan = !data.sample && data.explorer ? data.explorer : null;
-
   if (!selection) {
     return (
       <div className='p-5'>
@@ -74,6 +76,7 @@ export function EvidencePanel({ data, selection, onSelect }: { data: TraceCase; 
         <div>
           <div className='flex items-center gap-2'>
             <span className='chip' style={{ color: tone, borderColor: tone }}>{TYPE_LABEL[n.type]}</span>
+            <span className='chip inline-flex items-center gap-1.5'><ChainMark chain={n.chain ?? data.chain} className='h-4 min-w-4 px-1 text-[7px]' />{n.chain ?? data.chain ?? 'Ethereum'}</span>
             <span className='chip'>Hop {n.hop}</span>
           </div>
           <h3 className='display mt-4 text-[24px]'>{n.label ?? 'Unlabelled wallet'}</h3>
@@ -87,7 +90,7 @@ export function EvidencePanel({ data, selection, onSelect }: { data: TraceCase; 
             <div className='h-full rounded-full transition-all duration-700' style={{ width: `${n.risk}%`, background: tone }} />
           </div>
         </div>
-        <CopyField label='Address' value={n.id} href={scan ? `${scan}/address/${n.id}` : undefined} />
+        <CopyField label='Address' value={n.address ?? n.id} href={!data.sample && explorerFor(n.chain ?? data.chain) ? `${explorerFor(n.chain ?? data.chain)}/address/${n.address ?? n.id}` : undefined} />
         {flags.map((r, i) => (
           <div key={i} className={clsx('rounded-lg border p-3.5', `tone-${r.severity}`)} style={{ borderColor: 'color-mix(in srgb, var(--tone) 35%, transparent)' }}>
             <div className='font-display text-[12px] font-bold' style={{ color: 'var(--tone)' }}>{RISK_TITLE[r.type] ?? r.type}</div>
@@ -122,11 +125,26 @@ export function EvidencePanel({ data, selection, onSelect }: { data: TraceCase; 
           >
             <div className='font-display text-[10px] font-bold uppercase tracking-[.18em] text-dim'>{i ? 'To' : 'From'}</div>
             <div className='mt-1 truncate text-[13px] text-cream'>{n?.label ?? TYPE_LABEL[n?.type ?? 'wallet']}</div>
-            <div className='mono text-[11px] text-muted'>{short(n?.id ?? '', 6, 4)}</div>
+            <div className='mono text-[11px] text-muted'>{short(n?.address ?? n?.id ?? '', 6, 4)}</div>
           </button>
         )).flatMap((el, i) => (i === 0 ? [el, <ArrowRight key='arrow' className='h-4 w-4 text-cyan' />] : [el]))}
       </div>
-      <CopyField label='Transaction hash' value={e.txHash} href={scan ? `${scan}/tx/${e.txHash}` : undefined} />
+      <CopyField label='Transaction hash' value={e.txHash} href={!data.sample && explorerFor(e.chain ?? data.chain) ? `${explorerFor(e.chain ?? data.chain)}/tx/${e.txHash}` : undefined} />
+      {e.destinationTxHash && (
+        <div className='space-y-3 rounded-lg border border-[rgba(240,180,76,.25)] bg-[rgba(240,180,76,.05)] p-3'>
+          <div className='flex items-center gap-2 text-[12px] text-gold-soft'>
+            <ChainMark chain={e.chain} className='h-5 min-w-5 px-1 text-[8px]' />
+            <span>Canonical bridge event matched to a finalization on</span>
+            <ChainMark chain={e.destinationChain} className='h-5 min-w-5 px-1 text-[8px]' />
+            <span className='font-semibold'>{e.destinationChain}</span>
+          </div>
+          <CopyField
+            label={`${e.destinationChain} finalization transaction`}
+            value={e.destinationTxHash}
+            href={!data.sample && explorerFor(e.destinationChain) ? `${explorerFor(e.destinationChain)}/tx/${e.destinationTxHash}` : undefined}
+          />
+        </div>
+      )}
       {flags.map((r, i) => (
         <div key={i} className={clsx('rounded-lg border p-3.5', `tone-${r.severity}`)} style={{ borderColor: 'color-mix(in srgb, var(--tone) 35%, transparent)' }}>
           <div className='font-display text-[12px] font-bold' style={{ color: 'var(--tone)' }}>{RISK_TITLE[r.type] ?? r.type} · evidence</div>

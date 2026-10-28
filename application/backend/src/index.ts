@@ -52,6 +52,7 @@ app.post('/api/trace', traceLimit, async (req, res) => {
       hops,
       source: t.source,
       incomplete: t.incomplete,
+      crossChain: t.crossChain,
       score: t.score,
       engine: t.engine,
       graph: { nodes: t.nodes, edges: t.edges },

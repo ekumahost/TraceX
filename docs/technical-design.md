@@ -31,13 +31,13 @@ The Express API exposes `/api/chains`, `/api/trace`, `/api/shield`, `/api/recove
 
 The chain adapter supports Ethereum, Base, BNB Chain, Arbitrum, Optimism, Polygon, and Robinhood Chain. Alchemy is the recommended source; Etherscan V2 and selected keyless explorers can be used as alternatives for traces. Live traces include native assets and a small set of configured tokens, not every token on each network.
 
-The trace builder follows transfers forward in time using breadth-first traversal. It avoids expanding a wallet more than once, stops at labelled entities and contracts, follows up to 20 hops, and caps a case at 40 nodes. Results are therefore bounded views, not complete transaction histories.
+The trace builder follows transfers forward in time using breadth-first traversal. It avoids expanding a wallet more than once, stops at labelled entities and contracts, follows up to 20 hops, and caps a case at 40 nodes. Ethereum-to-Base, Optimism, and Arbitrum One bridge deposits may continue when the source initiation and exactly one destination finalization agree on protocol event fields. The destination recipient is then traced from the finalization block. Cross-chain node keys include the chain ID so the same address on two networks is not merged. Results are bounded views, not complete transaction histories.
 
 Wallet Shield uses Alchemy's transfer API to inspect up to two pages of incoming and outgoing records. It compares transfers against counterparties with verified value activity and reports lookalike addresses, zero-value transfers, and unverified tokens using familiar asset names. The response indicates when Alchemy returned another page beyond the scan limit. The scan does not establish intent or prove a wallet safe.
 
 The Recovery Kit re-runs a live trace on the backend instead of trusting a client-supplied graph, then asks Muse Spark for an exchange-preservation request and police incident-report draft. Drafts are restricted to transaction hashes and addresses in that trace; this does not verify translation quality or make the text legally suitable. The user reviews and sends drafts manually. The sample case is not eligible.
 
-Automatic cross-chain continuation from Ethereum to Base, Optimism, or Arbitrum remains planned and is not implemented.
+Cross-chain lookup finds the destination block near the source transaction time and searches up to 100,000 destination blocks from there. Missing or non-unique finalizations are left unmatched; the UI reports attempts, confirmations, unmatched lookups, and errors. The supported scope is OP Stack Standard Bridge (Base and Optimism) and Arbitrum One ERC20 gateway deposits. Arbitrum native-ETH Inbox deposits and L2-to-L1 withdrawals are excluded. This does not establish common wallet ownership or complete bridge coverage.
 
 ## Deterministic analysis
 

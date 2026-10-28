@@ -48,7 +48,10 @@ def analyze(nodes: list[dict], edges: list[dict]) -> dict:
     """Returns {"risks", "node_risk", "score"} for a traced case."""
     g = build_graph(nodes, edges)
     node = lambda nid: g.nodes[nid] if nid in g else {}
-    name = lambda nid: node(nid).get("label") or f"{nid[:8]}…{nid[-4:]}"
+    name = lambda nid: node(nid).get("label") or (
+        f"{(node(nid).get('address') or nid.split(':')[-1])[:8]}…"
+        f"{(node(nid).get('address') or nid.split(':')[-1])[-4:]}"
+    )
     outs = lambda nid: [d for _, _, d in g.out_edges(nid, data=True)]
 
     risk = {nid: BASE_RISK.get(d.get("type"), 10) for nid, d in g.nodes(data=True)}

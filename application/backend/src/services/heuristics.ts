@@ -27,7 +27,11 @@ export function scoreRisks(risks: Risk[]) {
 
 export function analyze(nodes: TraceNode[], edges: TraceEdge[]): Risk[] {
   const byId = new Map(nodes.map((n) => [n.id, n]));
-  const name = (id: string) => byId.get(id)?.label ?? `${id.slice(0, 8)}…${id.slice(-4)}`;
+  const name = (id: string) => {
+    const node = byId.get(id);
+    const address = node?.address ?? id.split(':').at(-1) ?? id;
+    return node?.label ?? `${address.slice(0, 8)}…${address.slice(-4)}`;
+  };
   const outs = (id: string) => edges.filter((e) => e.from === id);
   const risks: Risk[] = [];
   const bump = (id: string, risk: number) => {

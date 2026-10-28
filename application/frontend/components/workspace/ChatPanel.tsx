@@ -12,6 +12,27 @@ type Msg = { role: 'user' | 'ai' | 'error'; text: string; via?: string };
 
 const SUGGESTIONS = ['Did these funds touch a mixer?', 'Where did the money end up?', 'Which address should we ask an exchange about?'];
 
+function offlineAnswer(question: string, data: TraceCase) {
+  const q = question.toLowerCase();
+  const kind = q.includes('mixer') ? 'mixer'
+    : q.includes('exchange') || q.includes('cash') ? 'exchange'
+      : q.includes('bridge') || q.includes('chain') ? 'bridge'
+        : undefined;
+  const node = kind ? data.nodes.find((item) => item.type === kind) : undefined;
+  const edge = node
+    ? data.edges.find((item) => item.from === node.id || item.to === node.id)
+    : data.edges[0];
+  if (!node && kind) {
+    return `This synthetic offline trace has no node labelled as a ${kind}. No network lookup or AI model was used.`;
+  }
+  if (!edge) return 'This bundled synthetic trace has no transfer records to show.';
+  const address = node?.address ?? node?.id;
+  const fact = node
+    ? `The synthetic graph contains a ${node.type} node${node.label ? ` labelled ${node.label}` : ''}${address ? ` at ${address}` : ''}.`
+    : 'This is an illustrative, synthetic transfer in the bundled graph.';
+  return `${fact} Verify the selected transfer in the Evidence tab. Transaction: ${edge.txHash}\n\nNo network lookup or AI model was used. This example does not identify a real wallet.`;
+}
+
 export function ChatPanel({ data, onCite }: { data: TraceCase; onCite: (s: Selection) => void }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [q, setQ] = useState('');
@@ -28,6 +49,10 @@ export function ChatPanel({ data, onCite }: { data: TraceCase; onCite: (s: Selec
     setMsgs((m) => [...m, { role: 'user', text: question }]);
     setBusy(true);
     try {
+      if (data.demo) {
+        setMsgs((m) => [...m, { role: 'ai', text: offlineAnswer(question, data), via: 'Offline deterministic reply' }]);
+        return;
+      }
       const a = await askCase(question, data);
       setMsgs((m) => [...m, { role: 'ai', text: a.text, via: PROVIDER_LABEL[a.provider].model }]);
     } catch (e: any) {

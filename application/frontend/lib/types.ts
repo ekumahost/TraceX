@@ -3,7 +3,9 @@ export type EntityType = 'source' | 'wallet' | 'exchange' | 'mixer' | 'bridge' |
 export type Severity = 'high' | 'medium' | 'low';
 
 export interface TraceNode {
-  id: string; // address
+  id: string; // chain-qualified identity
+  address?: string; // EVM address for display, links, and citations
+  chain?: string;
   label?: string;
   type: EntityType;
   hop: number;
@@ -19,6 +21,9 @@ export interface TraceEdge {
   asset: string;
   timestamp: string; // ISO
   hop: number;
+  chain?: string;
+  destinationTxHash?: string;
+  destinationChain?: string;
 }
 
 export interface Risk {
@@ -38,6 +43,7 @@ export interface TraceCase {
   edges: TraceEdge[];
   risks: Risk[];
   sample?: boolean; // synthetic data, not a live trace
+  demo?: { id: string; title: string }; // bundled synthetic case; no chain data fetched
   chain?: string; // backend chain id, e.g. 'base'
   explorer?: string; // block explorer base URL for this chain
   source?: string; // data provider for live traces
@@ -45,6 +51,7 @@ export interface TraceCase {
   engine?: string; // which detector engine ran
   incomplete?: string[]; // wallets whose transfers couldn't be loaded
   hops?: number; // requested maximum trace depth
+  crossChain?: { attempted: number; followed: number; unmatched: number; errors: number };
 }
 
 export type Provider = 'meta' | 'fireworks' | 'baseten';

@@ -30,6 +30,7 @@ export async function fetchTrace(input: string, chain = 'auto', hops = 5): Promi
         engine: data.engine,
         incomplete: data.incomplete ?? [],
         hops: data.hops ?? hops,
+        crossChain: data.crossChain,
       },
     };
   } catch (e: any) {

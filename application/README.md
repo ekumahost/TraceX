@@ -71,6 +71,8 @@ Alchemy also replaces the free public RPC nodes, which can't look up older trans
 
 If a live trace fails, the app shows the labelled sample case and the reason.
 
+The investigation form also offers bundled offline synthetic cases. Select one to demonstrate the graph, evidence panel, rule-based brief, and follow-up replies without contacting the backend, RPC providers, or AI services. Every address and transaction hash in these fixtures is generated; they are not known fraud wallets, real traces, or chain evidence.
+
 ## Analysis engine (Python + NetworkX, on Modal)
 The detectors (mixer, peel chain, velocity, exchange cash-out and hopping, bridge) and the
 0-100 case score run in `application/analysis-engine`. The backend calls it when
@@ -99,4 +101,7 @@ Wallet Shield requires `ALCHEMY_API_KEY` with the selected network enabled. It r
 ## Recovery Kit
 The investigation workspace has a Recovery Kit tab for a live trace. It re-runs the trace server-side, then uses Muse Spark to generate editable exchange-preservation and police incident-report drafts in English, Nigerian Pidgin, Igbo, Yoruba, or Hausa. Each draft must cite a transaction in that server-generated case; generated addresses outside the case are rejected. The documents are never sent automatically, and people must review details, translation, and citations before using them. Configure `META_API_KEY`; optional alternate providers are not used for Recovery Kit generation.
 
-Cross-chain follow-through from Ethereum to Base, Optimism, and Arbitrum is a planned feature, not currently available.
+## Cross-chain follow
+Live traces can continue from canonical Ethereum L1 bridge transfers onto Base, Optimism, and Arbitrum One. TraceX checks the L1 initiation event against a unique L2 finalization event, then continues tracing the recipient from the destination block. Graph node IDs are chain-qualified internally; the UI displays the address and chain-specific explorer links.
+
+The destination lookup finds the block near the source transaction timestamp, then searches a bounded window of up to 100,000 destination blocks. Missing or ambiguous finalizations do not become graph edges, and RPC providers can rate-limit log queries. OP Stack Standard Bridge transfers are supported for Base and Optimism; Arbitrum support is for ERC20 gateway deposits only. Arbitrum native-ETH Inbox deposits and L2-to-L1 withdrawals are not followed. No cross-chain link proves common ownership or that the received asset is the same economic funds.

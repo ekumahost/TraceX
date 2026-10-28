@@ -10,7 +10,7 @@ import type { Selection } from './TraceGraph';
  * 0x tx hash / address becomes a citation chip that jumps to it in the graph.
  */
 
-const TOKEN = /(`[^`\n]+`|0x[a-fA-F0-9]{64}|0x[a-fA-F0-9]{40}(?![a-fA-F0-9])|\*\*[^*]+\*\*)/g;
+const TOKEN = /(`[^`\n]+`|0x[a-fA-F0-9]{64}|(?:ethereum|base|bnb|arbitrum|optimism|polygon|robinhood):0x[a-fA-F0-9]{40}|0x[a-fA-F0-9]{40}(?![a-fA-F0-9])|\*\*[^*]+\*\*)/g;
 
 function Inline({ text, data, onCite }: { text: string; data: TraceCase; onCite: (s: Selection) => void }) {
   return (
@@ -20,7 +20,8 @@ function Inline({ text, data, onCite }: { text: string; data: TraceCase; onCite:
         // models often wrap hashes in `code` - unwrap so they still become citations
         const coded = raw.startsWith('`') && raw.endsWith('`') && raw.length > 1;
         const part = coded ? raw.slice(1, -1) : raw;
-        if (coded && !/^0x[a-fA-F0-9]{40}([a-fA-F0-9]{24})?$/.test(part)) {
+        const addressPart = part.replace(/^(?:ethereum|base|bnb|arbitrum|optimism|polygon|robinhood):/i, '');
+        if (coded && !/^0x[a-fA-F0-9]{40}([a-fA-F0-9]{24})?$/.test(addressPart)) {
           return <code key={i} className='mono rounded bg-panel-3 px-1 text-[.88em] text-cream'>{part}</code>;
         }
         if (part.startsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>;
@@ -32,11 +33,11 @@ function Inline({ text, data, onCite }: { text: string; data: TraceCase; onCite:
             </button>
           );
         }
-        if (/^0x[a-fA-F0-9]{40}$/.test(part)) {
-          const node = data.nodes.find((n) => n.id.toLowerCase() === part.toLowerCase());
+        if (/^0x[a-fA-F0-9]{40}$/.test(addressPart)) {
+          const node = data.nodes.find((n) => (n.address ?? n.id).toLowerCase() === addressPart.toLowerCase());
           return (
             <button key={i} type='button' title={part} disabled={!node} onClick={() => node && onCite({ kind: 'node', id: node.id })} className={clsx('cite cite--addr', !node && 'opacity-60')}>
-              {node?.label ?? short(part, 6, 4)}
+              {node?.label ?? short(addressPart, 6, 4)}
             </button>
           );
         }

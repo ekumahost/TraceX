@@ -31,12 +31,13 @@ Application is in application/ folder:
 - analysis-engine/ - Python FastAPI + NetworkX heuristics
 - Wallet Shield - read-only scan of recent indexed transfers for poisoning patterns
 - Recovery Kit - generates editable, citation-checked exchange and police-report drafts in English, Nigerian Pidgin, Igbo, Yoruba, or Hausa; never sends them
-- Cross-chain follow - planned Ethereum-to-Base, Optimism, and Arbitrum bridge tracing; not yet implemented
+- Cross-chain follow - follows supported canonical Ethereum L1 bridge transfers to Base, Optimism, and Arbitrum when their L2 finalization can be uniquely verified
 
 ## Safety features and status
 - **Poisoning Shield (available):** scans a bounded amount of Alchemy-indexed wallet history for look-alike counterparties, zero-value transfers, and unverified-token activity. It reports scan coverage and links evidence; a clean scan is not proof of safety.
 - **Recovery Kit (available):** asks Muse Spark for editable exchange-preservation and police incident-report drafts using trace evidence. The API checks that each draft cites a transaction in the case and rejects unrecognized addresses. Review all generated text; it is not legal advice and TraceX does not send requests.
-- **Cross-chain follow (planned):** the intended first scope is canonical Ethereum L1 bridge transfers to Base, Optimism, or Arbitrum. This is not currently available, and no cross-chain graph or automatic destination-chain tracing is claimed.
+- **Cross-chain follow (available, bounded):** recognizes canonical Ethereum L1 Standard Bridge events to Base and Optimism and ERC20 gateway deposits to Arbitrum One. It follows into the destination graph only when a unique destination finalization matches the source event fields; no amount/time-only joins are used. Nodes use chain-qualified identities and chain-specific explorer links. Searches cover a bounded 100,000-block destination window beginning near the source transaction time; missing or ambiguous events are not joined. Arbitrum native-ETH Inbox deposits and L2-to-L1 withdrawals are not followed. Public RPCs may rate-limit log searches.
+- **Offline demo cases:** choose one of the bundled synthetic traces from the investigation form. They load the graph, evidence, deterministic brief, and local follow-up replies without RPC or AI requests. Their generated addresses and transaction hashes are fixtures, not real wallets or on-chain records.
 
 ## Stack
 - Frontend: Next.js 14 + TypeScript + Tailwind + shadcn + React Flow + Framer Motion

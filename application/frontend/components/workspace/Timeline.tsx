@@ -4,12 +4,14 @@ import type { TraceCase } from '@/lib/types';
 import { fmtDuration, fmtTime, fmtValue, short } from '@/lib/format';
 import { Adinkra, ADINKRA } from '../Adinkra';
 import type { Selection } from './TraceGraph';
+import { ChainMark } from './ChainMarks';
 
 export function Timeline({ data, selection, onSelect }: { data: TraceCase; selection: Selection; onSelect: (s: Selection) => void }) {
   const events = [...data.edges].sort((a, b) => +new Date(a.timestamp) - +new Date(b.timestamp));
   const t0 = events[0] ? +new Date(events[0].timestamp) : 0;
   const flagged = new Set(data.risks.map((r) => r.tx).filter(Boolean));
-  const name = (id: string) => data.nodes.find((n) => n.id === id)?.label ?? short(id, 6, 4);
+  const node = (id: string) => data.nodes.find((n) => n.id === id);
+  const name = (id: string) => node(id)?.label ?? short(node(id)?.address ?? id, 6, 4);
 
   return (
     <div className='p-5'>
@@ -34,7 +36,11 @@ export function Timeline({ data, selection, onSelect }: { data: TraceCase; selec
                   <span className='font-display text-[11px] font-bold uppercase tracking-[.16em] text-gold'>{delta ? `T + ${fmtDuration(delta)}` : 'T 0'}</span>
                   <span className='mono text-[12.5px] text-cream'>{fmtValue(e.value, e.asset)}</span>
                 </div>
-                <div className='mt-1 text-[13px] text-muted'>{name(e.from)} → {name(e.to)}</div>
+                <div className='mt-1 flex items-center gap-1.5 text-[13px] text-muted'>
+                  <ChainMark chain={node(e.from)?.chain ?? e.chain ?? data.chain} className='h-4 min-w-4 px-1 text-[7px]' />
+                  {name(e.from)} → {name(e.to)}
+                  {e.destinationTxHash && <><ChainMark chain={e.destinationChain} className='h-4 min-w-4 px-1 text-[7px]' /><span>bridge finalized</span></>}
+                </div>
                 <div className='mt-0.5 text-[11px] text-dim'>{fmtTime(e.timestamp)}</div>
               </button>
             </li>

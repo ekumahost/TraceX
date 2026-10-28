@@ -10,6 +10,7 @@ import type { Selection } from './TraceGraph';
 export type BriefState =
   | { status: 'loading' }
   | { status: 'done'; answer: AIAnswer }
+  | { status: 'offline'; answer: string }
   | { status: 'error'; error: string };
 
 // Reveals text progressively, like the model is writing it
@@ -74,6 +75,21 @@ export function AIBrief({ data, state, onRetry, onCite }: { data: TraceCase; sta
           <span className='chip'>No AI</span>
         </div>
         <div className='mt-4'><RichText text={ruleBrief(data)} data={data} onCite={onCite} /></div>
+      </div>
+    );
+  }
+
+  if (state.status === 'offline') {
+    return (
+      <div className='p-5'>
+        <div className='mb-5 flex items-center justify-between gap-2'>
+          <span className='chip tone-low'>Offline trace reply</span>
+          <span className='text-[11.5px] text-dim'>Deterministic · no AI used</span>
+        </div>
+        <RichText text={state.answer} data={data} onCite={onCite} />
+        <p className='mt-6 border-t border-line pt-4 text-[12px] text-dim'>
+          Bundled synthetic example. This result is for interface demonstration only and does not describe a real wallet or transaction.
+        </p>
       </div>
     );
   }

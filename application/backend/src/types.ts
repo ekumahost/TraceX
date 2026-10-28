@@ -4,7 +4,9 @@ export type EntityType = 'source' | 'wallet' | 'exchange' | 'mixer' | 'bridge' |
 export type Severity = 'high' | 'medium' | 'low';
 
 export interface TraceNode {
-  id: string; // lowercase address
+  id: string; // chain-qualified identity
+  address?: string; // lowercase EVM address
+  chain?: string;
   label?: string;
   type: EntityType;
   hop: number;
@@ -20,6 +22,9 @@ export interface TraceEdge {
   asset: string;
   timestamp: string; // ISO
   hop: number;
+  chain?: string;
+  destinationTxHash?: string;
+  destinationChain?: string;
 }
 
 export interface Risk {

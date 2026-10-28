@@ -2,7 +2,7 @@
 
 TraceX is a read-only blockchain investigation and wallet-safety app. It turns supported EVM transfers into a bounded graph, runs deterministic pattern checks, and uses Muse Spark through the Meta Model API to explain the evidence. Wallet Shield scans recent indexed history for address-poisoning patterns such as lookalike addresses and unverified tokens. The Recovery Kit can draft exchange and police incident-report documents from a live trace in English, Nigerian Pidgin, Igbo, Yoruba, or Hausa.
 
-Automatic cross-chain follow-through from Ethereum to Base, Optimism, and Arbitrum is a proposed feature only; it is not implemented in the current demo.
+Cross-chain follow-through is implemented for canonical Ethereum L1 Standard Bridge transfers to Base and Optimism and Arbitrum One ERC20 gateway deposits, when exactly one matching destination finalization can be found in the bounded lookup window. Arbitrum native-ETH Inbox deposits and withdrawals are not followed.
 
 ## Hackathon fit
 
@@ -25,6 +25,6 @@ Automatic cross-chain follow-through from Ethereum to Base, Optimism, and Arbitr
 - The Python analysis service is optional and is selected with `ANALYSIS_ENGINE_URL`; otherwise the backend uses its TypeScript implementation.
 - Model prompts request evidence-grounded answers but do not guarantee that every generated claim is correct.
 - Recovery Kit re-runs the live trace server-side and checks every distinct case transaction hash in both drafts. It does not send documents or validate translation quality.
-- Cross-chain bridge matching is not yet available; do not describe it as a working feature.
+- Do not describe an unmatched/ambiguous bridge transfer as followed, or show cross-chain behavior without verifying the source and destination transactions in their explorers.
 - Scores are deterministic rule-based indicators, not calibrated probabilities.
 - Live demo and video links belong here only after they have been published and checked.

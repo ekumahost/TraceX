@@ -6,7 +6,9 @@ import { Check, Download, FileText, Info, Loader2, Search, X } from 'lucide-reac
 import type { TraceCase } from '@/lib/types';
 import { explainCase, fetchTrace } from '@/lib/api';
 import { SAMPLE_CASE } from '@/lib/sample-case';
+import { getOfflineCase } from '@/lib/offline-cases';
 import { caseScore, short } from '@/lib/format';
+import { ruleBrief } from '@/lib/rule-brief';
 import { saveReport } from '@/lib/report';
 import { Wordmark, Mark } from '../Logo';
 import { SearchConsole } from '../SearchConsole';
@@ -30,7 +32,8 @@ const TABS: { id: Tab; label: string }[] = [
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function Workspace({ query, chain = 'auto' }: { query: string; chain?: string }) {
-  const isSample = !query || query === 'sample';
+  const isOfflineDemo = query.startsWith('demo:');
+  const isSample = !query || query === 'sample' || isOfflineDemo;
   const [stage, setStage] = useState(0); // 0 fetch · 1 graph · 2 heuristics · 3 ready
   const [data, setData] = useState<TraceCase | null>(null);
   const [failReason, setFailReason] = useState<string | null>(null); // live trace failed, showing sample
@@ -49,15 +52,16 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
     (async () => {
       const [live] = await Promise.all([isSample ? null : fetchTrace(query, chain), wait(isSample ? 700 : 900)]);
       if (id !== run.current) return;
-      const c = live && 'data' in live ? live.data : SAMPLE_CASE;
-      setFailReason(live && 'error' in live ? live.error : null);
+      const offline = isOfflineDemo ? getOfflineCase(query) : undefined;
+      const c = offline?.data ?? (live && 'data' in live ? live.data : SAMPLE_CASE);
+      setFailReason(isOfflineDemo && !offline ? 'That offline demo case was not found.' : live && 'error' in live ? live.error : null);
       setStage(1); await wait(550);
       if (id !== run.current) return;
       setStage(2); await wait(550);
       if (id !== run.current) return;
       setData(c); setStage(3);
     })();
-  }, [query, chain, isSample]);
+  }, [query, chain, isSample, isOfflineDemo]);
 
   // grow the graph hop by hop
   useEffect(() => {
@@ -82,6 +86,14 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
 
   useEffect(() => {
     if (!data) return;
+    if (data.demo) {
+      const offline = getOfflineCase(`demo:${data.demo.id}`);
+      setBrief({
+        status: 'offline',
+        answer: `${offline?.reply ?? 'This is a bundled synthetic trace. No live chain data or AI model was used.'}\n\n${ruleBrief(data)}`,
+      });
+      return;
+    }
     if (data.edges.length) explain(data);
     else setBrief({ status: 'error', error: 'No outgoing transfers were found from this starting point, so there is nothing to explain yet.' });
   }, [data, explain]);
@@ -112,7 +124,7 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
     window.open('/report', '_blank');
   };
 
-  const steps = [isSample ? 'Loading sample case' : 'Fetching on-chain transfers', 'Building fund-flow graph', 'Running heuristics'];
+  const steps = [isOfflineDemo ? 'Loading offline synthetic case' : isSample ? 'Loading sample case' : 'Fetching on-chain transfers', 'Building fund-flow graph', 'Running heuristics'];
 
   return (
     <div className='flex h-[100dvh] flex-col bg-ink'>
@@ -140,7 +152,8 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
         <div className='flex flex-none items-center gap-3 border-b border-[rgba(240,180,76,.25)] bg-[rgba(240,180,76,.07)] px-5 py-2 text-[12.5px] text-gold-soft'>
           <Info className='h-4 w-4 flex-none' />
           <span>
-            <strong className='font-display text-[11px] uppercase tracking-[.16em] text-gold'>Sample case</strong> · synthetic data for demonstration.
+            <strong className='font-display text-[11px] uppercase tracking-[.16em] text-gold'>{data.demo?.title ?? 'Sample case'}</strong> · synthetic demonstration data; no live wallet attribution.
+            {data.demo && <> Loaded locally without RPC or AI requests.</>}
             {failReason && <> The live trace for <span className='mono'>{short(query, 10, 6)}</span> failed: {failReason}.</>}
           </span>
         </div>
@@ -197,7 +210,17 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
           <div className='scroll-thin min-h-0 flex-1 overflow-y-auto'>
             {!data ? (
               <div className='space-y-3 p-5'>{[90, 100, 70].map((w, i) => <div key={i} className='shimmer h-3' style={{ width: `${w}%` }} />)}</div>
-            ) : tab === 'brief' ? (
+            ) : (
+              <>
+                {!!data.crossChain?.attempted && (
+                  <div className='border-b border-line bg-[rgba(240,180,76,.05)] px-5 py-3 text-[11.5px] leading-relaxed text-gold-soft' role='status'>
+                    Canonical bridge checks: {data.crossChain.followed} destination continuation{data.crossChain.followed === 1 ? '' : 's'} confirmed from {data.crossChain.attempted} attempt{data.crossChain.attempted === 1 ? '' : 's'}.
+                    {!!data.crossChain.unmatched && <> {data.crossChain.unmatched} had no unique matching finalization in the indexed window; TraceX does not join by amount or time alone.</>}
+                    {!!data.crossChain.errors && <> {data.crossChain.errors} lookup{data.crossChain.errors === 1 ? '' : 's'} failed.</>}
+                    {' '}L1→L2 only; Arbitrum native ETH deposits are not followed.
+                  </div>
+                )}
+                {tab === 'brief' ? (
               <AIBrief data={data} state={brief} onRetry={() => explain(data)} onCite={cite} />
             ) : tab === 'ask' ? (
               <ChatPanel data={data} onCite={cite} />
@@ -207,6 +230,8 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
               <Timeline data={data} selection={selection} onSelect={cite} />
             ) : (
               <RecoveryKit data={data} />
+            )}
+              </>
             )}
           </div>
         </aside>

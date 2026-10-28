@@ -24,10 +24,13 @@ Paste a transaction hash, wallet address, or ENS name to start a trace. Or open 
 - An interactive graph, evidence and timeline panels, follow-up questions, JSON export, and a printable report that can be saved as PDF from the browser.
 - A read-only address-poisoning scan for recent Alchemy-indexed transfers. The interface reports scan limits and warns that a clean scan is not a guarantee of safety.
 - A Recovery Kit tab that generates editable exchange and police-report drafts from a trace. It requires the Meta Model API and a live case; the backend re-runs the requested trace server-side, requires each draft to cite a transaction in that authoritative case, and rejects addresses not present in its graph. The user must verify and send the drafts themselves.
+- Automatic L1-to-L2 follow-through for canonical Ethereum bridge transfers to Base, Optimism, and Arbitrum One. TraceX matches protocol initiation/finalization events and follows the recipient on the destination chain; it does not join based only on amount or time. Graph identities and explorer links are chain-specific.
+- Bundled offline demo traces are selectable in the investigation form. They exercise graph, evidence, deterministic reply, and local follow-up UI without a backend, chain RPC, or AI provider. All included addresses and hashes are generated fixtures and must not be presented as real cases.
 
-## Planned, not implemented
+## Cross-chain boundaries
 
-- Automatic cross-chain follow-through is not available yet. The initial proposed scope is Ethereum L1 bridge transfers to Base, Optimism, and Arbitrum. Do not present this as a working feature until canonical bridge event matching, destination-chain continuation, and chain-specific graph links have been implemented and tested.
+- Cross-chain matching locates the destination block near the source transaction timestamp, searches a bounded window of up to 100,000 blocks after that point, and follows only a unique matching finalization. Missing, ambiguous, or failed lookups do not create a cross-chain edge; public RPC providers may rate-limit these searches.
+- Supported bridges are the OP Stack L1 Standard Bridge for Base and Optimism and Arbitrum One ERC20 gateways. Arbitrum native-ETH Inbox deposits and L2-to-L1 withdrawals are not supported.
 
 ## Why this problem
 
@@ -56,10 +59,12 @@ The code also includes optional Fireworks and Baseten explanation providers. The
 4. Confirm the model provider shown in the brief, and describe unconfigured providers as optional code only.
 5. Test the printable report and JSON export, including on a phone-sized viewport.
 6. Replace the live-demo and video placeholders only with working public links.
+7. If live network access is unavailable during a presentation, use an offline synthetic demo and clearly identify it as generated demonstration data—not a real fraud wallet or on-chain investigation.
 
 ## Known limitations to disclose
 
 - Traces are bounded by the hop and node caps and follow only supported native assets and selected tokens.
+- Cross-chain graph continuation is limited to the supported bridge event types and indexed destination lookback; it is not a complete bridge history or proof of common fund ownership.
 - Address labels and known-entity coverage vary by chain.
 - Wallet Shield scans a bounded amount of Alchemy-indexed history; it does not prove a wallet is safe or malicious.
 - Recovery Kit output is model-generated and requires human verification. Citation checks constrain hashes and addresses to the submitted trace, but do not validate translation quality or guarantee the draft is suitable for a particular exchange or police agency.

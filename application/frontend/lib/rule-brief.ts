@@ -14,7 +14,7 @@ export function ruleBrief(c: TraceCase) {
 
   const lines = [
     '### Summary',
-    `${fmtValue(s.moved, s.asset)} left the origin wallet ${origin?.id ?? ''}${first ? ` in ${first.txHash}` : ''} and spread across ${s.wallets} wallets over ${s.hops} hops${s.span ? ` within ${fmtDuration(s.span)}` : ''}. Case score: **${score}/100 (${verdict(score).label})**.`,
+    `${fmtValue(s.moved, s.asset)} left the origin wallet ${origin?.address ?? origin?.id ?? ''}${first ? ` in ${first.txHash}` : ''} and spread across ${s.wallets} wallets over ${s.hops} hops${s.span ? ` within ${fmtDuration(s.span)}` : ''}. Case score: **${score}/100 (${verdict(score).label})**.`,
     '### Flags',
     ...c.risks.map((r) => `- **${r.title ?? RISK_TITLE[r.type] ?? r.type}** (${r.severity}): ${r.detail ?? ''}${r.tx ? ` Evidence: ${r.tx}` : ''}`),
   ];
@@ -22,7 +22,7 @@ export function ruleBrief(c: TraceCase) {
     lines.push('### Where the trail leaves the chain');
     for (const n of exits) {
       const inbound = c.edges.filter((e) => e.to === n.id);
-      lines.push(`- ${n.id} received ${fmtValue(inbound.reduce((a, e) => a + e.value, 0), s.asset)}${inbound[0] ? ` via ${inbound[0].txHash}` : ''}.`);
+      lines.push(`- ${n.address ?? n.id} received ${fmtValue(inbound.reduce((a, e) => a + e.value, 0), s.asset)}${inbound[0] ? ` via ${inbound[0].txHash}` : ''}.`);
     }
   }
   const has = (t: string) => c.nodes.some((n) => n.type === t);

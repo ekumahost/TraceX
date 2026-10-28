@@ -6,7 +6,7 @@ import { transfersInTxViaAlchemy } from './sources';
 
 // RPC_URL (Ethereum only) wins, then Alchemy, then the chain's free public node
 const providers = new Map<string, JsonRpcProvider>();
-function provider(chain: Chain) {
+export function getProvider(chain: Chain) {
   if (!providers.has(chain.id)) {
     const key = process.env.ALCHEMY_API_KEY;
     const url = (chain.id === 'ethereum' && process.env.RPC_URL)
@@ -31,13 +31,13 @@ const codeCache = new Map<string, boolean>();
 
 export async function isContract(chain: Chain, address: string) {
   const key = `${chain.id}:${address}`;
-  if (!codeCache.has(key)) codeCache.set(key, (await provider(chain).getCode(address)) !== '0x');
+  if (!codeCache.has(key)) codeCache.set(key, (await getProvider(chain).getCode(address)) !== '0x');
   return codeCache.get(key)!;
 }
 
 // ENS lives on Ethereum; the resolved address can then be traced on any chain
 export async function resolveEns(name: string) {
-  const address = await provider(CHAINS.ethereum).resolveName(name).catch(() => null);
+  const address = await getProvider(CHAINS.ethereum).resolveName(name).catch(() => null);
   if (!address) throw new NotFoundError(`${name} doesn't resolve to an address`);
   return address.toLowerCase();
 }
@@ -45,7 +45,7 @@ export async function resolveEns(name: string) {
 // A tx hash doesn't say which chain it's on - ask them all, prefer the earliest in CHAIN_ORDER
 export async function findTxChain(hash: string): Promise<Chain> {
   const found = await Promise.all(
-    CHAIN_ORDER.map((id) => provider(CHAINS[id]).getTransaction(hash).then((tx) => !!tx).catch((e) => friendly(CHAINS[id], e))),
+    CHAIN_ORDER.map((id) => getProvider(CHAINS[id]).getTransaction(hash).then((tx) => !!tx).catch((e) => friendly(CHAINS[id], e))),
   );
   const i = found.indexOf(true);
   if (i >= 0) return CHAINS[CHAIN_ORDER[i]];
@@ -66,7 +66,7 @@ export async function transfersInTx(chain: Chain, hash: string): Promise<Transfe
 }
 
 async function readTxTransfers(chain: Chain, hash: string): Promise<Transfer[]> {
-  const p = provider(chain);
+  const p = getProvider(chain);
   const tx = await p.getTransaction(hash);
   if (!tx) throw new NotFoundError(`Transaction not found on ${chain.name}`);
   if (tx.blockNumber == null) throw new NotFoundError('Transaction is still pending');
@@ -97,7 +97,7 @@ async function readTxTransfers(chain: Chain, hash: string): Promise<Transfer[]> 
 
 // Reads symbol() and decimals() - used by scripts/check-chains.ts to verify the token lists
 export async function tokenInfo(chain: Chain, address: string) {
-  const p = provider(chain);
+  const p = getProvider(chain);
   const [sym, dec] = await Promise.all([p.call({ to: address, data: '0x95d89b41' }), p.call({ to: address, data: '0x313ce567' })]);
   const coder = AbiCoder.defaultAbiCoder();
   return { symbol: coder.decode(['string'], sym)[0] as string, decimals: Number(coder.decode(['uint8'], dec)[0]) };

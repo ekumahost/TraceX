@@ -45,6 +45,9 @@ const CONTRACTS: Partial<Record<ChainId, Seed>> = {
     // canonical L2 bridges on the Ethereum side
     '0x99c9fc46f92e8a1c0dec1b1747d010903e884be1': { label: 'Optimism Gateway', type: 'bridge' },
     '0x3154cf16ccdb4c6d922629664174b904d80f2c35': { label: 'Base Bridge', type: 'bridge' },
+    '0xa3a7b6f88361f48403514059f1f16c8e78d60eec': { label: 'Arbitrum ERC20 Gateway', type: 'bridge' },
+    '0xcee284f754e854890e311e3280b767f80797180d': { label: 'Arbitrum Custom Gateway', type: 'bridge' },
+    '0xd92023e9d9911199a6711321d1277285e6d4e2db': { label: 'Arbitrum WETH Gateway', type: 'bridge' },
     '0x4dbd4fc535ac27206064b68ffcf827b0a60bab3f': { label: 'Arbitrum Delayed Inbox', type: 'bridge' },
     '0x8484ef722627bf18ca5ae6bcf031c23e6e922b30': { label: 'Polygon Ether Bridge', type: 'bridge' },
     '0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf': { label: 'Polygon ERC20 Bridge', type: 'bridge' },

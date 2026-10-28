@@ -4,6 +4,8 @@
 
 Before recording, confirm that the backend, data-provider key, and Meta Model API key work; choose a real address-poisoning scan with a verified finding; verify every displayed transaction in its explorer; and prepare the sample case as a fallback. Never present sample data as live.
 
+If RPC or API access is unavailable, choose one of the labelled offline synthetic traces from the investigation form. Its graph and deterministic reply run locally; do not describe fixture addresses or hashes as real.
+
 ## 0:00–0:15 — The problem
 
 **Show:** TraceX landing page.
@@ -38,6 +40,13 @@ Only state a detector result if it appears in the verified case. If the AI brief
 
 **Say:** “TraceX is a practical tool for checking recipients and making on-chain trails easier to understand and verify. It is read-only, and it keeps the underlying transactions visible so people can check the explanation for themselves. Built for the Meta Global AI Developer Hackathon, under Build for Your World.”
 
+## Optional — Cross-chain follow (if a verified live bridge case is prepared)
+**Show:** Open a trace with a supported Ethereum L1 bridge initiation that has a unique Base, Optimism, or Arbitrum One L2 finalization in the indexed window. Point out the chain badges, confirmed continuation edge, and separate explorer links for the source and destination transactions.
+
+- Use a transaction verified on both explorers; do not imply that a cross-chain edge proves common ownership or complete fund provenance.
+- If the app reports an unmatched or failed lookup, explain the bounded provider window/rate limit rather than presenting it as a confirmed destination.
+- Arbitrum native-ETH Inbox deposits and L2-to-L1 withdrawals are not in the current supported scope.
+
 ## Recording checklist
 
 - Use a verified live case and keep its explorer page ready.
@@ -48,7 +57,7 @@ Only state a detector result if it appears in the verified case. If the AI brief
 
 - Use a live trace with real transaction evidence; the app disables generation for sample data.
 - Verify the cited transactions in the block explorer before recording.
-- Describe cross-chain follow as planned only; it is not part of the current demo.
+- Show cross-chain follow only with a verified live bridge case; otherwise omit it rather than implying it was exercised.
 - Confirm the AI provider shown in the brief and avoid untested performance claims.
 - If live services fail, switch to the visibly labelled sample and say that it is synthetic.
 - Test browser print-to-PDF and JSON export.

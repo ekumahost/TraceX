@@ -59,23 +59,26 @@ export function validateRecoveryCitations(text: string, hashes: Set<string>, add
 }
 
 export async function generateRecoveryDocuments(
-  graph: { input: string; network: string; nodes: Array<{ id: string; label?: string; type: string }>; edges: Array<{ from: string; to: string; txHash: string; value: number; asset: string; timestamp: string }> },
+  graph: { input: string; network: string; nodes: Array<{ id: string; address?: string; chain?: string; label?: string; type: string }>; edges: Array<{ from: string; to: string; txHash: string; destinationTxHash?: string; chain?: string; destinationChain?: string; value: number; asset: string; timestamp: string }> },
   heuristics: Array<{ type: string; severity: string; detail?: string; tx?: string }>,
   exchange: string,
   language: RecoveryLanguage,
 ): Promise<RecoveryDocuments> {
   if (!graph.edges.length) throw new Error('A Recovery Kit needs at least one on-chain transfer.');
 
-  const hashes = new Set(graph.edges.map((edge) => edge.txHash.toLowerCase()));
+  const hashes = new Set(graph.edges.flatMap((edge) => [edge.txHash, edge.destinationTxHash].filter(Boolean).map((hash) => hash!.toLowerCase())));
   if (hashes.size > 40) throw new Error('This case has more than 40 transactions. Use a narrower trace to generate a complete Recovery Kit.');
-  const addresses = new Set(graph.nodes.map((node) => node.id.toLowerCase()));
+  const addresses = new Set(graph.nodes.map((node) => (node.address ?? node.id).toLowerCase()));
   const evidence = JSON.stringify({
     case: { input: graph.input, network: graph.network },
     targetExchange: exchange.trim(),
     transfers: graph.edges.map((edge) => ({
       txHash: edge.txHash,
-      from: edge.from,
-      to: edge.to,
+      destinationTxHash: edge.destinationTxHash,
+      chain: edge.chain,
+      destinationChain: edge.destinationChain,
+      from: graph.nodes.find((node) => node.id === edge.from)?.address ?? edge.from,
+      to: graph.nodes.find((node) => node.id === edge.to)?.address ?? edge.to,
       amount: `${edge.value} ${edge.asset}`,
       timestamp: edge.timestamp,
     })),

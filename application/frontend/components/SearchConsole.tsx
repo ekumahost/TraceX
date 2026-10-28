@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, Search } from 'lucide-react';
 import clsx from 'clsx';
 import { CHAINS } from '@/lib/chains';
+import { OFFLINE_PRESETS } from '@/lib/offline-cases';
 
 export function detectInput(v: string): 'tx' | 'wallet' | 'ens' | null {
   const s = v.trim();
@@ -75,6 +76,20 @@ export function SearchConsole({ initial = '', initialChain = 'auto', compact = f
           <button type='button' onClick={() => setValue('vitalik.eth')} className='hover:text-cream'>vitalik.eth</button>
         </div>
       )}
+      <label className={clsx('mt-3 flex flex-wrap items-center gap-2 text-[12px] text-dim', compact ? 'justify-end' : 'justify-start')}>
+        <span>Offline demo (no RPC):</span>
+        <select
+          value=''
+          onChange={(event) => {
+            if (event.target.value) go(`demo:${event.target.value}`);
+          }}
+          aria-label='Open an offline synthetic trace'
+          className='cursor-pointer rounded-md border border-line-2 bg-panel-2 px-2.5 py-2 font-display text-[11px] font-semibold text-muted outline-none hover:text-cream focus:border-[var(--line-v)]'
+        >
+          <option value=''>Choose a synthetic case</option>
+          {OFFLINE_PRESETS.map((preset) => <option key={preset.id} value={preset.id}>{preset.title}</option>)}
+        </select>
+      </label>
     </form>
   );
 }
