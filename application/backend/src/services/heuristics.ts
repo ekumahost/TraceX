@@ -98,6 +98,36 @@ export function analyze(nodes: TraceNode[], edges: TraceEdge[]): Risk[] {
     }
   }
 
+  // exchange hopping: the same funds pass through more than one exchange along a path
+  const exchanges = nodes.filter((n) => n.type === 'exchange').map((n) => n.id);
+  const firstStep = (a: string, b: string): TraceEdge | null => {
+    // breadth-first from a; returns the first edge of a shortest path to b
+    const prev = new Map<string, TraceEdge>();
+    const queue = [a];
+    const seen = new Set([a]);
+    while (queue.length) {
+      const cur = queue.shift()!;
+      for (const e of outs(cur)) {
+        if (seen.has(e.to)) continue;
+        seen.add(e.to);
+        prev.set(e.to, e);
+        if (e.to === b) {
+          let step = e;
+          while (step.from !== a) step = prev.get(step.from)!;
+          return step;
+        }
+        queue.push(e.to);
+      }
+    }
+    return null;
+  };
+  for (const a of exchanges) {
+    for (const b of exchanges) {
+      const step = a !== b ? firstStep(a, b) : null;
+      if (step) risks.push({ type: 'exchange_hop', severity: 'medium', tx: step.txHash, address: a, detail: `Funds moved from ${name(a)} on to ${name(b)} - hopping between exchanges to break the trail.` });
+    }
+  }
+
   // one flag per pattern and address - repeat deposits to the same exchange are one finding
   const seen = new Set<string>();
   const unique = risks.filter((r) => {

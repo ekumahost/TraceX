@@ -7,7 +7,7 @@ import { caseScore, caseStats, fmtDuration, fmtValue, RISK_TITLE, verdict } from
  */
 export function ruleBrief(c: TraceCase) {
   const s = caseStats(c);
-  const score = caseScore(c.risks);
+  const score = c.score ?? caseScore(c.risks);
   const origin = c.nodes.find((n) => n.type === 'source') ?? c.nodes[0];
   const first = c.edges.find((e) => e.from === origin?.id);
   const exits = c.nodes.filter((n) => n.type === 'exchange' || n.type === 'bridge');

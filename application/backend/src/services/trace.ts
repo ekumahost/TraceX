@@ -4,7 +4,7 @@ import { limiter } from './http';
 import { classify } from './labels';
 import { resolveEns, transfersInTx } from './rpc';
 import { outgoing } from './sources';
-import { analyze } from './heuristics';
+import { runAnalysis } from './analysis';
 
 /**
  * Follows the money forward from a transaction or wallet, breadth-first.
@@ -30,6 +30,8 @@ export interface TraceResult {
   nodes: TraceNode[];
   edges: TraceEdge[];
   risks: Risk[];
+  score: number;
+  engine: string; // which detector engine produced the risks
   source: string;
   incomplete: string[]; // wallets whose transfers couldn't be loaded
 }
@@ -133,6 +135,6 @@ export async function traceCase(input: string, hops = 5): Promise<TraceResult> {
   if (origin && !origin.label) origin.label = kind === 'ens' ? input.trim() : kind === 'tx' ? 'Sender' : 'Start wallet';
 
   const list = [...nodes.values()];
-  const risks = analyze(list, edges);
-  return { input: input.trim(), network: 'Ethereum', nodes: list, edges, risks, source, incomplete };
+  const { risks, score, engine } = await runAnalysis(list, edges);
+  return { input: input.trim(), network: 'Ethereum', nodes: list, edges, risks, score, engine, source, incomplete };
 }

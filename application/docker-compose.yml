@@ -19,7 +19,7 @@ services:
   analysis-engine:
     build: ./analysis-engine
     ports:
-      - "8000:8000"
+      - "8100:8000"
     environment:
       - PYTHON_ENV=development
     volumes:
@@ -39,6 +39,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://tracex:tracex_dev@postgres:5432/tracex
       - REDIS_URL=redis://redis:6379
+      - ANALYSIS_ENGINE_URL=http://analysis-engine:8000
 
 volumes:
   postgres_data:

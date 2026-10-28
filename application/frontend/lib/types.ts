@@ -39,6 +39,8 @@ export interface TraceCase {
   risks: Risk[];
   sample?: boolean; // synthetic data, not a live trace
   source?: string; // data provider for live traces
+  score?: number; // case score from the analysis engine
+  engine?: string; // which detector engine ran
   incomplete?: string[]; // wallets whose transfers couldn't be loaded
 }
 

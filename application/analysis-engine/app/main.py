@@ -1,32 +1,46 @@
+from typing import Literal
+
 from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List, Dict
+from pydantic import BaseModel, ConfigDict, Field
 
-app = FastAPI(title='TraceX Analysis Engine', version='0.1.0')
+from app.heuristics import analyze
 
-class TraceRequest(BaseModel):
-    nodes: List[Dict]
-    edges: List[Dict]
+api = FastAPI(title="TraceX Analysis Engine", version="0.2.0")
 
-@app.get('/')
+
+class Node(BaseModel):
+    id: str
+    type: Literal["source", "wallet", "exchange", "mixer", "bridge", "contract"]
+    hop: int
+    label: str | None = None
+    risk: int = 0
+
+
+class Edge(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str
+    from_: str = Field(alias="from")
+    to: str
+    txHash: str
+    value: float
+    asset: str
+    timestamp: str
+    hop: int
+
+
+class AnalyzeRequest(BaseModel):
+    nodes: list[Node]
+    edges: list[Edge]
+
+
+@api.get("/")
 def health():
-    return {'status': 'ok', 'service': 'tracex-analysis-engine'}
+    return {"status": "ok", "service": "tracex-analysis-engine", "version": api.version}
 
-@app.post('/analyze/heuristics')
-def analyze_heuristics(req: TraceRequest):
-    risks = []
-    mixer_addresses = ['0xtornado']  # placeholder
-    for edge in req.edges:
-        if edge.get('to', '').lower() in mixer_addresses:
-            risks.append({'type': 'mixer', 'tx': edge.get('txHash'), 'severity': 'high'})
-    from_counts = {}
-    for e in req.edges:
-        from_counts[e['from']] = from_counts.get(e['from'], 0) + 1
-    for addr, count in from_counts.items():
-        if count > 10:
-            risks.append({'type': 'peel_chain', 'address': addr, 'count': count, 'severity': 'medium'})
-    return {'risks': risks, 'nodes': len(req.nodes), 'edges': len(req.edges)}
 
-@app.post('/analyze/risk')
-def score_risk(address: str):
-    return {'address': address, 'risk_score': 42, 'labels': []}
+@api.post("/analyze")
+def analyze_case(req: AnalyzeRequest):
+    nodes = [n.model_dump() for n in req.nodes]
+    edges = [e.model_dump(by_alias=True) for e in req.edges]
+    return {**analyze(nodes, edges), "engine": "python-networkx"}

@@ -27,6 +27,8 @@ app.post('/api/trace', async (req, res) => {
       hops,
       source: t.source,
       incomplete: t.incomplete,
+      score: t.score,
+      engine: t.engine,
       graph: { nodes: t.nodes, edges: t.edges },
       heuristics: t.risks,
     });

@@ -24,6 +24,8 @@ export async function fetchTrace(input: string, hops = 5): Promise<{ data: Trace
         edges: data.graph?.edges ?? [],
         risks: data.heuristics ?? [],
         source: data.source,
+        score: data.score,
+        engine: data.engine,
         incomplete: data.incomplete ?? [],
       },
     };

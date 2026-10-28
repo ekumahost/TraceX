@@ -1,0 +1,259 @@
+{
+  "input": {
+    "nodes": [
+      {
+        "id": "0x6c177cb9f383b2593cd2c71de21bf5a5094c65b2",
+        "type": "source",
+        "hop": 0,
+        "risk": 0,
+        "label": "Origin wallet"
+      },
+      {
+        "id": "0x0793f71b5765dfc37f24f82de4042f9d5f0053a6",
+        "type": "wallet",
+        "hop": 1,
+        "risk": 0,
+        "label": "Drainer"
+      },
+      {
+        "id": "0xbd6c0f4bac2b502903ec74fe230dbaa71f7b01eb",
+        "type": "mixer",
+        "hop": 2,
+        "risk": 0,
+        "label": "Mixing pool"
+      },
+      {
+        "id": "0x3f528a81ae512d80f7cc66701b4925d1c1905f28",
+        "type": "wallet",
+        "hop": 2,
+        "risk": 0,
+        "label": "Peel 1"
+      },
+      {
+        "id": "0xa19ff737b05e29ebd90d181a3bc2c6bd01bfb1d7",
+        "type": "wallet",
+        "hop": 3,
+        "risk": 0,
+        "label": "Fresh wallet"
+      },
+      {
+        "id": "0x1d476dcaef34e31519992d7ebae89fc58b1d02ed",
+        "type": "wallet",
+        "hop": 3,
+        "risk": 0
+      },
+      {
+        "id": "0x87591ecf34953d6ff42a0a931a7e35cf4430ce2c",
+        "type": "wallet",
+        "hop": 3,
+        "risk": 0,
+        "label": "Peel 2"
+      },
+      {
+        "id": "0xfca58a24f1c4b65486cebfb3762612cf3b8ab6f0",
+        "type": "wallet",
+        "hop": 4,
+        "risk": 0
+      },
+      {
+        "id": "0x19351838fc7ae101ab08b4ac0e30262254780858",
+        "type": "bridge",
+        "hop": 4,
+        "risk": 0,
+        "label": "Bridge"
+      },
+      {
+        "id": "0xee471ab5af263b9d62e05957509b3bf2cb496000",
+        "type": "wallet",
+        "hop": 4,
+        "risk": 0,
+        "label": "Peel 3"
+      },
+      {
+        "id": "0xd7bbaf5ee857f0b6de664956fedcdcf0cd1f2471",
+        "type": "wallet",
+        "hop": 5,
+        "risk": 0
+      },
+      {
+        "id": "0xb0438df2fe480c8c04e79f6016777845d68b3bba",
+        "type": "exchange",
+        "hop": 5,
+        "risk": 0,
+        "label": "Exchange deposit"
+      }
+    ],
+    "edges": [
+      {
+        "id": "drain",
+        "from": "0x6c177cb9f383b2593cd2c71de21bf5a5094c65b2",
+        "to": "0x0793f71b5765dfc37f24f82de4042f9d5f0053a6",
+        "txHash": "0x2bc40ccde1e2c583930ddc6a38918d6a2ea5f774992cd57173dc62b00ec9b3d5",
+        "value": 120,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:11:00.000Z",
+        "hop": 1
+      },
+      {
+        "id": "mix-in",
+        "from": "0x0793f71b5765dfc37f24f82de4042f9d5f0053a6",
+        "to": "0xbd6c0f4bac2b502903ec74fe230dbaa71f7b01eb",
+        "txHash": "0x239d9de394170b93d9cf7501da8698763883caf27a68e99c8c301c1179fd02c8",
+        "value": 40,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:17:00.000Z",
+        "hop": 2
+      },
+      {
+        "id": "peel1",
+        "from": "0x0793f71b5765dfc37f24f82de4042f9d5f0053a6",
+        "to": "0x3f528a81ae512d80f7cc66701b4925d1c1905f28",
+        "txHash": "0x6f779c4f03387430ba702f0f4da38827a849b8f475b99cbf83e5aaa8e0a68ff0",
+        "value": 79.5,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:20:00.000Z",
+        "hop": 2
+      },
+      {
+        "id": "side1",
+        "from": "0x3f528a81ae512d80f7cc66701b4925d1c1905f28",
+        "to": "0x1d476dcaef34e31519992d7ebae89fc58b1d02ed",
+        "txHash": "0x53067f03002c7f7077852ab188bf18d81f218c4afbb3b8de19afefca6e8d61c1",
+        "value": 4.2,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:25:00.000Z",
+        "hop": 3
+      },
+      {
+        "id": "peel2",
+        "from": "0x3f528a81ae512d80f7cc66701b4925d1c1905f28",
+        "to": "0x87591ecf34953d6ff42a0a931a7e35cf4430ce2c",
+        "txHash": "0x16f1d4b3a093f28006b021c153881025601f8483817a344439a8201d88d847c8",
+        "value": 75.2,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:26:00.000Z",
+        "hop": 3
+      },
+      {
+        "id": "side2",
+        "from": "0x87591ecf34953d6ff42a0a931a7e35cf4430ce2c",
+        "to": "0xfca58a24f1c4b65486cebfb3762612cf3b8ab6f0",
+        "txHash": "0xcaccc59e1d9ab8811bdd0544d5cec73ea80934ea5c1247a0882ff7b3adec373f",
+        "value": 3.8,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:32:00.000Z",
+        "hop": 4
+      },
+      {
+        "id": "bridge",
+        "from": "0x87591ecf34953d6ff42a0a931a7e35cf4430ce2c",
+        "to": "0x19351838fc7ae101ab08b4ac0e30262254780858",
+        "txHash": "0xd5ba8eda085011aa46cfc79879af88469c468eb5ff9107dd3233c5681942e4c7",
+        "value": 20,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:34:00.000Z",
+        "hop": 4
+      },
+      {
+        "id": "peel3",
+        "from": "0x87591ecf34953d6ff42a0a931a7e35cf4430ce2c",
+        "to": "0xee471ab5af263b9d62e05957509b3bf2cb496000",
+        "txHash": "0x394bd6bb300e79d519a06faf9ee535253070a9a58dc77be735cefdfaa448d082",
+        "value": 51.3,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:35:00.000Z",
+        "hop": 4
+      },
+      {
+        "id": "side3",
+        "from": "0xee471ab5af263b9d62e05957509b3bf2cb496000",
+        "to": "0xd7bbaf5ee857f0b6de664956fedcdcf0cd1f2471",
+        "txHash": "0xe1d2e0e40409fe634375f3a15d3409015e9ca66b8065cb23193743c3d8a437e4",
+        "value": 2.9,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:42:00.000Z",
+        "hop": 5
+      },
+      {
+        "id": "cashout",
+        "from": "0xee471ab5af263b9d62e05957509b3bf2cb496000",
+        "to": "0xb0438df2fe480c8c04e79f6016777845d68b3bba",
+        "txHash": "0xbb54718599fdadd7a4ac257420541bd5c6f3a202e4c4d03ba6b2641aac1b7142",
+        "value": 48.3,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:49:00.000Z",
+        "hop": 5
+      },
+      {
+        "id": "mix-out",
+        "from": "0xbd6c0f4bac2b502903ec74fe230dbaa71f7b01eb",
+        "to": "0xa19ff737b05e29ebd90d181a3bc2c6bd01bfb1d7",
+        "txHash": "0xdbda4b5cc481c28466f6a16ce9b47821b0bd045916f3a4022c09725b4a007c3a",
+        "value": 39.6,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T07:23:00.000Z",
+        "hop": 3
+      }
+    ]
+  },
+  "expected": {
+    "risks": [
+      {
+        "type": "mixer",
+        "severity": "high",
+        "tx": "0x239d9de394170b93d9cf7501da8698763883caf27a68e99c8c301c1179fd02c8",
+        "address": "0xbd6c0f4bac2b502903ec74fe230dbaa71f7b01eb",
+        "detail": "40 ETH sent from Drainer into Mixing pool."
+      },
+      {
+        "type": "mixer",
+        "severity": "high",
+        "tx": "0xdbda4b5cc481c28466f6a16ce9b47821b0bd045916f3a4022c09725b4a007c3a",
+        "address": "0xa19ff737b05e29ebd90d181a3bc2c6bd01bfb1d7",
+        "detail": "Fresh wallet received 39.6 ETH withdrawn from Mixing pool."
+      },
+      {
+        "type": "peel_chain",
+        "severity": "medium",
+        "address": "0x3f528a81ae512d80f7cc66701b4925d1c1905f28",
+        "count": 3,
+        "tx": "0x16f1d4b3a093f28006b021c153881025601f8483817a344439a8201d88d847c8",
+        "detail": "3 wallets in a row from Peel 1 each pass most of the balance on while shaving 2.9 ETH–4.2 ETH off."
+      },
+      {
+        "type": "velocity",
+        "severity": "medium",
+        "tx": "0x2bc40ccde1e2c583930ddc6a38918d6a2ea5f774992cd57173dc62b00ec9b3d5",
+        "detail": "Funds crossed 5 hops in 31 minutes - far faster than normal wallet activity."
+      },
+      {
+        "type": "exchange_hop",
+        "severity": "medium",
+        "tx": "0xbb54718599fdadd7a4ac257420541bd5c6f3a202e4c4d03ba6b2641aac1b7142",
+        "address": "0xb0438df2fe480c8c04e79f6016777845d68b3bba",
+        "detail": "48.3 ETH reached Exchange deposit - an exchange where KYC records may identify the owner."
+      },
+      {
+        "type": "bridge",
+        "severity": "low",
+        "tx": "0xd5ba8eda085011aa46cfc79879af88469c468eb5ff9107dd3233c5681942e4c7",
+        "address": "0x19351838fc7ae101ab08b4ac0e30262254780858",
+        "detail": "20 ETH sent into Bridge; the trail continues on another chain."
+      }
+    ],
+    "nodeRisk": {
+      "0x6c177cb9f383b2593cd2c71de21bf5a5094c65b2": 0,
+      "0x0793f71b5765dfc37f24f82de4042f9d5f0053a6": 85,
+      "0xbd6c0f4bac2b502903ec74fe230dbaa71f7b01eb": 95,
+      "0x3f528a81ae512d80f7cc66701b4925d1c1905f28": 60,
+      "0xa19ff737b05e29ebd90d181a3bc2c6bd01bfb1d7": 75,
+      "0x1d476dcaef34e31519992d7ebae89fc58b1d02ed": 10,
+      "0x87591ecf34953d6ff42a0a931a7e35cf4430ce2c": 60,
+      "0xfca58a24f1c4b65486cebfb3762612cf3b8ab6f0": 10,
+      "0x19351838fc7ae101ab08b4ac0e30262254780858": 45,
+      "0xee471ab5af263b9d62e05957509b3bf2cb496000": 60,
+      "0xd7bbaf5ee857f0b6de664956fedcdcf0cd1f2471": 10,
+      "0xb0438df2fe480c8c04e79f6016777845d68b3bba": 40
+    }
+  }
+}

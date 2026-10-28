@@ -92,7 +92,7 @@ export function Workspace({ query }: { query: string }) {
       generatedAt: new Date().toISOString(),
       sampleData: !!data.sample,
       query,
-      score: caseScore(data.risks),
+      score: data.score ?? caseScore(data.risks),
       case: data,
       aiBrief: brief.status === 'done' ? brief.answer : null,
     };
@@ -156,6 +156,7 @@ export function Workspace({ query }: { query: string }) {
             <div className='pointer-events-none absolute left-4 top-4 flex flex-wrap gap-2'>
               <span className='chip bg-[rgba(7,7,13,.8)]'>Case <span className='mono normal-case tracking-normal text-cream'>{short(data.input, 8, 6)}</span></span>
               {data.source && <span className='chip bg-[rgba(7,7,13,.8)]'>Data · {data.source}</span>}
+              {data.engine && <span className='chip bg-[rgba(7,7,13,.8)]'>Heuristics · {data.engine}</span>}
               {!!data.incomplete?.length && <span className='chip tone-medium bg-[rgba(7,7,13,.8)]'>{data.incomplete.length} wallet{data.incomplete.length > 1 ? 's' : ''} not loaded</span>}
             </div>
           )}

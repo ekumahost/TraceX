@@ -35,7 +35,7 @@ function RiskGauge({ score }: { score: number }) {
 }
 
 export function CaseSummary({ data, onSelect }: { data: TraceCase; onSelect: (s: Selection) => void }) {
-  const score = caseScore(data.risks);
+  const score = data.score ?? caseScore(data.risks);
   const s = caseStats(data);
   const pick = (tx?: string, address?: string) => {
     const edge = tx && data.edges.find((e) => e.txHash === tx);

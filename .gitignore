@@ -11,3 +11,4 @@ postgres_data/
 *.log
 next-env.d.ts
 *.tsbuildinfo
+.pytest_cache/

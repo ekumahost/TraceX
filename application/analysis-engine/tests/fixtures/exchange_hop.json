@@ -1,0 +1,94 @@
+{
+  "input": {
+    "nodes": [
+      {
+        "id": "0xs",
+        "type": "source",
+        "hop": 0,
+        "risk": 0
+      },
+      {
+        "id": "0xe1",
+        "type": "exchange",
+        "hop": 1,
+        "label": "Exchange A",
+        "risk": 0
+      },
+      {
+        "id": "0xw",
+        "type": "wallet",
+        "hop": 2,
+        "risk": 0
+      },
+      {
+        "id": "0xe2",
+        "type": "exchange",
+        "hop": 3,
+        "label": "Exchange B",
+        "risk": 0
+      }
+    ],
+    "edges": [
+      {
+        "id": "1",
+        "from": "0xs",
+        "to": "0xe1",
+        "txHash": "0x1",
+        "value": 5,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:11:00.000Z",
+        "hop": 1
+      },
+      {
+        "id": "2",
+        "from": "0xe1",
+        "to": "0xw",
+        "txHash": "0x2",
+        "value": 5,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:11:00.000Z",
+        "hop": 2
+      },
+      {
+        "id": "3",
+        "from": "0xw",
+        "to": "0xe2",
+        "txHash": "0x3",
+        "value": 5,
+        "asset": "ETH",
+        "timestamp": "2026-10-14T02:11:00.000Z",
+        "hop": 3
+      }
+    ]
+  },
+  "expected": {
+    "risks": [
+      {
+        "type": "velocity",
+        "severity": "medium",
+        "tx": "0x1",
+        "detail": "Funds crossed 3 hops in 0 minutes - far faster than normal wallet activity."
+      },
+      {
+        "type": "exchange_hop",
+        "severity": "medium",
+        "tx": "0x3",
+        "address": "0xe2",
+        "detail": "5 ETH reached Exchange B - an exchange where KYC records may identify the owner."
+      },
+      {
+        "type": "exchange_hop",
+        "severity": "medium",
+        "tx": "0x2",
+        "address": "0xe1",
+        "detail": "Funds moved from Exchange A on to Exchange B - hopping between exchanges to break the trail."
+      }
+    ],
+    "nodeRisk": {
+      "0xs": 0,
+      "0xe1": 40,
+      "0xw": 10,
+      "0xe2": 40
+    }
+  }
+}

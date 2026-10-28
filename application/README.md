@@ -62,3 +62,23 @@ Data comes from the first of these that is configured in `application/backend/.e
 3. Blockscout's public API - no key needed, but slow and quickly rate-limited
 
 If a live trace fails, the app shows the labelled sample case and the reason.
+
+## Analysis engine (Python + NetworkX, on Modal)
+The detectors (mixer, peel chain, velocity, exchange cash-out and hopping, bridge) and the
+0-100 case score run in `application/analysis-engine`. The backend calls it when
+`ANALYSIS_ENGINE_URL` is set and falls back to its built-in TypeScript copy otherwise, so a
+trace never fails because the engine is down. The UI shows which engine ran.
+
+```bash
+cd application/analysis-engine
+python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+.venv/bin/python -m pytest                       # includes a parity test against the TypeScript detectors
+.venv/bin/uvicorn app.main:api --port 8100       # local engine -> ANALYSIS_ENGINE_URL=http://localhost:8100
+
+# deploy to Modal (serverless, scales to zero)
+.venv/bin/modal setup                            # one-time browser login
+.venv/bin/modal deploy modal_app.py              # prints https://<you>--tracex-analysis-engine-web.modal.run
+```
+Put the deployed URL in `application/backend/.env` as `ANALYSIS_ENGINE_URL` and restart the backend.
+If you change the detectors, update both copies and regenerate the parity fixtures:
+`cd application/backend && npx tsx ../analysis-engine/tests/export_fixture.ts`.
