@@ -3,7 +3,7 @@
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { SAMPLE_CASE } from '../../frontend/lib/sample-case';
-import { analyze } from '../../backend/src/services/heuristics';
+import { analyze, scoreRisks } from '../../backend/src/services/heuristics';
 
 const nodes = SAMPLE_CASE.nodes.map((n) => ({ ...n, risk: 0 }));
 const edges = SAMPLE_CASE.edges;
@@ -30,3 +30,19 @@ writeFileSync(join(__dirname, 'fixtures/exchange_hop.json'), JSON.stringify({
   input: hopInput, expected: { risks: hopRisks, nodeRisk: Object.fromEntries(hopNodes.map((n) => [n.id, n.risk])) },
 }, null, 2));
 console.log(`wrote ${hopRisks.length} exchange-hop risks`);
+
+// six 100 ETH deposits from one wallet into a mixer - must be one grouped finding
+const depNodes = [
+  { id: '0xf', type: 'source', hop: 0, risk: 0 }, { id: '0xd', type: 'wallet', hop: 1, risk: 0 },
+  { id: '0xm', type: 'mixer', hop: 2, label: 'Tornado Cash 100 ETH', risk: 0 },
+];
+const depEdges = [
+  { id: 'f', from: '0xf', to: '0xd', txHash: '0xfund', value: 600.099, asset: 'ETH', timestamp: '2026-10-28T06:25:47.000Z', hop: 1 },
+  ...[0, 1, 2, 3, 4, 5].map((i) => ({ id: `d${i}`, from: '0xd', to: '0xm', txHash: `0xdep${i}`, value: 100, asset: 'ETH', timestamp: `2026-10-28T06:2${8 + Math.floor(i / 3)}:${10 + i * 7}.000Z`, hop: 2 })),
+];
+const depInput = { nodes: depNodes.map((n) => ({ ...n })), edges: depEdges };
+const depRisks = analyze(depNodes as any, depEdges as any);
+writeFileSync(join(__dirname, 'fixtures/mixer_deposits.json'), JSON.stringify({
+  input: depInput, expected: { risks: depRisks, nodeRisk: Object.fromEntries(depNodes.map((n) => [n.id, n.risk])), score: scoreRisks(depRisks) },
+}, null, 2));
+console.log(`wrote ${depRisks.length} mixer-deposit risks:`, depRisks.map((r) => r.detail));

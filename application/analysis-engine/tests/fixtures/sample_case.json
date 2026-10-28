@@ -203,6 +203,7 @@
         "severity": "high",
         "tx": "0x239d9de394170b93d9cf7501da8698763883caf27a68e99c8c301c1179fd02c8",
         "address": "0xbd6c0f4bac2b502903ec74fe230dbaa71f7b01eb",
+        "count": 1,
         "detail": "40 ETH sent from Drainer into Mixing pool."
       },
       {
@@ -210,6 +211,7 @@
         "severity": "high",
         "tx": "0xdbda4b5cc481c28466f6a16ce9b47821b0bd045916f3a4022c09725b4a007c3a",
         "address": "0xa19ff737b05e29ebd90d181a3bc2c6bd01bfb1d7",
+        "count": 1,
         "detail": "Fresh wallet received 39.6 ETH withdrawn from Mixing pool."
       },
       {
@@ -231,6 +233,7 @@
         "severity": "medium",
         "tx": "0xbb54718599fdadd7a4ac257420541bd5c6f3a202e4c4d03ba6b2641aac1b7142",
         "address": "0xb0438df2fe480c8c04e79f6016777845d68b3bba",
+        "count": 1,
         "detail": "48.3 ETH reached Exchange deposit - an exchange where KYC records may identify the owner."
       },
       {
@@ -238,6 +241,7 @@
         "severity": "low",
         "tx": "0xd5ba8eda085011aa46cfc79879af88469c468eb5ff9107dd3233c5681942e4c7",
         "address": "0x19351838fc7ae101ab08b4ac0e30262254780858",
+        "count": 1,
         "detail": "20 ETH sent into Bridge; the trail continues on another chain."
       }
     ],

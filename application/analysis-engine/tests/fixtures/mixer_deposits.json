@@ -1,0 +1,115 @@
+{
+  "input": {
+    "nodes": [
+      {
+        "id": "0xf",
+        "type": "source",
+        "hop": 0,
+        "risk": 0
+      },
+      {
+        "id": "0xd",
+        "type": "wallet",
+        "hop": 1,
+        "risk": 0
+      },
+      {
+        "id": "0xm",
+        "type": "mixer",
+        "hop": 2,
+        "label": "Tornado Cash 100 ETH",
+        "risk": 0
+      }
+    ],
+    "edges": [
+      {
+        "id": "f",
+        "from": "0xf",
+        "to": "0xd",
+        "txHash": "0xfund",
+        "value": 600.099,
+        "asset": "ETH",
+        "timestamp": "2026-10-28T06:25:47.000Z",
+        "hop": 1
+      },
+      {
+        "id": "d0",
+        "from": "0xd",
+        "to": "0xm",
+        "txHash": "0xdep0",
+        "value": 100,
+        "asset": "ETH",
+        "timestamp": "2026-10-28T06:28:10.000Z",
+        "hop": 2
+      },
+      {
+        "id": "d1",
+        "from": "0xd",
+        "to": "0xm",
+        "txHash": "0xdep1",
+        "value": 100,
+        "asset": "ETH",
+        "timestamp": "2026-10-28T06:28:17.000Z",
+        "hop": 2
+      },
+      {
+        "id": "d2",
+        "from": "0xd",
+        "to": "0xm",
+        "txHash": "0xdep2",
+        "value": 100,
+        "asset": "ETH",
+        "timestamp": "2026-10-28T06:28:24.000Z",
+        "hop": 2
+      },
+      {
+        "id": "d3",
+        "from": "0xd",
+        "to": "0xm",
+        "txHash": "0xdep3",
+        "value": 100,
+        "asset": "ETH",
+        "timestamp": "2026-10-28T06:29:31.000Z",
+        "hop": 2
+      },
+      {
+        "id": "d4",
+        "from": "0xd",
+        "to": "0xm",
+        "txHash": "0xdep4",
+        "value": 100,
+        "asset": "ETH",
+        "timestamp": "2026-10-28T06:29:38.000Z",
+        "hop": 2
+      },
+      {
+        "id": "d5",
+        "from": "0xd",
+        "to": "0xm",
+        "txHash": "0xdep5",
+        "value": 100,
+        "asset": "ETH",
+        "timestamp": "2026-10-28T06:29:45.000Z",
+        "hop": 2
+      }
+    ]
+  },
+  "expected": {
+    "risks": [
+      {
+        "type": "mixer",
+        "severity": "high",
+        "tx": "0xdep0",
+        "address": "0xm",
+        "count": 6,
+        "detail": "600 ETH sent from 0xd…0xd into Tornado Cash 100 ETH across 6 deposits."
+      }
+    ],
+    "nodeRisk": {
+      "0xf": 0,
+      "0xd": 85,
+      "0xm": 95
+    },
+    "score": 70
+  }
+}

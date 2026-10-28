@@ -13,7 +13,9 @@ from datetime import datetime
 import networkx as nx
 
 BASE_RISK = {"source": 0, "wallet": 10, "contract": 10, "exchange": 40, "bridge": 45, "mixer": 95}
-SEVERITY_WEIGHT = {"high": 35, "medium": 15, "low": 5}
+# case score: the worst finding sets the floor, each further finding adds a little
+SCORE_FLOOR = {"high": 70, "medium": 40, "low": 15}
+SCORE_EXTRA = {"high": 15, "medium": 8, "low": 3}
 SEVERITY_RANK = {"high": 0, "medium": 1, "low": 2}
 MAX_RISKS = 12
 
@@ -57,17 +59,25 @@ def analyze(nodes: list[dict], edges: list[dict]) -> dict:
 
     risks: list[dict] = []
 
+    # repeated transfers between the same pair are one finding: "600 ETH across 6 deposits"
+    def grouped(match):
+        groups: dict[str, list[dict]] = {}
+        for e in edges:
+            if match(e):
+                groups.setdefault(f"{e['from']}|{e['to']}|{e['asset']}", []).append(e)
+        return [(g[0], len(g), sum(x["value"] for x in g)) for g in groups.values()]
+
+    times = lambda n, noun: f" across {n} {noun}" if n > 1 else ""
+
     # mixers: deposits in, and wallets funded out of them
-    for e in edges:
-        to_type, from_type = node(e["to"]).get("type"), node(e["from"]).get("type")
-        if to_type == "mixer":
-            bump(e["from"], 85)
-            risks.append({"type": "mixer", "severity": "high", "tx": e["txHash"], "address": e["to"],
-                          "detail": f"{_fmt(e['value'], e['asset'])} sent from {name(e['from'])} into {name(e['to'])}."})
-        if from_type == "mixer":
-            bump(e["to"], 75)
-            risks.append({"type": "mixer", "severity": "high", "tx": e["txHash"], "address": e["to"],
-                          "detail": f"{name(e['to'])} received {_fmt(e['value'], e['asset'])} withdrawn from {name(e['from'])}."})
+    for e, n, total in grouped(lambda e: node(e["to"]).get("type") == "mixer"):
+        bump(e["from"], 85)
+        risks.append({"type": "mixer", "severity": "high", "tx": e["txHash"], "address": e["to"], "count": n,
+                      "detail": f"{_fmt(total, e['asset'])} sent from {name(e['from'])} into {name(e['to'])}{times(n, 'deposits')}."})
+    for e, n, total in grouped(lambda e: node(e["from"]).get("type") == "mixer"):
+        bump(e["to"], 75)
+        risks.append({"type": "mixer", "severity": "high", "tx": e["txHash"], "address": e["to"], "count": n,
+                      "detail": f"{name(e['to'])} received {_fmt(total, e['asset'])} withdrawn from {name(e['from'])}{times(n, 'withdrawals')}."})
 
     # peel chain: one dominant outflow (>= 60%) plus a small shave (<= 10%), repeated down the chain
     def peel_next(nid: str) -> dict | None:
@@ -112,14 +122,12 @@ def analyze(nodes: list[dict], edges: list[dict]) -> dict:
                           "detail": f"Funds crossed {deepest['hop']} hops in {_minutes(_ts(deepest) - t0)} - far faster than normal wallet activity."})
 
     # exits: exchange deposits (KYC may identify the owner) and bridges (trail continues elsewhere)
-    for e in edges:
-        to_type = node(e["to"]).get("type")
-        if to_type == "exchange" and e["hop"] > 1:
-            risks.append({"type": "exchange_hop", "severity": "medium", "tx": e["txHash"], "address": e["to"],
-                          "detail": f"{_fmt(e['value'], e['asset'])} reached {name(e['to'])} - an exchange where KYC records may identify the owner."})
-        if to_type == "bridge":
-            risks.append({"type": "bridge", "severity": "low", "tx": e["txHash"], "address": e["to"],
-                          "detail": f"{_fmt(e['value'], e['asset'])} sent into {name(e['to'])}; the trail continues on another chain."})
+    for e, n, total in grouped(lambda e: node(e["to"]).get("type") == "exchange" and e["hop"] > 1):
+        risks.append({"type": "exchange_hop", "severity": "medium", "tx": e["txHash"], "address": e["to"], "count": n,
+                      "detail": f"{_fmt(total, e['asset'])} reached {name(e['to'])}{times(n, 'transfers')} - an exchange where KYC records may identify the owner."})
+    for e, n, total in grouped(lambda e: node(e["to"]).get("type") == "bridge"):
+        risks.append({"type": "bridge", "severity": "low", "tx": e["txHash"], "address": e["to"], "count": n,
+                      "detail": f"{_fmt(total, e['asset'])} sent into {name(e['to'])}{times(n, 'transfers')}; the trail continues on another chain."})
 
     # exchange hopping: the same funds pass through more than one exchange along a path
     exchanges = [nid for nid, d in g.nodes(data=True) if d.get("type") == "exchange"]
@@ -131,16 +139,19 @@ def analyze(nodes: list[dict], edges: list[dict]) -> dict:
                 risks.append({"type": "exchange_hop", "severity": "medium", "tx": hop_edge["txHash"], "address": a,
                               "detail": f"Funds moved from {name(a)} on to {name(b)} - hopping between exchanges to break the trail."})
 
-    # one flag per pattern and address - repeat deposits to the same exchange are one finding
+    # drop exact repeats (e.g. the same exchange-hopping pair found twice)
     seen_keys: set[str] = set()
     unique = []
     for r in risks:
-        key = f"{r['type']}|{r.get('address') or r.get('tx')}"
+        key = f"{r['type']}|{r.get('address') or ''}|{r.get('tx') or ''}"
         if key not in seen_keys:
             seen_keys.add(key)
             unique.append(r)
     unique.sort(key=lambda r: SEVERITY_RANK[r["severity"]])
     unique = unique[:MAX_RISKS]
 
-    score = min(100, sum(SEVERITY_WEIGHT[r["severity"]] for r in unique))
+    score = 0
+    if unique:
+        worst, *rest = unique  # already sorted worst first
+        score = min(100, SCORE_FLOOR[worst["severity"]] + sum(SCORE_EXTRA[r["severity"]] for r in rest))
     return {"risks": unique, "node_risk": risk, "score": score}

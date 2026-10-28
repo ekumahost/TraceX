@@ -18,7 +18,7 @@ const TONE = { high: 'var(--red)', medium: 'var(--amber)', low: 'var(--cyan)', c
 const ICON = { source: Flag, wallet: Wallet, exchange: Building2, mixer: Shuffle, bridge: ArrowLeftRight, contract: FileCode2 };
 
 type WalletData = { node: TraceNode; selected: boolean; dim: boolean };
-type FlowData = { edge: TraceEdge; hot: boolean; selected: boolean; dim: boolean };
+type FlowData = { edge: TraceEdge; hot: boolean; selected: boolean; dim: boolean; label: string | null };
 
 const WalletNode = memo(function WalletNode({ data }: NodeProps<Node<WalletData>>) {
   const { node, selected, dim } = data;
@@ -61,7 +61,7 @@ const WalletNode = memo(function WalletNode({ data }: NodeProps<Node<WalletData>
 function FlowEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: EdgeProps<Edge<FlowData>>) {
   const [path, lx, ly] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition });
   if (!data) return null;
-  const { edge, hot, selected, dim } = data;
+  const { edge, hot, selected, dim, label } = data;
   const color = selected ? 'var(--cyan)' : hot ? 'var(--red)' : 'var(--violet-hi)';
   const width = 1.2 + Math.log10(edge.value + 1) * 1.8;
 
@@ -69,7 +69,7 @@ function FlowEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targ
     <g className={clsx('transition-opacity duration-500', dim && 'opacity-15')}>
       <BaseEdge id={id} path={path} style={{ stroke: color, strokeOpacity: selected ? 0.5 : 0.22, strokeWidth: width + (selected ? 4 : 0) }} />
       <path d={path} fill='none' stroke={color} strokeWidth={selected ? 2.4 : 1.6} className='flow-path' />
-      <EdgeLabelRenderer>
+      {(label || selected) && <EdgeLabelRenderer>
         <div
           className={clsx(
             'nodrag nopan pointer-events-none absolute mono rounded px-1.5 py-0.5 text-[11.5px] transition-colors',
@@ -78,9 +78,9 @@ function FlowEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targ
           )}
           style={{ transform: `translate(-50%, -50%) translate(${lx}px, ${ly}px)` }}
         >
-          {fmtValue(edge.value, edge.asset)}
+          {selected ? fmtValue(edge.value, edge.asset) : label}
         </div>
-      </EdgeLabelRenderer>
+      </EdgeLabelRenderer>}
     </g>
   );
 }
@@ -128,6 +128,21 @@ function Graph({ data, revealHop, selection, focusNonce, onSelect }: Props) {
     [data.nodes, pos, revealHop, selection, lit],
   );
 
+  // parallel transfers between the same pair share one label: "600 ETH · 6 tx"
+  const flowLabel = useMemo(() => {
+    const groups = new Map<string, TraceEdge[]>();
+    for (const e of data.edges) {
+      const key = `${e.from}|${e.to}|${e.asset}`;
+      groups.set(key, [...(groups.get(key) ?? []), e]);
+    }
+    const label = new Map<string, string>();
+    for (const g of groups.values()) {
+      const total = g.reduce((s, e) => s + e.value, 0);
+      label.set(g[0].id, `${fmtValue(total, g[0].asset)}${g.length > 1 ? ` · ${g.length} tx` : ''}`);
+    }
+    return label;
+  }, [data.edges]);
+
   const edges: Edge<FlowData>[] = useMemo(
     () =>
       data.edges
@@ -137,9 +152,9 @@ function Graph({ data, revealHop, selection, focusNonce, onSelect }: Props) {
           source: e.from,
           target: e.to,
           type: 'flow',
-          data: { edge: e, hot: (riskOf.get(e.to) ?? 0) >= 70, selected: selection?.kind === 'edge' && selection.id === e.id, dim: !!lit && !lit.has(e.id) },
+          data: { edge: e, hot: (riskOf.get(e.to) ?? 0) >= 70, selected: selection?.kind === 'edge' && selection.id === e.id, dim: !!lit && !lit.has(e.id), label: flowLabel.get(e.id) ?? null },
         })),
-    [data.edges, revealHop, riskOf, selection, lit],
+    [data.edges, revealHop, riskOf, selection, lit, flowLabel],
   );
 
   // frame by the known layout rather than measured nodes, so the camera is right

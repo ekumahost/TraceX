@@ -2,11 +2,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
-import { Check, Download, Info, Loader2 } from 'lucide-react';
+import { Check, Download, FileText, Info, Loader2 } from 'lucide-react';
 import type { TraceCase } from '@/lib/types';
 import { explainCase, fetchTrace } from '@/lib/api';
 import { SAMPLE_CASE } from '@/lib/sample-case';
 import { caseScore, short } from '@/lib/format';
+import { saveReport } from '@/lib/report';
 import { Wordmark, Mark } from '../Logo';
 import { SearchConsole } from '../SearchConsole';
 import { TraceGraph, type Selection } from './TraceGraph';
@@ -102,6 +103,12 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
     URL.revokeObjectURL(url);
   };
 
+  const openReport = () => {
+    if (!data) return;
+    saveReport({ data, query, score: data.score ?? caseScore(data.risks), brief: brief.status === 'done' ? brief.answer : null, generatedAt: new Date().toISOString() });
+    window.open('/report', '_blank');
+  };
+
   const steps = [isSample ? 'Loading sample case' : 'Fetching on-chain transfers', 'Building fund-flow graph', 'Running heuristics'];
 
   return (
@@ -112,7 +119,8 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
         <div className='mx-auto hidden w-full max-w-[560px] md:block'><SearchConsole compact initial={query} initialChain={chain} /></div>
         <div className='ml-auto flex flex-none items-center gap-2 md:ml-0'>
           <span className='chip hidden lg:inline-flex'><span className='dot dot--live tone-clean' /> {data?.network ?? 'Ethereum'}</span>
-          <button type='button' onClick={exportCase} disabled={!data} className='btn btn--ghost btn--sm'><Download /> <span className='hidden sm:inline'>Export</span></button>
+          <button type='button' onClick={openReport} disabled={!data} className='btn btn--sm' title='Printable evidence report - save as PDF'><FileText /> <span className='hidden sm:inline'>Report</span></button>
+          <button type='button' onClick={exportCase} disabled={!data} className='btn btn--ghost btn--sm' title='Download the case as JSON' aria-label='Download JSON'><Download /> <span className='hidden lg:inline'>JSON</span></button>
         </div>
       </header>
 

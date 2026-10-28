@@ -12,7 +12,7 @@ NODES, EDGES = FIXTURE["input"]["nodes"], FIXTURE["input"]["edges"]
 by_label = {n.get("label"): n["id"] for n in NODES}
 
 
-@pytest.mark.parametrize("fixture", ["sample_case.json", "exchange_hop.json"])
+@pytest.mark.parametrize("fixture", ["sample_case.json", "exchange_hop.json", "mixer_deposits.json"])
 def test_matches_typescript_detectors(fixture):
     # same findings, in the same order, as backend/src/services/heuristics.ts
     data = json.loads((Path(__file__).parent / "fixtures" / fixture).read_text())
@@ -27,7 +27,7 @@ def test_sample_case_flags_and_score():
     types = [r["type"] for r in result["risks"]]
     assert types.count("mixer") == 2
     assert {"peel_chain", "velocity", "exchange_hop", "bridge"} <= set(types)
-    assert result["score"] == 100  # 2 high + 3 medium + 1 low, capped
+    assert result["score"] == 100  # high floor 70 + 15 + 3x8 + 3, capped
     peel = next(r for r in result["risks"] if r["type"] == "peel_chain")
     assert peel["address"] == by_label["Peel 1"] and peel["count"] == 3
 
@@ -59,3 +59,11 @@ def test_http_endpoint():
     body = res.json()
     assert body["engine"] == "python-networkx" and body["score"] == 100 and len(body["risks"]) == 6
     assert client.post("/analyze", json={"nodes": [{"id": "x", "type": "alien", "hop": 0}], "edges": []}).status_code == 422
+
+
+def test_repeat_deposits_are_one_finding_and_score_high():
+    data = json.loads((Path(__file__).parent / "fixtures/mixer_deposits.json").read_text())
+    result = analyze(data["input"]["nodes"], data["input"]["edges"])
+    mixer = [r for r in result["risks"] if r["type"] == "mixer"]
+    assert len(mixer) == 1 and mixer[0]["count"] == 6 and "600 ETH" in mixer[0]["detail"]
+    assert result["score"] == data["expected"]["score"] >= 70  # one mixer finding alone is high risk

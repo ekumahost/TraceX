@@ -14,6 +14,17 @@ const minutes = (ms: number) => {
   return m < 120 ? `${m} minutes` : `${Math.round(m / 60)} hours`;
 };
 
+// Case score: the worst finding sets the floor, each further finding adds a little.
+// One mixer deposit alone is already "high risk"; a pile of low findings never is.
+const FLOOR = { high: 70, medium: 40, low: 15 };
+const EXTRA = { high: 15, medium: 8, low: 3 };
+export function scoreRisks(risks: Risk[]) {
+  if (!risks.length) return 0;
+  const rank = { high: 0, medium: 1, low: 2 };
+  const [worst, ...rest] = [...risks].sort((a, b) => rank[a.severity] - rank[b.severity]);
+  return Math.min(100, FLOOR[worst.severity] + rest.reduce((s, r) => s + EXTRA[r.severity], 0));
+}
+
 export function analyze(nodes: TraceNode[], edges: TraceEdge[]): Risk[] {
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const name = (id: string) => byId.get(id)?.label ?? `${id.slice(0, 8)}…${id.slice(-4)}`;
@@ -27,17 +38,25 @@ export function analyze(nodes: TraceNode[], edges: TraceEdge[]): Risk[] {
   // base risk by entity type
   for (const n of nodes) n.risk = { source: 0, wallet: 10, contract: 10, exchange: 40, bridge: 45, mixer: 95 }[n.type];
 
+  // repeated transfers between the same pair are one finding: "600 ETH across 6 deposits"
+  const grouped = (match: (e: TraceEdge) => boolean) => {
+    const groups = new Map<string, TraceEdge[]>();
+    for (const e of edges.filter(match)) {
+      const key = `${e.from}|${e.to}|${e.asset}`;
+      groups.set(key, [...(groups.get(key) ?? []), e]);
+    }
+    return [...groups.values()].map((g) => ({ first: g[0], n: g.length, total: g.reduce((s, e) => s + e.value, 0) }));
+  };
+  const times = (n: number, noun: string) => (n > 1 ? ` across ${n} ${noun}` : '');
+
   // mixers: deposits in, and wallets funded out of them
-  for (const e of edges) {
-    const to = byId.get(e.to), from = byId.get(e.from);
-    if (to?.type === 'mixer') {
-      bump(e.from, 85);
-      risks.push({ type: 'mixer', severity: 'high', tx: e.txHash, address: e.to, detail: `${fmt(e.value, e.asset)} sent from ${name(e.from)} into ${name(e.to)}.` });
-    }
-    if (from?.type === 'mixer') {
-      bump(e.to, 75);
-      risks.push({ type: 'mixer', severity: 'high', tx: e.txHash, address: e.to, detail: `${name(e.to)} received ${fmt(e.value, e.asset)} withdrawn from ${name(e.from)}.` });
-    }
+  for (const { first: e, n, total } of grouped((e) => byId.get(e.to)?.type === 'mixer')) {
+    bump(e.from, 85);
+    risks.push({ type: 'mixer', severity: 'high', tx: e.txHash, address: e.to, count: n, detail: `${fmt(total, e.asset)} sent from ${name(e.from)} into ${name(e.to)}${times(n, 'deposits')}.` });
+  }
+  for (const { first: e, n, total } of grouped((e) => byId.get(e.from)?.type === 'mixer')) {
+    bump(e.to, 75);
+    risks.push({ type: 'mixer', severity: 'high', tx: e.txHash, address: e.to, count: n, detail: `${name(e.to)} received ${fmt(total, e.asset)} withdrawn from ${name(e.from)}${times(n, 'withdrawals')}.` });
   }
 
   // peel chain: a wallet passes most of its balance on and shaves a little off, repeatedly.
@@ -88,14 +107,11 @@ export function analyze(nodes: TraceNode[], edges: TraceEdge[]): Risk[] {
   }
 
   // exits: exchange deposits (KYC may identify the owner) and bridges (trail continues elsewhere)
-  for (const e of edges) {
-    const to = byId.get(e.to);
-    if (to?.type === 'exchange' && e.hop > 1) {
-      risks.push({ type: 'exchange_hop', severity: 'medium', tx: e.txHash, address: e.to, detail: `${fmt(e.value, e.asset)} reached ${name(e.to)} - an exchange where KYC records may identify the owner.` });
-    }
-    if (to?.type === 'bridge') {
-      risks.push({ type: 'bridge', severity: 'low', tx: e.txHash, address: e.to, detail: `${fmt(e.value, e.asset)} sent into ${name(e.to)}; the trail continues on another chain.` });
-    }
+  for (const { first: e, n, total } of grouped((e) => byId.get(e.to)?.type === 'exchange' && e.hop > 1)) {
+    risks.push({ type: 'exchange_hop', severity: 'medium', tx: e.txHash, address: e.to, count: n, detail: `${fmt(total, e.asset)} reached ${name(e.to)}${times(n, 'transfers')} - an exchange where KYC records may identify the owner.` });
+  }
+  for (const { first: e, n, total } of grouped((e) => byId.get(e.to)?.type === 'bridge')) {
+    risks.push({ type: 'bridge', severity: 'low', tx: e.txHash, address: e.to, count: n, detail: `${fmt(total, e.asset)} sent into ${name(e.to)}${times(n, 'transfers')}; the trail continues on another chain.` });
   }
 
   // exchange hopping: the same funds pass through more than one exchange along a path
@@ -128,10 +144,10 @@ export function analyze(nodes: TraceNode[], edges: TraceEdge[]): Risk[] {
     }
   }
 
-  // one flag per pattern and address - repeat deposits to the same exchange are one finding
+  // drop exact repeats (e.g. the same exchange-hopping pair found twice)
   const seen = new Set<string>();
   const unique = risks.filter((r) => {
-    const key = `${r.type}|${r.address ?? r.tx}`;
+    const key = `${r.type}|${r.address ?? ''}|${r.tx ?? ''}`;
     return !seen.has(key) && !!seen.add(key);
   });
   const rank = { high: 0, medium: 1, low: 2 };

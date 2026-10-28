@@ -296,7 +296,19 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .reveal, .lines .line > span { opacity: 1; transform: none; }
 }
 
+/* printable report - ink on paper */
+.paper .prose-ai { color: #2a2938; font-size: 13px; }
+.paper .prose-ai h3 { color: #4b3fd6; }
+.paper .prose-ai strong { color: #000; }
+.paper .prose-ai li::before { background: #0b7f8c; }
+.paper .cite { color: #0b6e7a; background: #e8f6f8; border-color: #a8dce2; }
+.paper .cite--addr { color: #4b3fd6; background: #efedff; border-color: #c9c2ff; }
+.paper code { background: #f1f0f7 !important; color: #1c1b26 !important; }
+
 @media print {
+  @page { size: A4; margin: 14mm; }
   .no-print { display: none !important; }
-  body { background: #fff; color: #000; }
+  body { background: #fff !important; color: #000; }
+  .grain::after { display: none; }
+  .break-inside-avoid { break-inside: avoid; }
 }

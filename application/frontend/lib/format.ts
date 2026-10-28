@@ -17,11 +17,14 @@ export function fmtDuration(ms: number) {
   return `${Math.round(h / 24)} days`;
 }
 
-const WEIGHT: Record<Severity, number> = { high: 35, medium: 15, low: 5 };
-
-// Simple additive case score until the analysis engine returns its own
+// Case score - same rule as the detectors: the worst finding sets the floor, each further one adds a little
+const FLOOR: Record<Severity, number> = { high: 70, medium: 40, low: 15 };
+const EXTRA: Record<Severity, number> = { high: 15, medium: 8, low: 3 };
+const RANK: Record<Severity, number> = { high: 0, medium: 1, low: 2 };
 export function caseScore(risks: Risk[]) {
-  return Math.min(100, risks.reduce((s, r) => s + WEIGHT[r.severity], 0));
+  if (!risks.length) return 0;
+  const [worst, ...rest] = [...risks].sort((a, b) => RANK[a.severity] - RANK[b.severity]);
+  return Math.min(100, FLOOR[worst.severity] + rest.reduce((s, r) => s + EXTRA[r.severity], 0));
 }
 
 export function verdict(score: number): { label: string; tone: Severity | 'clean' } {
