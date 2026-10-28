@@ -51,7 +51,7 @@ cd application/frontend && npm install && npm run dev
 Open http://localhost:3300 and click **Sample case** (or go to `/investigate?q=sample`).
 If the backend runs somewhere else, set `NEXT_PUBLIC_API_URL` in `application/frontend/.env.local`.
 Paste a tx hash, wallet address or ENS name to run a live trace. Pick the chain next to the
-search box - Ethereum, Base, BNB Chain, Arbitrum, Optimism or Polygon. With "Auto chain", a tx
+search box - Ethereum, Base, BNB Chain, Arbitrum, Optimism, Polygon or Robinhood Chain. With "Auto chain", a tx
 hash is looked up on every chain automatically and wallets default to Ethereum.
 
 ## Blockchain data
@@ -61,12 +61,12 @@ native token (token lists in `backend/src/services/chains.ts`, verified on-chain
 (largest 4 transfers per wallet, up to 40 wallets), stopping at exchanges, mixers, bridges and contracts.
 
 Data comes from the first of these that is configured in `application/backend/.env`:
-1. `ALCHEMY_API_KEY` - free at https://dashboard.alchemy.com. One key covers Ethereum, Base,
-   Arbitrum, Optimism and Polygon (enable them on your Alchemy app). **Recommended.**
+1. `ALCHEMY_API_KEY` - free at https://dashboard.alchemy.com. One key covers all seven chains
+   (enable each network on your Alchemy app's Networks page). **Recommended.**
 2. `ETHERSCAN_API_KEY` - free at https://etherscan.io/myapikey. One V2 key covers many chains,
    including BNB Chain; check Etherscan's plans page for which chains the free tier includes.
 3. Free keyless explorers - Ethereum (Blockscout, Routescan) and Optimism (explorer.optimism.io) only.
-   Slow and quickly rate-limited; Base, BNB Chain, Arbitrum and Polygon have no keyless option.
+   Slow and quickly rate-limited; the other chains have no keyless option.
 
 Alchemy also replaces the free public RPC nodes, which can't look up older transactions.
 

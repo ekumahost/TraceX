@@ -6,7 +6,7 @@ import { InputError } from '../types';
  * on-chain (symbol + decimals) by scripts/check-chains.ts.
  */
 
-export type ChainId = 'ethereum' | 'base' | 'bnb' | 'arbitrum' | 'optimism' | 'polygon';
+export type ChainId = 'ethereum' | 'base' | 'bnb' | 'arbitrum' | 'optimism' | 'polygon' | 'robinhood';
 
 export interface Token { symbol: string; decimals: number; usd: number }
 
@@ -108,9 +108,20 @@ export const CHAINS: Record<ChainId, Chain> = {
       '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270': { symbol: 'WPOL', decimals: 18, usd: POL_USD },
     },
   },
+  // Arbitrum Orbit L2; tokens picked from its most-transferred contracts (2026-10-28)
+  robinhood: {
+    id: 'robinhood', name: 'Robinhood Chain', chainId: 4663, native: 'ETH', nativeUsd: ETH_USD,
+    rpc: 'https://rpc.mainnet.chain.robinhood.com', alchemy: 'robinhood-mainnet',
+    keyless: [],
+    explorer: 'https://robinhoodchain.blockscout.com',
+    tokens: {
+      '0x5fc5360d0400a0fd4f2af552add042d716f1d168': stable('USDG'),
+      '0x0bd7d308f8e1639fab988df18a8011f41eacad73': { symbol: 'WETH', decimals: 18, usd: ETH_USD },
+    },
+  },
 };
 
-export const CHAIN_ORDER: ChainId[] = ['ethereum', 'base', 'bnb', 'arbitrum', 'optimism', 'polygon'];
+export const CHAIN_ORDER: ChainId[] = ['ethereum', 'base', 'bnb', 'arbitrum', 'optimism', 'polygon', 'robinhood'];
 
 export function getChain(id?: string): Chain {
   if (!id || id === 'auto') return CHAINS.ethereum;
