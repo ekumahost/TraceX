@@ -10,13 +10,19 @@ import type { Selection } from './TraceGraph';
  * 0x tx hash / address becomes a citation chip that jumps to it in the graph.
  */
 
-const TOKEN = /(0x[a-fA-F0-9]{64}|0x[a-fA-F0-9]{40}(?![a-fA-F0-9])|\*\*[^*]+\*\*)/g;
+const TOKEN = /(`[^`\n]+`|0x[a-fA-F0-9]{64}|0x[a-fA-F0-9]{40}(?![a-fA-F0-9])|\*\*[^*]+\*\*)/g;
 
 function Inline({ text, data, onCite }: { text: string; data: TraceCase; onCite: (s: Selection) => void }) {
   return (
     <>
-      {text.split(TOKEN).map((part, i) => {
-        if (!part) return null;
+      {text.split(TOKEN).map((raw, i) => {
+        if (!raw) return null;
+        // models often wrap hashes in `code` - unwrap so they still become citations
+        const coded = raw.startsWith('`') && raw.endsWith('`') && raw.length > 1;
+        const part = coded ? raw.slice(1, -1) : raw;
+        if (coded && !/^0x[a-fA-F0-9]{40}([a-fA-F0-9]{24})?$/.test(part)) {
+          return <code key={i} className='mono rounded bg-panel-3 px-1 text-[.88em] text-cream'>{part}</code>;
+        }
         if (part.startsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>;
         if (/^0x[a-fA-F0-9]{64}$/.test(part)) {
           const edge = data.edges.find((e) => e.txHash.toLowerCase() === part.toLowerCase());

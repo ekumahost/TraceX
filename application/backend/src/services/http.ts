@@ -31,7 +31,12 @@ export async function fetchJson<T>(
         signal: AbortSignal.timeout(timeoutMs),
       });
       if (res.status === 429 || res.status >= 500) throw new RetryableError(`${host} responded ${res.status}`);
-      if (!res.ok) throw new Error(`${host} responded ${res.status}`);
+      if (!res.ok) {
+        // providers explain errors in the body (e.g. Alchemy: "BASE_MAINNET is not enabled for this app")
+        const body: any = await res.json().catch(() => null);
+        const reason = body?.error?.message ?? body?.message;
+        throw new Error(`${host} responded ${res.status}${reason ? `: ${String(reason).slice(0, 200)}` : ''}`);
+      }
       const data = (await res.json()) as T;
       if (opts.cache !== false) cache.set(key, { at: Date.now(), data });
       return data;

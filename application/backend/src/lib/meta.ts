@@ -24,6 +24,19 @@ function getClient() {
 
 const model = () => process.env.META_MODEL || 'muse-spark-1.3';
 
+// Muse Spark reasons before it answers, and reasoning tokens count against max_tokens -
+// so the budget has to cover both. Low effort answers a case in ~10s; medium takes ~2x.
+const BUDGET = 12_000;
+const effort = () => (process.env.META_REASONING_EFFORT || 'low') as 'low' | 'medium' | 'high';
+
+function answer(response: OpenAI.Chat.Completions.ChatCompletion) {
+  const choice = response.choices[0];
+  if (!choice?.message.content && choice?.finish_reason === 'length') {
+    throw new Error('Muse Spark used its whole token budget reasoning - try META_REASONING_EFFORT=low');
+  }
+  return choice?.message.content ?? null;
+}
+
 export async function explainWithMetaAPI(graphJson: any, heuristics: any) {
   const prompt = `You are TraceX investigator - evidence-backed blockchain forensics.
 
@@ -37,10 +50,11 @@ Explain what happened, cite tx hashes for every claim, highlight suspicious patt
     model: model(),
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.1, // low for evidence-backed
-    max_tokens: 2000,
+    max_tokens: BUDGET,
+    reasoning_effort: effort(),
   });
 
-  return response.choices[0].message.content;
+  return answer(response);
 }
 
 export async function askQuestionWithMetaAPI(question: string, graphJson: any) {
@@ -51,6 +65,8 @@ export async function askQuestionWithMetaAPI(question: string, graphJson: any) {
       { role: 'user', content: `Question: ${question}\nTrace: ${JSON.stringify(graphJson).slice(0, 3000)}` },
     ],
     temperature: 0.1,
+    max_tokens: BUDGET,
+    reasoning_effort: effort(),
   });
-  return response.choices[0].message.content;
+  return answer(response);
 }
