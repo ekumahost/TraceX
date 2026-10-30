@@ -98,7 +98,6 @@ export function RecoveryKit({ data }: { data: TraceCase }) {
             value={exchange}
             onChange={(event) => setExchange(event.target.value)}
             maxLength={100}
-            required
             placeholder='Exchange name (optional)'
             className='input mt-1.5 w-full rounded-lg border border-line-2 bg-panel-2 px-3 py-2.5 text-[13px]'
           />

@@ -275,7 +275,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 @keyframes ring { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(1.9); opacity: 0; } }
 
 .tab {
-  position: relative; padding: 14px 2px; font: 700 11px/1 var(--f-display); letter-spacing: .18em; text-transform: uppercase;
+  position: relative; flex: none; white-space: nowrap; padding: 14px 2px; font: 700 11px/1 var(--f-display); letter-spacing: .14em; text-transform: uppercase;
   color: var(--dim); transition: color .3s;
 }
 .tab::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--cyan); transform: scaleX(0); transition: transform .45s var(--ease); }

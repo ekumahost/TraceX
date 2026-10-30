@@ -85,10 +85,21 @@ export async function generateRecoveryDocuments(
     })),
     deterministicFindings: heuristics.map(({ type, severity, detail, tx }) => ({ type, severity, detail, tx })),
   });
-  const raw = await draftRecoveryDocuments(evidence, LANGUAGE_NAMES[language]);
-  if (!raw) throw new Error('The Meta Model API returned an empty recovery draft.');
-  const documents = parseRecoveryDocuments(raw);
-  validateRecoveryCitations(documents.freezeRequest, hashes, addresses);
-  validateRecoveryCitations(documents.policeReport, hashes, addresses);
-  return { provider: 'meta', ...documents };
+  // The model sometimes skips a citation; every draft must cite every transaction and nothing
+  // else, so retry a couple of times before showing the user an error.
+  let lastError: Error = new Error('Recovery Kit generation failed.');
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const raw = await draftRecoveryDocuments(evidence, LANGUAGE_NAMES[language]);
+      if (!raw) throw new Error('The Meta Model API returned an empty recovery draft.');
+      const documents = parseRecoveryDocuments(raw);
+      validateRecoveryCitations(documents.freezeRequest, hashes, addresses);
+      validateRecoveryCitations(documents.policeReport, hashes, addresses);
+      return { provider: 'meta', ...documents };
+    } catch (e) {
+      lastError = e instanceof Error ? e : new Error(String(e));
+      console.warn(`Recovery Kit draft ${attempt}/3 rejected: ${lastError.message}`);
+    }
+  }
+  throw lastError;
 }

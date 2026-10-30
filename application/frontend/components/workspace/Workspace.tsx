@@ -26,7 +26,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'ask', label: 'Ask' },
   { id: 'evidence', label: 'Evidence' },
   { id: 'timeline', label: 'Timeline' },
-  { id: 'recovery', label: 'Recovery Kit' },
+  { id: 'recovery', label: 'Recovery' },
 ];
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -202,7 +202,7 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
 
         {/* right: brief / ask / evidence / timeline */}
         <aside className='order-3 flex min-h-[70svh] flex-col border-line lg:order-none lg:min-h-0 lg:border-l'>
-          <div role='tablist' className='flex flex-none gap-6 border-b border-line px-5'>
+          <div role='tablist' className='scroll-thin flex flex-none gap-4 overflow-x-auto border-b border-line px-4'>
             {TABS.map((t) => (
               <button key={t.id} role='tab' aria-selected={tab === t.id} onClick={() => setTab(t.id)} className='tab'>{t.label}</button>
             ))}

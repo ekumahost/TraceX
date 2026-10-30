@@ -76,7 +76,7 @@ export function SearchConsole({ initial = '', initialChain = 'auto', compact = f
           <button type='button' onClick={() => setValue('vitalik.eth')} className='hover:text-cream'>vitalik.eth</button>
         </div>
       )}
-      <label className={clsx('mt-3 flex flex-wrap items-center gap-2 text-[12px] text-dim', compact ? 'justify-end' : 'justify-start')}>
+      {!compact && <label className='mt-3 flex flex-wrap items-center gap-2 text-[12px] text-dim'>
         <span>Offline demo (no RPC):</span>
         <select
           value=''
@@ -89,7 +89,7 @@ export function SearchConsole({ initial = '', initialChain = 'auto', compact = f
           <option value=''>Choose a synthetic case</option>
           {OFFLINE_PRESETS.map((preset) => <option key={preset.id} value={preset.id}>{preset.title}</option>)}
         </select>
-      </label>
+      </label>}
     </form>
   );
 }

@@ -14,6 +14,8 @@ class Node(BaseModel):
     hop: int
     label: str | None = None
     risk: int = 0
+    address: str | None = None  # node ids are chain-qualified; this is the bare address
+    chain: str | None = None
 
 
 class Edge(BaseModel):
