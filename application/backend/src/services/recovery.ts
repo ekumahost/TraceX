@@ -71,7 +71,8 @@ export async function generateRecoveryDocuments(
   const addresses = new Set(graph.nodes.map((node) => (node.address ?? node.id).toLowerCase()));
   const evidence = JSON.stringify({
     case: { input: graph.input, network: graph.network },
-    targetExchange: exchange.trim(),
+    // no exchange yet (e.g. funds went into a mixer): the model writes an [EXCHANGE NAME] placeholder
+    targetExchange: exchange.trim() || '[EXCHANGE NAME] - not identified in this trace yet',
     transfers: graph.edges.map((edge) => ({
       txHash: edge.txHash,
       destinationTxHash: edge.destinationTxHash,

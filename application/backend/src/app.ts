@@ -25,7 +25,7 @@ export function createApp() {
     input: z.string().trim().min(1).max(100),
     chain: z.string().min(1).max(40).default('auto'),
     hops: z.number().int().min(1).max(20).default(5),
-    exchange: z.string().trim().min(1).max(100),
+    exchange: z.string().trim().max(100).default(''), // optional - mixer cases may never reach an exchange
     language: z.enum(RECOVERY_LANGUAGES),
   });
 

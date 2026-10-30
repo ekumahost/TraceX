@@ -99,10 +99,10 @@ export function RecoveryKit({ data }: { data: TraceCase }) {
             onChange={(event) => setExchange(event.target.value)}
             maxLength={100}
             required
-            placeholder='Enter the exchange name'
+            placeholder='Exchange name (optional)'
             className='input mt-1.5 w-full rounded-lg border border-line-2 bg-panel-2 px-3 py-2.5 text-[13px]'
           />
-          {!knownExchange && <span className='mt-1 block text-[10.5px] text-dim'>No exchange is labelled in this trace; confirm the name before using the draft.</span>}
+          {!knownExchange && <span className='mt-1 block text-[10.5px] text-dim'>No exchange in this trace yet - leave blank and the request uses an [EXCHANGE NAME] placeholder.</span>}
         </label>
         <label className='block'>
           <span className='font-display text-[10px] font-bold uppercase tracking-[.14em] text-dim'>Draft language</span>
@@ -114,7 +114,7 @@ export function RecoveryKit({ data }: { data: TraceCase }) {
             {LANGUAGES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
           </select>
         </label>
-        <button type='submit' disabled={state.status === 'loading' || !exchange.trim()} className='btn btn--sm w-full'>
+        <button type='submit' disabled={state.status === 'loading'} className='btn btn--sm w-full'>
           {state.status === 'loading' ? <><Loader2 className='animate-spin' /> Drafting with Muse Spark…</> : 'Generate both drafts'}
         </button>
       </form>
