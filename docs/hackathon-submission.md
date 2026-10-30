@@ -36,7 +36,6 @@ On 28 Oct 2026 wallet `0x884f…e79e` received 600.099 ETH (tx `0x08bf5ce46d97ec
 - Backend: 26 unit + HTTP integration tests (validation, error codes, rate limiting, CORS, no-key AI failure, poisoning rules, bridge matching, Recovery Kit validation) plus 4 opt-in live tests on the real case above (`npm run test:live`).
 - Analysis engine: 8 pytest tests, including parity with the TypeScript detectors on shared fixtures.
 - Frontend: 13 unit tests (scoring parity with the backend, formatting, sample-case integrity, layout).
-- CI workflow runs typecheck, lint, all suites and the production build (`.github/workflows/ci.yml`).
 
 ## Cross-chain boundaries
 

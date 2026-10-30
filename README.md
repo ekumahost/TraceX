@@ -101,7 +101,7 @@ flowchart LR
 | AI | Muse Spark via Meta Model API |
 | Data | Alchemy (all 7 chains), Etherscan V2, Blockscout / Routescan / Optimism explorer (keyless), publicnode RPC |
 | Storage | None needed - traces are computed on demand with a short in-memory cache |
-| Ops | Dockerfiles, docker-compose, Render blueprint (`render.yaml`), GitHub Actions CI |
+| Ops | Dockerfiles, docker-compose, Render blueprint (`render.yaml`) |
 
 **Supported chains:** Ethereum · Base · BNB Chain · Arbitrum · Optimism · Polygon · Robinhood Chain - each with its native coin plus verified stablecoins and wrapped native tokens ([`chains.ts`](application/backend/src/services/chains.ts), verified with `scripts/check-chains.ts`). Exchange hot-wallet labels (Binance, Coinbase, Kraken, OKX, Bybit, Crypto.com) and canonical bridge contracts were each checked against their public Etherscan labels.
 
@@ -114,7 +114,7 @@ flowchart LR
 | Analysis engine (8) | Detectors, scoring, HTTP endpoint, **parity with the TypeScript detectors** on shared fixtures | `cd application/analysis-engine && .venv/bin/python -m pytest` |
 | Frontend (13) | Scoring (incl. parity with the backend), formatting, sample-case integrity, rule-based brief, layout | `cd application/frontend && npm test` |
 
-CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs typecheck, lint, every suite and the production build on each push.
+All suites pass on the submitted commit; each package also typechecks, lints and builds cleanly.
 
 ## Run it locally
 

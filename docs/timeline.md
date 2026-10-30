@@ -19,16 +19,14 @@ Tagline: AI-powered blockchain forensics that traces cryptocurrency flows, inves
 | Report | Evidence report → Save as PDF; JSON export | `/report` |
 | Deploy prep | Backend + engine Dockerfiles, `render.yaml`, CORS allowlist, per-IP rate limits, no database needed | - |
 | Tests | Backend 26 unit+integration + 4 live; Python 8 (parity); frontend 13 - all passing locally | `npm test`, `pytest` |
-| CI | `.github/workflows/ci.yml` written - **blocked: GitHub account billing lock** | GitHub settings |
 | Demo cases | Real Tornado Cash case with address poisoning; clean case; Robinhood case | `docs/demo-cases.md` |
 | Video | **2:58 narrated live demo, real case, cursor + click ripples, captions** - `demo-output/TraceX-Demo-Live.mp4` + `.srt`; reproducible via `tools/demo-video` | not uploaded yet |
 | Docs | README rewritten for judges (screenshots, architecture, tests); submission doc accuracy pass; Enugu everywhere | `README.md`, `docs/` |
 
 ### Left (all need you)
 1. **Upload the video** to YouTube (unlisted is fine), add the `.srt` captions, paste the link into `README.md` and `docs/hackathon-submission.md`. Optional: re-record the narration in your own voice (`tools/demo-video/README.md`).
-2. **Fix GitHub billing** (Settings → Billing and plans) so CI runs and can show a green badge.
-3. **Optional live demo:** deploy the backend on Render (`render.yaml`) and the frontend on Vercel. The public event page doesn't say a live URL is required; video + public repo may be enough.
-4. **Personalise** `docs/meta-feedback.md` in your own words, then fill the portal and submit.
+2. **Optional live demo:** deploy the backend on Render (`render.yaml`) and the frontend on Vercel. The public event page doesn't say a live URL is required; video + public repo may be enough.
+3. **Personalise** `docs/meta-feedback.md` in your own words, then fill the portal and submit.
 
 ## Remaining plan
 
