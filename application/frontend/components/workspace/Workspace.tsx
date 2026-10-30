@@ -173,7 +173,7 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
               <div className='w-[290px] text-center'>
                 <Mark className='loader-mark mx-auto !h-16 !w-16' />
                 <p className='mt-5 font-serif text-[20px] italic text-violet-hi'>Following the money…</p>
-                {!isSample && stage === 0 && <p className='mt-2 text-[12.5px] text-dim'>Live traces can take up to a minute on the free data tier.</p>}
+                {!isSample && stage === 0 && <p className='mt-2 text-[12.5px] text-dim'>Live traces take a few seconds - up to a minute if the free server is waking up.</p>}
                 <ul className='mt-6 space-y-2.5 text-left'>
                   {steps.map((s, i) => (
                     <li key={s} className={clsx('flex items-center gap-3 text-[13.5px] transition-colors', i < stage ? 'text-cream' : i === stage ? 'text-cream' : 'text-dim')}>

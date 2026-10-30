@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Montserrat, EB_Garamond, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { ServerWake } from '@/components/ServerWake';
 
 const display = Montserrat({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'], variable: '--f-display' });
 const serif = EB_Garamond({ subsets: ['latin'], style: ['italic'], weight: ['400', '500'], variable: '--f-serif' });
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang='en' className={`${display.variable} ${serif.variable} ${mono.variable}`}>
       <body className='grain' style={{ ['--f-body' as string]: 'var(--f-display)' }}>
         {children}
+        <ServerWake />
       </body>
     </html>
   );

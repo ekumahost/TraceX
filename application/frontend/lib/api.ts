@@ -1,6 +1,7 @@
 import type { AIAnswer, Provider, RecoveryDocuments, RecoveryLanguage, ShieldResult, TraceCase } from './types';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API = API_URL;
 
 async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API}${path}`, {
