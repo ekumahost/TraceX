@@ -1,0 +1,15 @@
+{
+  "name": "tracex-demo-video",
+  "private": true,
+  "type": "module",
+  "description": "Records the narrated TraceX demo video from the live app",
+  "scripts": {
+    "narrate": "python3 narrate.py",
+    "record": "node record.mjs",
+    "build": "python3 build.py",
+    "all": "npm run narrate && npm run record && npm run build"
+  },
+  "dependencies": {
+    "playwright-core": "1.48.2"
+  }
+}

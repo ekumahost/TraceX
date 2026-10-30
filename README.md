@@ -1,75 +1,167 @@
-# TraceX AI — Trace cryptocurrency flows, inspect wallet-safety signals, and verify on-chain evidence.
+<div align="center">
 
-Built for the [Meta Global AI Developer Hackathon 2026](https://cerebralvalley.ai/e/meta-ai-developer-hackathon).
+# TraceX AI
 
-![Meta AI Hackathon](https://img.shields.io/badge/Meta%20AI%20Hackathon-2026-blueviolet?style=for-the-badge) ![Muse Spark](https://img.shields.io/badge/AI-Muse%20Spark-6d5bff?style=for-the-badge)
+### Follow the money. *Prove it.*
 
-## Vision
-Trace cryptocurrency transfers, investigate suspicious fund movements, and inspect possible address-poisoning attempts with evidence links.
+AI-powered blockchain forensics that traces cryptocurrency flows across seven chains, flags laundering patterns with deterministic detectors, and turns on-chain data into evidence-backed briefs, reports and recovery drafts - with **Meta's Muse Spark** citing a transaction hash for every claim.
 
-TraceX combines on-chain data retrieval, bounded graph analysis, deterministic heuristics, and a Meta Model API explanation path. Model prompts ask for evidence-grounded explanations; reviewers should verify generated claims against linked on-chain records.
+**Built in Enugu, Nigeria, for the [Meta Global AI Developer Hackathon 2026](https://cerebralvalley.ai/e/meta-ai-developer-hackathon)** · Indie track · *Build for Your World*
 
-## Hackathon Submission Info
-- **Event:** Meta AI Developer Hackathon 2026 - https://cerebralvalley.ai/e/meta-ai-developer-hackathon
-- **Track:** Indie developer
-- **Theme:** Build for Your World
-- **Folder:** /Applications/WEBSITE/TraceX
-- **Docs:** docs/hackathon-submission.md, docs/demo-script.md, docs/technical-design.md
+![Muse Spark](https://img.shields.io/badge/Meta%20Model%20API-Muse%20Spark-6d5bff?style=for-the-badge)
+![Modal](https://img.shields.io/badge/Detectors-Python%20on%20Modal-00e5ff?style=for-the-badge)
+![Chains](https://img.shields.io/badge/EVM%20chains-7-f0b44c?style=for-the-badge)
+![License](https://img.shields.io/badge/license-MIT-2ee6a6?style=for-the-badge)
 
-## Quick Start
-The project structure lives in /Applications/WEBSITE/TraceX
+**[▶ Demo video (2:58)](#demo)** · **[A real case](#a-real-case-traced-end-to-end)** · **[How it works](#architecture)** · **[Run it](#run-it-locally)**
 
-Docs are in docs/ folder:
-- requirements.md - Vision + use cases
-- technical-design.md - Architecture + stack
-- hackathon-submission.md - Implementation summary, limitations, and submission-day checks
-- meta-feedback.md - Personal feedback draft; verify and personalize before submitting
+![TraceX workspace on a real Tornado Cash case](docs/screenshots/workspace-tornado.png)
 
-Application is in application/ folder:
-- frontend/ - Next.js 14 amazing investigative UI (React Flow + Tailwind)
-- backend/ - TypeScript API
-- analysis-engine/ - Python FastAPI + NetworkX heuristics
-- Wallet Shield - read-only scan of recent indexed transfers for poisoning patterns
-- Recovery Kit - generates editable, citation-checked exchange and police-report drafts in English, Nigerian Pidgin, Igbo, Yoruba, or Hausa; never sends them
-- Cross-chain follow - follows supported canonical Ethereum L1 bridge transfers to Base, Optimism, and Arbitrum when their L2 finalization can be uniquely verified
+</div>
 
-## Safety features and status
-- **Poisoning Shield (available):** scans a bounded amount of Alchemy-indexed wallet history for look-alike counterparties, zero-value transfers, and unverified-token activity. It reports scan coverage and links evidence; a clean scan is not proof of safety.
-- **Recovery Kit (available):** asks Muse Spark for editable exchange-preservation and police incident-report drafts using trace evidence. The API checks that each draft cites a transaction in the case and rejects unrecognized addresses. Review all generated text; it is not legal advice and TraceX does not send requests.
-- **Cross-chain follow (available, bounded):** recognizes canonical Ethereum L1 Standard Bridge events to Base and Optimism and ERC20 gateway deposits to Arbitrum One. It follows into the destination graph only when a unique destination finalization matches the source event fields; no amount/time-only joins are used. Nodes use chain-qualified identities and chain-specific explorer links. Searches cover a bounded 100,000-block destination window beginning near the source transaction time; missing or ambiguous events are not joined. Arbitrum native-ETH Inbox deposits and L2-to-L1 withdrawals are not followed. Public RPCs may rate-limit log searches.
-- **Offline demo cases:** choose one of the bundled synthetic traces from the investigation form. They load the graph, evidence, deterministic brief, and local follow-up replies without RPC or AI requests. Their generated addresses and transaction hashes are fixtures, not real wallets or on-chain records.
+---
 
-## Stack
-- Frontend: Next.js 14 + TypeScript + Tailwind + shadcn + React Flow + Framer Motion
-- Backend: Express TypeScript
-- Analysis: Python FastAPI + NetworkX + web3.py
-- Blockchain: Alchemy recommended; Etherscan V2 and selected keyless explorers are alternatives
-- AI: Muse Spark via Meta Model API by default; Fireworks and Baseten are optional fallback providers
-- Storage: investigations are computed on demand; the app does not currently save user cases to a database
-- Infra: Docker Compose, Vercel, Fly.io
+## The problem
 
-## Hackathon fit
-The public event page describes the indie developer track in terms of creativity, technical ambition, and whether the project works. TraceX focuses on a concrete wallet-safety and investigation workflow, bounded graph traversal, deterministic analysis, and a working user-facing demo. No unofficial judging percentages or impact estimates are claimed.
+When crypto is stolen, the trail is public - but reading it is not. Block explorers show raw transfers, one address at a time. Following stolen funds across wallets, mixers and chains takes an analyst hours, and the tools that automate it are priced for enterprises and law-enforcement agencies.
 
-## Run Locally
-See [application/README.md](./application/README.md) for provider setup and full instructions. Run the frontend and backend in separate terminals:
+So a scam victim in Enugu - or anywhere - is left with a transaction hash and no way to answer the questions that matter: *Where did my money go? Did it hit an exchange that could freeze it? What do I tell the police?*
+
+## What TraceX makes possible
+
+Paste a transaction hash, wallet address or ENS name. In seconds TraceX:
+
+| | |
+|---|---|
+| **Traces** the money forward in time across **7 EVM chains** - Ethereum, Base, BNB Chain, Arbitrum, Optimism, Polygon and Robinhood Chain. Tx hashes are auto-detected on whichever chain they live on, and canonical bridges are followed to the destination chain. | **Detects** mixer deposits and withdrawals, peel chains, high-velocity movement, exchange cash-outs, exchange hopping and bridge exits - deterministic rules in Python/NetworkX, deployed on **Modal**, each finding citing its transaction. |
+| **Explains** the case with **Muse Spark** via the **Meta Model API**: a plain-English brief and follow-up Q&A where every claim cites a tx hash - click any citation to jump to that transfer in the graph. | **Recovers**: the **Recovery Kit** drafts a records-preservation request for the exchange and a police incident report - in **English, Nigerian Pidgin, Igbo, Yoruba or Hausa** - and rejects any draft that invents a wallet or skips a transaction. |
+| **Protects**: **Poisoning Shield** finds address-poisoning attacks in a wallet's history - look-alike addresses, fake tokens and spoofed zero-value transfers - before you copy the wrong address. | **Proves**: export a printable **evidence report** (score, findings, graph, AI brief, every tx hash) as PDF, or the full case as JSON. |
+
+What wasn't possible before: a victim, in their own language, going from a transaction hash to a cited investigation and ready-to-review recovery documents in about a minute, for free.
+
+## Demo
+
+**▶ [Watch the 2:58 narrated walkthrough](https://youtube.com/)** *(link added on upload)* - recorded from the live app on a real mainnet case: real Alchemy data, the deployed Modal engine and live Muse Spark responses, including Recovery Kit drafts in Igbo. Captions are uploaded with the video.
+
+The video is reproducible: [`tools/demo-video`](tools/demo-video) narrates each scene, drives the app with a scripted cursor and builds the MP4.
+
+## A real case, traced end to end
+
+On **28 Oct 2026**, wallet `0x884f…e79e` received **600.099 ETH** and within five minutes moved all of it into **Tornado Cash's 100 ETH pool** in six deposits. TraceX ([`docs/demo-cases.md`](docs/demo-cases.md)):
+
+1. Paste [`0x08bf5ce4…909b90`](https://etherscan.io/tx/0x08bf5ce46d97ec6299b7a4d1ba9b37591a66c97775186ffd30a1cd023d909b90) with *Auto chain* - found on Ethereum.
+2. Traces sender → wallet → Tornado Cash: **600 ETH · 6 tx**, one grouped high-severity finding, case score **70 / High risk** (~6 s).
+3. Muse Spark writes the brief, citing all six deposit hashes and the funding transaction.
+4. The same wallet was being **address-poisoned**: two look-alike senders (`0x241e94…db8e`, `0x241b22…db8e`) copying the real funder `0x241e55…db8e`, plus a **fake "ETH" token** for the exact same 600.099 amount. Paste the fake-token tx and TraceX refuses it - it only follows real assets. Poisoning Shield flags all three.
+
+These exact checks run as live tests: `npm run test:live`.
+
+| Poisoning Shield | Recovery Kit (Igbo) |
+|---|---|
+| ![Poisoning Shield](docs/screenshots/poisoning-shield.png) | ![Recovery Kit](docs/screenshots/recovery-kit-igbo.png) |
+
+| Evidence report (PDF) | Cited evidence |
+|---|---|
+| ![Report](docs/screenshots/report.png) | ![Evidence](docs/screenshots/workspace-evidence.png) |
+
+## How TraceX uses Meta AI
+
+| Meta product | Where | What it does |
+|---|---|---|
+| **Muse Spark** (`muse-spark-1.3`) via **Meta Model API** | [`backend/src/lib/meta.ts`](application/backend/src/lib/meta.ts) | Investigation brief, follow-up Q&A, Recovery Kit drafts in five languages |
+
+Design choices that make the model trustworthy for forensics:
+- **Evidence in, citations out.** The model never sees raw chain data it could misread - it gets the traced graph and the deterministic findings, and must cite a transaction hash for every claim. The UI turns every hash into a clickable citation.
+- **Drafts are validated, not trusted.** Recovery Kit output is parsed and checked: every transaction in the case must be cited, and no wallet outside the case may appear. Failing drafts are retried, then rejected ([`recovery.ts`](application/backend/src/services/recovery.ts)).
+- **Reasoning budget tuned.** Muse Spark reasons before it answers and reasoning tokens count against `max_tokens`; TraceX sizes the budget and uses `reasoning_effort: low` (~10-15 s per brief).
+- **No silent fakes.** If no AI provider is reachable the API fails loudly and the UI shows a clearly labelled rule-based summary - never placeholder text dressed up as AI.
+
+Fireworks and Baseten adapters exist as optional Llama 3.3 70B fallbacks (OpenAI-compatible); they were **not** used for this submission.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  U[Investigator / victim] --> FE[Next.js 15 frontend<br/>React Flow graph · reports · Shield]
+  FE -->|/api/trace /api/shield<br/>/api/explain /api/ask /api/recovery-kit| BE[Express + TypeScript API<br/>rate-limited, CORS-locked]
+  BE --> TR[Tracer<br/>BFS forward in time · loop-safe<br/>bridge follow · 40-wallet cap]
+  TR -->|transfers, labels| DATA[(Alchemy · Etherscan V2<br/>keyless explorers · public RPC)]
+  TR --> CH[7 EVM chains<br/>token lists verified on-chain]
+  BE -->|graph| MO[Analysis engine on Modal<br/>Python · FastAPI · NetworkX]
+  MO -.->|if unreachable| TS[Identical TypeScript detectors<br/>parity-tested]
+  BE -->|graph + findings| META[Muse Spark<br/>Meta Model API]
+  META --> V[Citation validator]
 ```
-cd application/frontend && npm install && npm run dev
-cd application/backend && npm install && npm run dev
-```
 
-The optional Python analysis service can be started separately:
-```
+| Layer | Stack |
+|---|---|
+| Frontend | Next.js 15, React 18, TypeScript, Tailwind, React Flow (`@xyflow/react`), Lucide |
+| API | Node 20, Express, TypeScript, Zod, ethers v6, OpenAI-compatible SDK |
+| Detectors | Python 3.12, FastAPI, NetworkX - deployed on **Modal** (`modal_app.py`); TypeScript copy as fallback |
+| AI | Muse Spark via Meta Model API |
+| Data | Alchemy (all 7 chains), Etherscan V2, Blockscout / Routescan / Optimism explorer (keyless), publicnode RPC |
+| Storage | None needed - traces are computed on demand with a short in-memory cache |
+| Ops | Dockerfiles, docker-compose, Render blueprint (`render.yaml`), GitHub Actions CI |
+
+**Supported chains:** Ethereum · Base · BNB Chain · Arbitrum · Optimism · Polygon · Robinhood Chain - each with its native coin plus verified stablecoins and wrapped native tokens ([`chains.ts`](application/backend/src/services/chains.ts), verified with `scripts/check-chains.ts`). Exchange hot-wallet labels (Binance, Coinbase, Kraken, OKX, Bybit, Crypto.com) and canonical bridge contracts were each checked against their public Etherscan labels.
+
+## Engineering quality
+
+| Suite | What it covers | Run |
+|---|---|---|
+| Backend unit + integration (26) | Real HTTP API in-process: validation, error codes, rate limiting, CORS, no-key AI failure; poisoning look-alike rules; bridge matching; Recovery Kit parsing and citation validation | `cd application/backend && npm test` |
+| Backend live (4, opt-in) | Real mainnet cases: 600 ETH into Tornado, fake-token refusal, Shield imposters, Robinhood auto-detect | `npm run test:live` |
+| Analysis engine (8) | Detectors, scoring, HTTP endpoint, **parity with the TypeScript detectors** on shared fixtures | `cd application/analysis-engine && .venv/bin/python -m pytest` |
+| Frontend (13) | Scoring (incl. parity with the backend), formatting, sample-case integrity, rule-based brief, layout | `cd application/frontend && npm test` |
+
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs typecheck, lint, every suite and the production build on each push.
+
+## Run it locally
+
+```bash
+# 1. backend API -> http://localhost:4000
+cd application/backend
+cp .env.example .env          # add META_API_KEY and ALCHEMY_API_KEY
+npm install && npm run dev
+
+# 2. frontend -> http://localhost:3300
+cd application/frontend
+npm install && npm run dev
+
+# 3. optional: local detector engine (otherwise the deployed Modal URL or the built-in copy is used)
 cd application/analysis-engine
-pip install -r requirements-dev.txt
-uvicorn app.main:api --reload --port 8100
+python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+.venv/bin/uvicorn app.main:api --port 8100
 ```
 
-## Links
-- Hackathon: https://cerebralvalley.ai/e/meta-ai-developer-hackathon
-- Submission Portal: https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit
-- Live Demo: not published yet
-- Demo Video: not published yet
-- GitHub: https://github.com/ekumahost/TraceX
+| Key | Needed for | Get it |
+|---|---|---|
+| `META_API_KEY` | AI brief, Q&A, Recovery Kit (Muse Spark) | dev.meta.ai |
+| `ALCHEMY_API_KEY` | Tracing on all 7 chains, Poisoning Shield | dashboard.alchemy.com (enable each network) |
+| `ANALYSIS_ENGINE_URL` | Python detectors on Modal | `modal deploy modal_app.py` |
+| `ETHERSCAN_API_KEY` | Optional backup data source | etherscan.io/myapikey |
 
-Built for the Meta AI Developer Hackathon 2026.
+No keys? The workspace still opens a clearly labelled synthetic sample case and offline demo cases. Full setup: [`application/README.md`](application/README.md).
+
+## Project structure
+
+```
+application/
+  frontend/          Next.js app - landing, investigation workspace, report, Poisoning Shield
+  backend/           Express API - tracer, chains, sources, labels, bridges, shield, recovery, AI layer
+  analysis-engine/   Python detectors (FastAPI + NetworkX) + Modal deployment + parity tests
+tools/demo-video/    Reproducible narrated demo recording
+docs/                Demo cases, submission notes, screenshots, timeline
+```
+
+## Limits, stated plainly
+
+- TraceX is **read-only**. It never asks for keys or seed phrases and never sends documents.
+- The case score is a **rule-based indicator**, not a probability or proof of wrongdoing.
+- Traces are bounded (40 wallets, largest destinations per wallet) and stop at exchanges, mixers, bridges and contracts. Cross-chain follow covers supported canonical bridge events only.
+- Labels cover major exchanges and bridges; an unlabelled address is not proof of anything.
+- AI output can be wrong - which is why every claim is cited and every Recovery Kit draft is validated and must be reviewed by a human.
+
+## Credits
+
+Built by **Okokoh Benjamin** in Enugu, Nigeria. Design language inspired by West African visual tradition - Adinkra symbols (Akan, Ghana), Kente and Adire patterns. Licensed [MIT](LICENSE).

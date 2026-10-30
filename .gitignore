@@ -12,3 +12,6 @@ postgres_data/
 next-env.d.ts
 *.tsbuildinfo
 .pytest_cache/
+
+# rendered demo videos (uploaded to YouTube, too large for git)
+demo-output/
