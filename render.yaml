@@ -4,6 +4,7 @@ services:
   - type: web
     name: tracex-backend
     runtime: docker
+    plan: free # sleeps after ~15 idle min; the UI shows a wake-up notice
     dockerContext: ./application/backend
     dockerfilePath: ./application/backend/Dockerfile
     healthCheckPath: /
