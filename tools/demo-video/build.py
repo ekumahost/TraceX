@@ -49,21 +49,34 @@ mix = ";".join(chains) + ";" + "".join(f"[a{i}]" for i in range(len(marks))) + \
 # screencast frames are occasionally trimmed (e.g. 1920x993) - fit every frame onto a 1080p canvas
 video = "[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=0x07070d,fps=30,format=yuv420p[vout]"
 
+# optional builder intro filmed on camera (out/face/intro.json: video + caption cues), played first
+INTRO = json.load(open("out/face/intro.json")) if os.path.exists("out/face/intro.json") else None
+MAIN = "out/main.mp4" if INTRO else OUT
+
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", "out/frames.txt", *inputs,
                 "-filter_complex", video + ";" + mix, "-map", "[vout]", "-map", "[aout]",
                 "-c:v", "libx264", "-preset", "slow", "-crf", "18",
-                "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-shortest", OUT], check=True)
+                "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-shortest", MAIN], check=True)
+
+offset = 0.0
+if INTRO:
+    offset = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", INTRO["video"]]))
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", INTRO["video"], "-i", MAIN, "-filter_complex",
+                    "[0:v]fps=30,format=yuv420p,setsar=1[v0];[1:v]fps=30,format=yuv420p,setsar=1[v1];"
+                    "[0:a]aresample=48000[a0];[1:a]aresample=48000[a1];[v0][a0][v1][a1]concat=n=2:v=1:a=1[v][a]",
+                    "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "slow", "-crf", "18",
+                    "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", OUT], check=True)
 
 # 3. captions: one cue per sentence, timed in proportion to its length within the scene's clip
 def stamp(sec):
     h, rem = divmod(sec, 3600); m, s = divmod(rem, 60)
     return f"{int(h):02d}:{int(m):02d}:{s:06.3f}".replace(".", ",")
-cues = []
+cues = [tuple(c) for c in INTRO["cues"]] if INTRO else []
 for m in marks:
     sc = scenes[m["id"]]
     sentences = [x.strip() for x in re.split(r"(?<=[.!?])\s+", sc["text"]) if x.strip()]
     total = sum(len(x) for x in sentences)
-    at = m["start"] - t0
+    at = m["start"] - t0 + offset
     for sentence in sentences:
         span = sc["seconds"] * len(sentence) / total
         cues.append((at, at + span, sentence.replace("A.I.", "AI").replace("A.P.I.", "API").replace("E T H", "ETH")

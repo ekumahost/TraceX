@@ -151,6 +151,23 @@ await scene('ask', async () => {
   await glide(mouse[0], mouse[1] - 160, 900);
 });
 
+await scene('models', async () => {
+  await click(page.getByRole('tab', { name: 'AI brief' }), 700);
+  await sleep(600);
+  await point(page.getByRole('radiogroup', { name: 'AI model' }), 0, 0, 900);
+  await sleep(900);
+  // the same brief, re-written by Meta Llama on each partner
+  for (const [name, via] of [['Fireworks', 'via Fireworks AI'], ['Baseten', 'via Baseten']]) {
+    await click(page.getByRole('radio', { name }), 600);
+    await page.waitForSelector(`text=${via}`, { timeout: 120_000 });
+    await show(async () => {
+      await point(page.locator(`text=${via}`).first(), -150, 60, 700);
+      await sleep(2600);
+    });
+  }
+  await click(page.getByRole('radio', { name: 'Auto' }), 600); // back to Muse Spark for the rest
+});
+
 await scene('recovery', async () => {
   await click(page.getByRole('tab', { name: 'Recovery' }), 700);
   await sleep(900);
