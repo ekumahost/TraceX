@@ -1,6 +1,6 @@
 # TraceX AI
 
-TraceX is a read-only blockchain investigation and wallet-safety app. It turns supported EVM transfers into a bounded graph, runs deterministic pattern checks, and uses Muse Spark through the Meta Model API to explain the evidence. Wallet Shield scans recent indexed history for address-poisoning patterns such as lookalike addresses and unverified tokens. The Recovery Kit can draft exchange and police incident-report documents from a live trace in English, Nigerian Pidgin, Igbo, Yoruba, or Hausa.
+TraceX is a read-only blockchain investigation and wallet-safety app. It turns supported EVM transfers into a bounded graph, runs deterministic pattern checks, and uses Meta's Muse Spark models to explain the evidence: Muse Spark on the Meta Model API, or Muse Spark Open on Fireworks AI and Baseten, with a model picker and automatic fallback. Wallet Shield scans recent indexed history for address-poisoning patterns such as lookalike addresses and unverified tokens. The Recovery Kit can draft exchange and police incident-report documents from a live trace in English, Nigerian Pidgin, Igbo, Yoruba, or Hausa.
 
 Cross-chain follow-through is implemented for canonical Ethereum L1 Standard Bridge transfers to Base and Optimism and Arbitrum One ERC20 gateway deposits, when exactly one matching destination finalization can be found in the bounded lookup window. Arbitrum native-ETH Inbox deposits and withdrawals are not followed.
 
@@ -10,6 +10,9 @@ Cross-chain follow-through is implemented for canonical Ethereum L1 Standard Bri
 - **Track:** Indie developer
 - **Theme:** Build for Your World
 - **Public indie-track criteria:** Creativity, technical ambition, and whether the project works.
+- **Partners used:** Modal (Python detectors), Fireworks AI and Baseten (Muse Spark Open), alongside the Meta Model API (Muse Spark).
+- **Live demo:** https://trace-x-khaki.vercel.app
+- **Demo video (2:57):** https://youtu.be/UsOnJBtFpOI
 
 ## Project
 
@@ -21,10 +24,9 @@ Cross-chain follow-through is implemented for canonical Ethereum L1 Standard Bri
 
 ## Important accuracy notes
 
-- The Meta Model API / Muse Spark integration is the default AI path. Fireworks and Baseten are optional fallback providers; only describe them as tested if they were configured and exercised.
+- Muse Spark on the Meta Model API is the default AI path. Muse Spark Open on Fireworks and Baseten was configured and verified live on 2 Nov 2026 for the brief, questions and Recovery Kit; the UI names the provider and model on every answer.
 - The Python analysis service is optional and is selected with `ANALYSIS_ENGINE_URL`; otherwise the backend uses its TypeScript implementation.
 - Model prompts request evidence-grounded answers but do not guarantee that every generated claim is correct.
 - Recovery Kit re-runs the live trace server-side and checks every distinct case transaction hash in both drafts. It does not send documents or validate translation quality.
 - Do not describe an unmatched/ambiguous bridge transfer as followed, or show cross-chain behavior without verifying the source and destination transactions in their explorers.
 - Scores are deterministic rule-based indicators, not calibrated probabilities.
-- Live demo and video links belong here only after they have been published and checked.

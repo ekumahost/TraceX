@@ -9,11 +9,13 @@ AI-powered blockchain forensics that traces cryptocurrency flows across seven ch
 **Built in Enugu, Nigeria, for the [Meta Global AI Developer Hackathon 2026](https://cerebralvalley.ai/e/meta-ai-developer-hackathon)** · Indie track · *Build for Your World*
 
 ![Muse Spark](https://img.shields.io/badge/Meta%20Model%20API-Muse%20Spark-6d5bff?style=for-the-badge)
+![Fireworks](https://img.shields.io/badge/Fireworks%20AI-Muse%20Spark%20Open-ff6a3d?style=for-the-badge)
+![Baseten](https://img.shields.io/badge/Baseten-Muse%20Spark%20Open-2ee6a6?style=for-the-badge)
 ![Modal](https://img.shields.io/badge/Detectors-Python%20on%20Modal-00e5ff?style=for-the-badge)
 ![Chains](https://img.shields.io/badge/EVM%20chains-7-f0b44c?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-2ee6a6?style=for-the-badge)
 
-**[🌐 Try it live](https://trace-x-khaki.vercel.app/)** · **[▶ Demo video (2:58)](#demo)** · **[A real case](#a-real-case-traced-end-to-end)** · **[How it works](#architecture)** · **[Run it](#run-it-locally)**
+**[🌐 Try it live](https://trace-x-khaki.vercel.app/)** · **[▶ Demo video (2:57)](https://youtu.be/UsOnJBtFpOI)** · **[A real case](#a-real-case-traced-end-to-end)** · **[How it works](#architecture)** · **[Run it](#run-it-locally)**
 
 > Live app: **https://trace-x-khaki.vercel.app** (frontend on Vercel) · API: `https://tracex-backend-d0il.onrender.com` (Render free tier: the first request after ~15 idle minutes takes about 30-50 s while the server wakes up).
 
@@ -46,14 +48,14 @@ Paste a transaction hash, wallet address or ENS name. In seconds TraceX:
 | | |
 |---|---|
 | **Traces** the money forward in time across **7 EVM chains** - Ethereum, Base, BNB Chain, Arbitrum, Optimism, Polygon and Robinhood Chain. Tx hashes are auto-detected on whichever chain they live on, and canonical bridges are followed to the destination chain. | **Detects** mixer deposits and withdrawals, peel chains, high-velocity movement, exchange cash-outs, exchange hopping and bridge exits - deterministic rules in Python/NetworkX, deployed on **Modal**, each finding citing its transaction. |
-| **Explains** the case with **Muse Spark** via the **Meta Model API**: a plain-English brief and follow-up Q&A where every claim cites a tx hash - click any citation to jump to that transfer in the graph. | **Recovers**: the **Recovery Kit** drafts a records-preservation request for the exchange and a police incident report - in **English, Nigerian Pidgin, Igbo, Yoruba or Hausa** - and rejects any draft that invents a wallet or skips a transaction. |
+| **Explains** the case with **Muse Spark** via the **Meta Model API** - or Muse Spark Open on **Fireworks AI** or **Baseten**, switching automatically if one is down: a plain-English brief and follow-up Q&A where every claim cites a tx hash - click any citation to jump to that transfer in the graph. | **Recovers**: the **Recovery Kit** drafts a records-preservation request for the exchange and a police incident report - in **English, Nigerian Pidgin, Igbo, Yoruba or Hausa** - and rejects any draft that invents a wallet or skips a transaction. |
 | **Protects**: **Poisoning Shield** finds address-poisoning attacks in a wallet's history - look-alike addresses, fake tokens and spoofed zero-value transfers - before you copy the wrong address. | **Proves**: export a printable **evidence report** (score, findings, graph, AI brief, every tx hash) as PDF, or the full case as JSON. |
 
 What wasn't possible before: a victim, in their own language, going from a transaction hash to a cited investigation and ready-to-review recovery documents in about a minute, for free.
 
 ## Demo
 
-**▶ [Watch the 2:58 narrated walkthrough](https://youtube.com/)** *(link added on upload)* - recorded from the live app on a real mainnet case: real Alchemy data, the deployed Modal engine and live Muse Spark responses, including Recovery Kit drafts in Igbo. Captions are uploaded with the video.
+**▶ [Watch the 2:57 walkthrough](https://youtu.be/UsOnJBtFpOI)** - narrated by the builder and recorded from the live app on a real mainnet case: real Alchemy data, the deployed Modal engine, live answers from Muse Spark on the Meta Model API and Muse Spark Open on Fireworks and Baseten, and Recovery Kit drafts in Igbo. Captions are uploaded with the video.
 
 The video is reproducible: [`tools/demo-video`](tools/demo-video) narrates each scene, drives the app with a scripted cursor and builds the MP4.
 
@@ -80,7 +82,8 @@ These exact checks run as live tests: `npm run test:live`.
 
 | Meta product | Where | What it does |
 |---|---|---|
-| **Muse Spark** (`muse-spark-1.3`) via **Meta Model API** | [`backend/src/lib/meta.ts`](application/backend/src/lib/meta.ts) | Investigation brief, follow-up Q&A, Recovery Kit drafts in five languages |
+| **Muse Spark** (`muse-spark-1.3`) via **Meta Model API** | [`providers.ts`](application/backend/src/lib/providers.ts), [`ai-unified.ts`](application/backend/src/lib/ai-unified.ts) | Default model: investigation brief, follow-up Q&A, Recovery Kit drafts in five languages |
+| **Muse Spark Open** (Meta open weights) via **Fireworks AI** and **Baseten** | same | The same three features, chosen in the model picker or used automatically when another provider fails |
 
 Design choices that make the model trustworthy for forensics:
 - **Evidence in, citations out.** The model never sees raw chain data it could misread - it gets the traced graph and the deterministic findings, and must cite a transaction hash for every claim. The UI turns every hash into a clickable citation.
@@ -95,14 +98,16 @@ Design choices that make the model trustworthy for forensics:
 ```mermaid
 flowchart LR
   U[Investigator / victim] --> FE[Next.js 15 frontend<br/>React Flow graph · reports · Shield]
-  FE -->|/api/trace /api/shield<br/>/api/explain /api/ask /api/recovery-kit| BE[Express + TypeScript API<br/>rate-limited, CORS-locked]
+  FE -->|/api/trace /api/shield<br/>/api/explain /api/ask /api/recovery-kit<br/>/api/providers| BE[Express + TypeScript API<br/>rate-limited, CORS-locked]
   BE --> TR[Tracer<br/>BFS forward in time · loop-safe<br/>bridge follow · 40-wallet cap]
   TR -->|transfers, labels| DATA[(Alchemy · Etherscan V2<br/>keyless explorers · public RPC)]
   TR --> CH[7 EVM chains<br/>token lists verified on-chain]
   BE -->|graph| MO[Analysis engine on Modal<br/>Python · FastAPI · NetworkX]
   MO -.->|if unreachable| TS[Identical TypeScript detectors<br/>parity-tested]
   BE -->|graph + findings| META[Muse Spark<br/>Meta Model API]
+  BE -.->|picked or fallback| OPEN[Muse Spark Open<br/>Fireworks AI · Baseten]
   META --> V[Citation validator]
+  OPEN --> V
 ```
 
 | Layer | Stack |
@@ -121,7 +126,7 @@ flowchart LR
 
 | Suite | What it covers | Run |
 |---|---|---|
-| Backend unit + integration (26) | Real HTTP API in-process: validation, error codes, rate limiting, CORS, no-key AI failure; poisoning look-alike rules; bridge matching; Recovery Kit parsing and citation validation | `cd application/backend && npm test` |
+| Backend unit + integration (32) | Real HTTP API in-process: validation, error codes, rate limiting, CORS, no-key AI failure, AI provider order and automatic fallback; poisoning look-alike rules; bridge matching; Recovery Kit parsing and citation validation | `cd application/backend && npm test` |
 | Backend live (4, opt-in) | Real mainnet cases: 600 ETH into Tornado, fake-token refusal, Shield imposters, Robinhood auto-detect | `npm run test:live` |
 | Analysis engine (8) | Detectors, scoring, HTTP endpoint, **parity with the TypeScript detectors** on shared fixtures | `cd application/analysis-engine && .venv/bin/python -m pytest` |
 | Frontend (13) | Scoring (incl. parity with the backend), formatting, sample-case integrity, rule-based brief, layout | `cd application/frontend && npm test` |

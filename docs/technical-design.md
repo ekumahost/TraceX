@@ -16,7 +16,7 @@ Express/TypeScript API (port 4000)
   ├─ bounded graph traversal and local transfer cache
   ├─ deterministic analysis (TypeScript fallback)
   ├─ optional FastAPI/NetworkX analysis service
-  └─ Muse Spark via Meta Model API (optional Fireworks/Baseten fallbacks)
+  └─ Muse Spark (Meta Model API) · Muse Spark Open (Fireworks AI, Baseten) - pick one or auto-switch
 ```
 
 ## Frontend
@@ -27,7 +27,7 @@ The report page uses the browser print dialog; users can choose “Save as PDF.�
 
 ## API and chain data
 
-The Express API exposes `/api/chains`, `/api/trace`, `/api/shield`, `/api/recovery-kit`, `/api/explain`, and `/api/ask`. API keys are read by the backend and are not sent to the browser. Per-IP request limits are held in memory for a single backend instance.
+The Express API exposes `/api/chains`, `/api/providers`, `/api/trace`, `/api/shield`, `/api/recovery-kit`, `/api/explain`, and `/api/ask`. API keys are read by the backend and are not sent to the browser. Per-IP request limits are held in memory for a single backend instance.
 
 The chain adapter supports Ethereum, Base, BNB Chain, Arbitrum, Optimism, Polygon, and Robinhood Chain. Alchemy is the recommended source; Etherscan V2 and selected keyless explorers can be used as alternatives for traces. Live traces include native assets and a small set of configured tokens, not every token on each network.
 
@@ -35,7 +35,7 @@ The trace builder follows transfers forward in time using breadth-first traversa
 
 Wallet Shield uses Alchemy's transfer API to inspect up to two pages of incoming and outgoing records. It compares transfers against counterparties with verified value activity and reports lookalike addresses, zero-value transfers, and unverified tokens using familiar asset names. The response indicates when Alchemy returned another page beyond the scan limit. The scan does not establish intent or prove a wallet safe.
 
-The Recovery Kit re-runs a live trace on the backend instead of trusting a client-supplied graph, then asks Muse Spark for an exchange-preservation request and police incident-report draft. Drafts are restricted to transaction hashes and addresses in that trace; this does not verify translation quality or make the text legally suitable. The user reviews and sends drafts manually. The sample case is not eligible.
+The Recovery Kit re-runs a live trace on the backend instead of trusting a client-supplied graph, then asks the selected Muse Spark model for an exchange-preservation request and police incident-report draft. Drafts are restricted to transaction hashes and addresses in that trace; this does not verify translation quality or make the text legally suitable. The user reviews and sends drafts manually. The sample case is not eligible.
 
 Cross-chain lookup finds the destination block near the source transaction time and searches up to 100,000 destination blocks from there. Missing or non-unique finalizations are left unmatched; the UI reports attempts, confirmations, unmatched lookups, and errors. The supported scope is OP Stack Standard Bridge (Base and Optimism) and Arbitrum One ERC20 gateway deposits. Arbitrum native-ETH Inbox deposits and L2-to-L1 withdrawals are excluded. This does not establish common wallet ownership or complete bridge coverage.
 
@@ -47,7 +47,7 @@ Detectors look for known mixer interactions, peel-chain-shaped movement, rapid m
 
 ## AI explanation
 
-Muse Spark via the Meta Model API is the default explanation and question-answer provider. Fireworks and Baseten can be configured as optional fallbacks for explanations; Baseten is not used for follow-up Q&A. Provider selection is server-side through `AI_PROVIDER`.
+Three providers serve Meta's Muse Spark models through one OpenAI-compatible client: Muse Spark on the Meta Model API, and Muse Spark Open on Fireworks AI and Baseten. All three handle the brief, follow-up questions and Recovery Kit with the same prompts. The workspace model picker chooses a provider per request; on Auto the backend starts with `AI_PROVIDER` (default `meta`) and moves to the next configured provider on an error, empty answer or exhausted token budget, reporting the switch in `fellBackFrom`. See [integrations-fireworks-modal-baseten.md](integrations-fireworks-modal-baseten.md).
 
 The model receives the graph and deterministic findings and is instructed to stay grounded in them and cite transactions. This instruction is not an enforcement mechanism. The UI links transaction hashes only when they match an edge in the current case, and users should verify the model's claims in the explorer.
 

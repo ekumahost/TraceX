@@ -40,19 +40,19 @@ Tagline: AI-powered blockchain forensics that traces cryptocurrency flows, inves
 - Evidence report: case summary, score, flags with tx hashes, graph image, transfer table, AI brief, sample/live label
 - Export button offers PDF + JSON
 
-### ◐ Fri Oct 30 - Deploy (code ready: Dockerfiles, render.yaml, rate limits, CORS - actual deploy needs your Render/Vercel accounts)
+### ✅ Fri Oct 30 - Deploy (live 2 Nov: https://trace-x-khaki.vercel.app + Render API, CORS locked to the Vercel URL)
 - Backend Dockerfile + deploy (Render/Railway/Fly) with env vars; restrict CORS to the frontend URL
 - Frontend to Vercel with `NEXT_PUBLIC_API_URL`
 - Simple per-IP rate limit on `/api/trace` and the AI endpoints
 - Test the live URLs from a phone and an incognito window
 
-### ✅ Sat Oct 31 - Polish + repo (done early; Fireworks skipped - optional)
-- Optional: Fireworks key so the fallback is real and tested
+### ✅ Sat Oct 31 - Polish + repo
+- ✅ 2 Nov: Fireworks + Baseten keys added; Muse Spark Open on both, model picker + auto-switch, tested live
 - Mobile search in workspace, loading/error states pass
 - README (badges, screenshots, live link), LICENSE MIT, updated architecture diagram showing Modal + Meta Model API + 7 chains
 - Make repo public
 
-### ✅ Sun Nov 1 - Demo video (done Oct 30 - upload to YouTube left)
+### ✅ Sun Nov 1 - Demo video (final cut 2 Nov: 2:57, builder's own voice + face intro, captions - upload to YouTube left)
 - Follow `docs/demo-script.md`: hook → paste suspicious case → graph builds → flags → Muse Spark brief with citations → Ask → evidence → architecture (Modal, Meta Model API, multi-chain) → impact
 - Record, caption, upload unlisted to YouTube
 
@@ -74,5 +74,5 @@ Tagline: AI-powered blockchain forensics that traces cryptocurrency flows, inves
 | `ALCHEMY_API_KEY` | set ✅ (all 7 networks enabled) | Chain data on all chains |
 | `ANALYSIS_ENGINE_URL` | set ✅ (Modal) | Detectors + case score |
 | `ETHERSCAN_API_KEY` | empty - key page was down | Backup chain data |
-| `FIREWORKS_API_KEY` | empty | Optional Llama 3.3 fallback |
-| `BASETEN_API_KEY` / `BASETEN_MODEL_ID` | empty | Optional Llama 3.3 fallback |
+| `FIREWORKS_API_KEY` | set ✅ (local + Render) | Muse Spark Open on Fireworks |
+| `BASETEN_API_KEY` | set ✅ (local + Render) | Muse Spark Open on Baseten |

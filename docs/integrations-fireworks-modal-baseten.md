@@ -1,20 +1,24 @@
-# Optional Inference and Analysis Providers
+# Inference and Analysis Providers
 
-TraceX uses the Meta Model API with Muse Spark by default. Fireworks and Baseten are optional Llama 3.3 explanation providers; the Python/NetworkX service can be hosted separately, including on Modal. These integrations are configuration options, not prerequisites for a local run.
+TraceX runs Meta's Muse Spark models on three providers, and its deterministic detectors on Modal. All four are hackathon partners or Meta services, and all four are configured on the deployed app.
 
-The hackathon event page lists Baseten, Modal, and Fireworks as partners. It describes $100 in credits for selected participants for each partner; this does not mean TraceX has received credits, deployed a service, or used each provider.
+## AI providers
 
-## AI provider routing
+All three providers use the OpenAI-compatible chat API, so one client covers them ([`providers.ts`](../application/backend/src/lib/providers.ts)), and all three get the same prompts ([`ai-unified.ts`](../application/backend/src/lib/ai-unified.ts)).
 
-The backend tries the configured `AI_PROVIDER` first, then available explanation providers. Set provider keys in `application/backend/.env`; never put them in the frontend environment or commit them.
+| Provider | Key | Default model (override) | Brief | Questions | Recovery Kit |
+|---|---|---|---|---|---|
+| Meta Model API | `META_API_KEY` | `muse-spark-1.3` (`META_MODEL`) | Yes | Yes | Yes |
+| Fireworks AI | `FIREWORKS_API_KEY` | `accounts/fireworks/models/muse-spark-open` (`FIREWORKS_MODEL`) | Yes | Yes | Yes |
+| Baseten Model APIs | `BASETEN_API_KEY` | `meta-models/muse-spark-open` (`BASETEN_MODEL`) | Yes | Yes | Yes |
 
-| Provider | Required settings | Model/path | Follow-up Q&A |
-|---|---|---|---|
-| Meta | `META_API_KEY` | Meta Model API; Muse Spark by default | Yes |
-| Fireworks | `FIREWORKS_API_KEY` | Llama 3.3 70B Instruct | Yes |
-| Baseten | `BASETEN_API_KEY`, `BASETEN_MODEL_ID` | Compatible deployed model endpoint | No; Q&A skips this provider |
+- **Choosing:** the workspace model picker sends `provider` with each request. Auto sends nothing; the backend then starts with `AI_PROVIDER` (default `meta`).
+- **Fallback:** providers with a key are tried first, in order. An error, an empty answer, or running out of tokens moves on to the next provider; the response includes `fellBackFrom` and the UI shows "Switched automatically". If every provider fails, the API returns an error, never placeholder text.
+- **Reasoning budget:** Muse Spark and Muse Spark Open reason before answering and the reasoning counts against `max_tokens`, so every Muse Spark model gets a 12,000-token budget and `reasoning_effort: low`.
+- **Status:** `GET /api/providers` lists each provider, its model and whether a key is set (never the key itself).
+- Keys live only in `application/backend/.env` locally and in the Render dashboard in production. Never put them in the frontend environment or commit them.
 
-These are API integrations. Only describe a provider as live or tested after setting its credentials and verifying an actual response. The app displays which provider answered.
+Verified live on 2 Nov 2026 against the real Tornado Cash case in [`demo-cases.md`](demo-cases.md): brief, follow-up question and Igbo Recovery Kit on each provider.
 
 ## Optional Python analysis service
 

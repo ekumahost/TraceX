@@ -21,7 +21,9 @@
   <text x="815" y="170" text-anchor="middle" fill="#fff" font-size="9">FastAPI + NetworkX</text>
   <rect x="920" y="120" width="150" height="120" rx="16" fill="none" stroke="#6d5bff" stroke-width="2"/>
   <text x="995" y="150" text-anchor="middle" fill="#6d5bff" font-size="12" font-weight="700">Meta AI Layer</text>
-  <text x="995" y="170" text-anchor="middle" fill="#fff" font-size="9">Llama 3.3 via Spark</text>
+  <text x="995" y="170" text-anchor="middle" fill="#fff" font-size="9">Muse Spark · Meta Model API</text>
+  <text x="995" y="186" text-anchor="middle" fill="#fff" font-size="9">Muse Spark Open</text>
+  <text x="995" y="200" text-anchor="middle" fill="#fff" font-size="9">Fireworks · Baseten</text>
   <rect x="400" y="350" width="200" height="100" rx="16" fill="rgba(0,229,255,0.1)" stroke="#00e5ff" stroke-width="2"/>
   <text x="500" y="390" text-anchor="middle" fill="#00e5ff" font-size="14" font-weight="700">Response</text>
   <text x="500" y="410" text-anchor="middle" fill="#fff" font-size="10">Graph JSON + Timeline + AI Summary</text>

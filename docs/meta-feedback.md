@@ -14,7 +14,7 @@ This form asks for feedback from the builder's own experience. Do not submit a f
 
 TraceX's backend contains a Muse Spark integration through the Meta Model API. It sends a bounded blockchain graph and deterministic findings to request an explanation. The prompt asks for evidence-grounded answers, but this does not guarantee correctness. The app can show a matching transaction citation in its evidence UI.
 
-The backend also contains optional Fireworks and Baseten integrations. The presence of integration code alone does not mean either provider was configured or tested. Describe them as personal experience only if you actually used them.
+The same features also run on Muse Spark Open (Meta's open-weights model) through Fireworks AI and Baseten; both were configured and tested on 2 Nov 2026. Things you could mention if they match your experience: both partners served `muse-spark-open` but no Llama models on these accounts; Muse Spark models spend reasoning tokens before answering, so a small `max_tokens` budget returned no text at all until it was raised; and response times differed a lot between hosts for the same model (about 8 s on Baseten vs 30 s on Fireworks for the same brief).
 
 ## Optional structure
 
