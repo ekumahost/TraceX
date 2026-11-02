@@ -45,10 +45,11 @@ export function parseRecoveryDocuments(text: string) {
   return parsed.data;
 }
 
-export function validateRecoveryCitations(text: string, hashes: Set<string>, addresses: Set<string>) {
+// extra: hashes and addresses the victim wrote in their own statement - allowed, not required
+export function validateRecoveryCitations(text: string, hashes: Set<string>, addresses: Set<string>, extra: Set<string> = new Set()) {
   const citations = text.match(TX_RE) ?? [];
   if (!citations.length) throw new Error('The model did not cite any transaction in the case. Retry the draft.');
-  if (citations.some((hash) => !hashes.has(hash.toLowerCase()))) {
+  if (citations.some((hash) => !hashes.has(hash.toLowerCase()) && !extra.has(hash.toLowerCase()))) {
     throw new Error('The model cited a transaction that is not in this case. Retry the draft.');
   }
   const citedHashes = new Set(citations.map((hash) => hash.toLowerCase()));
@@ -56,7 +57,7 @@ export function validateRecoveryCitations(text: string, hashes: Set<string>, add
     throw new Error('The model did not cite every transaction in this case. Retry the draft.');
   }
   const citedAddresses = text.match(ADDRESS_RE) ?? [];
-  if (citedAddresses.some((address) => !addresses.has(address.toLowerCase()))) {
+  if (citedAddresses.some((address) => !addresses.has(address.toLowerCase()) && !extra.has(address.toLowerCase()))) {
     throw new Error('The model included a wallet address that is not in this case. Retry the draft.');
   }
 }
@@ -67,6 +68,7 @@ export async function generateRecoveryDocuments(
   exchange: string,
   language: RecoveryLanguage,
   preferred?: Provider,
+  statement = '',
 ): Promise<RecoveryDocuments> {
   if (!graph.edges.length) throw new Error('A Recovery Kit needs at least one on-chain transfer.');
 
@@ -88,7 +90,10 @@ export async function generateRecoveryDocuments(
       timestamp: edge.timestamp,
     })),
     deterministicFindings: heuristics.map(({ type, severity, detail, tx }) => ({ type, severity, detail, tx })),
+    // the victim's own account (typed, or spoken and transcribed by Muse Voice Transcribe) - unverified
+    ...(statement.trim() ? { victimStatement: statement.trim() } : {}),
   });
+  const extra = new Set([...(statement.match(TX_RE) ?? []), ...(statement.match(ADDRESS_RE) ?? [])].map((v) => v.toLowerCase()));
   // The model sometimes skips a citation; every draft must cite every transaction and nothing
   // else, so give each provider two tries before switching to the next one.
   const fellBackFrom: Array<{ provider: Provider; error: string }> = [];
@@ -99,8 +104,8 @@ export async function generateRecoveryDocuments(
         const raw = await draftRecoveryDocuments(provider, evidence, LANGUAGE_NAMES[language]);
         if (!raw) throw new Error('The model returned an empty recovery draft.');
         const documents = parseRecoveryDocuments(raw);
-        validateRecoveryCitations(documents.freezeRequest, hashes, addresses);
-        validateRecoveryCitations(documents.policeReport, hashes, addresses);
+        validateRecoveryCitations(documents.freezeRequest, hashes, addresses, extra);
+        validateRecoveryCitations(documents.policeReport, hashes, addresses, extra);
         return { provider, model: modelOf(provider), ...documents, ...(fellBackFrom.length ? { fellBackFrom } : {}) };
       } catch (e) {
         lastError = e instanceof Error ? e : new Error(String(e));

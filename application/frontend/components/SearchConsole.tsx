@@ -1,10 +1,18 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Search } from 'lucide-react';
+import { ArrowRight, CircleCheck, ImageUp, Loader2, Search, TriangleAlert } from 'lucide-react';
 import clsx from 'clsx';
 import { CHAINS } from '@/lib/chains';
 import { OFFLINE_PRESETS } from '@/lib/offline-cases';
+import { readScreenshot, type ScreenshotCandidate } from '@/lib/api';
+import { fileToDataUrl } from '@/lib/audio';
+
+type ShotState =
+  | { status: 'idle' }
+  | { status: 'reading'; preview: string }
+  | { status: 'done'; preview: string; candidates: ScreenshotCandidate[] }
+  | { status: 'error'; message: string };
 
 export function detectInput(v: string): 'tx' | 'wallet' | 'ens' | null {
   const s = v.trim();
@@ -21,9 +29,30 @@ export function SearchConsole({ initial = '', initialChain = 'auto', compact = f
   const [value, setValue] = useState(initial === 'sample' ? '' : initial);
   const [chain, setChain] = useState(initialChain);
   const [error, setError] = useState('');
+  const [shot, setShot] = useState<ShotState>({ status: 'idle' });
+  const fileInput = useRef<HTMLInputElement>(null);
   const kind = detectInput(value);
 
-  const go = (q: string) => router.push(`/investigate?q=${encodeURIComponent(q)}${q !== 'sample' && chain !== 'auto' ? `&chain=${chain}` : ''}`);
+  const go = (q: string, on = chain) => router.push(`/investigate?q=${encodeURIComponent(q)}${q !== 'sample' && on !== 'auto' ? `&chain=${on}` : ''}`);
+
+  // Screenshot to trace: Muse Spark reads the hashes and addresses, the backend checks each on-chain
+  const read = async (file: File) => {
+    if (!file.type.startsWith('image/')) return setShot({ status: 'error', message: 'That file is not an image. Use a PNG, JPEG or WebP screenshot.' });
+    if (file.size > 8 * 1024 * 1024) return setShot({ status: 'error', message: 'That screenshot is larger than 8 MB.' });
+    setError('');
+    const preview = await fileToDataUrl(file);
+    setShot({ status: 'reading', preview });
+    try {
+      const { candidates } = await readScreenshot(preview);
+      setShot({ status: 'done', preview, candidates });
+    } catch (e: any) {
+      setShot({ status: 'error', message: /(Failed to fetch|NetworkError|Load failed)/i.test(e.message) ? 'The TraceX backend isn’t reachable.' : e.message });
+    }
+  };
+  const onPaste = (e: React.ClipboardEvent) => {
+    const file = [...e.clipboardData.files].find((f) => f.type.startsWith('image/'));
+    if (file) { e.preventDefault(); read(file); }
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,12 +70,28 @@ export function SearchConsole({ initial = '', initialChain = 'auto', compact = f
             value={value}
             autoFocus={autoFocus}
             onChange={(e) => { setValue(e.target.value); setError(''); }}
+            onPaste={onPaste}
             placeholder={compact ? 'New trace: tx hash, wallet or ENS' : 'Paste a tx hash, wallet address or ENS name'}
             className={clsx('input min-w-0 flex-1', compact ? 'py-2 text-[13px]' : 'py-3')}
             spellCheck={false}
             aria-label='Transaction hash, wallet address or ENS name'
           />
           {kind && <span className='chip tone-low hidden sm:inline-flex'>{KIND_LABEL[kind]}</span>}
+          {!compact && (
+            <>
+              <input ref={fileInput} type='file' accept='image/png,image/jpeg,image/webp,image/gif' className='hidden' onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) read(f); }} />
+              <button
+                type='button'
+                onClick={() => fileInput.current?.click()}
+                disabled={shot.status === 'reading'}
+                title='Trace from a screenshot: an exchange withdrawal, wallet receipt or chat. You can also paste one into the box.'
+                aria-label='Trace from a screenshot'
+                className='flex-none rounded-md border border-line-2 bg-panel-2 p-2.5 text-muted hover:text-cream disabled:opacity-50'
+              >
+                {shot.status === 'reading' ? <Loader2 className='h-4 w-4 animate-spin' /> : <ImageUp className='h-4 w-4' />}
+              </button>
+            </>
+          )}
           <select
             value={chain}
             onChange={(e) => setChain(e.target.value)}
@@ -66,6 +111,27 @@ export function SearchConsole({ initial = '', initialChain = 'auto', compact = f
         </div>
       </div>
       {error && <p className='mt-3 text-[13px] text-risk-medium'>{error}</p>}
+      {shot.status !== 'idle' && (
+        <div className='mt-3 flex gap-3 rounded-lg border border-line bg-panel p-3 text-left' role='status'>
+          {'preview' in shot && <img src={shot.preview} alt='Your screenshot' className='h-20 w-14 flex-none rounded border border-line object-cover object-top' />}
+          <div className='min-w-0 flex-1 space-y-2'>
+            {shot.status === 'reading' && <p className='text-[12.5px] text-muted'>Muse Spark is reading your screenshot, then TraceX checks each value on-chain…</p>}
+            {shot.status === 'error' && <p className='text-[12.5px] text-risk-medium'>{shot.message}</p>}
+            {shot.status === 'done' && !shot.candidates.length && <p className='text-[12.5px] text-muted'>No transaction hash, wallet address or ENS name found in this screenshot. Try a clearer or closer one.</p>}
+            {shot.status === 'done' && shot.candidates.map((c) => (
+              <div key={c.value} className='flex flex-wrap items-center gap-2'>
+                <span className='chip !px-2 !py-0.5 !text-[9px]'>{c.label || KIND_LABEL[c.kind === 'address' ? 'wallet' : c.kind]}</span>
+                <code className='min-w-0 truncate font-mono text-[12px] text-cream' title={c.value}>{c.value}</code>
+                <span className={clsx('flex items-center gap-1 text-[11px]', c.verified ? 'text-risk-clean' : 'text-risk-medium')}>
+                  {c.verified ? <CircleCheck className='h-3.5 w-3.5' /> : <TriangleAlert className='h-3.5 w-3.5' />}{c.note}
+                </span>
+                <button type='button' onClick={() => go(c.value, c.kind === 'tx' && c.chains[0] ? c.chains[0] : chain)} className='btn btn--sm !px-3 !py-1.5'>Trace <ArrowRight /></button>
+              </div>
+            ))}
+            {shot.status === 'done' && !!shot.candidates.length && <p className='text-[10.5px] text-dim'>Read by Muse Spark (Meta Model API). Compare each value with your screenshot before you rely on it.</p>}
+          </div>
+        </div>
+      )}
       {!compact && (
         <div className='mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-dim'>
           <span>Try:</span>

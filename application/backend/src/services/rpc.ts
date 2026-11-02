@@ -102,3 +102,18 @@ export async function tokenInfo(chain: Chain, address: string) {
   const coder = AbiCoder.defaultAbiCoder();
   return { symbol: coder.decode(['string'], sym)[0] as string, decimals: Number(coder.decode(['uint8'], dec)[0]) };
 }
+
+// Chains where an address has ever done anything (sent a tx, holds a balance, or is a contract) -
+// used to check that a value read from a screenshot is a real, used address, not a misread one
+export async function addressActivity(address: string): Promise<Chain[]> {
+  const active = await Promise.all(CHAIN_ORDER.map(async (id) => {
+    const p = getProvider(CHAINS[id]);
+    const [nonce, balance, code] = await Promise.all([
+      p.getTransactionCount(address).catch(() => 0),
+      p.getBalance(address).catch(() => 0n),
+      p.getCode(address).catch(() => '0x'),
+    ]);
+    return nonce > 0 || balance > 0n || code !== '0x';
+  }));
+  return CHAIN_ORDER.filter((_, i) => active[i]).map((id) => CHAINS[id]);
+}

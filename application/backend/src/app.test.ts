@@ -27,7 +27,7 @@ function serve(env: Record<string, string>) {
     });
     return { status: res.status, headers: res.headers, json: (await res.json().catch(() => null)) as any };
   };
-  return { server, call };
+  return { server, call, url: `http://127.0.0.1:${port}` };
 }
 
 let api: ReturnType<typeof serve>;
@@ -96,6 +96,17 @@ describe('AI endpoints without provider keys', () => {
     assert.equal(r.status, 200);
     assert.deepEqual(r.json.map((p: any) => [p.id, p.configured]), [['meta', false], ['fireworks', false], ['baseten', false]]);
     assert.ok(r.json.every((p: any) => p.model && p.via));
+  });
+
+  test('/api/extract rejects anything but an image data URL', async () => {
+    const r = await api.call('/api/extract', { image: 'https://example.com/receipt.png' });
+    assert.equal(r.status, 400);
+    assert.match(r.json.error, /data URL/);
+  });
+
+  test('/api/transcribe rejects audio that is not WAV', async () => {
+    const res = await fetch(`${api.url}/api/transcribe`, { method: 'POST', headers: { 'Content-Type': 'audio/wav' }, body: 'not audio' });
+    assert.equal(res.status, 400);
   });
 
   test('/api/ask needs a question and a graph', async () => {

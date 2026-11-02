@@ -55,17 +55,39 @@ const graphPayload = (c: TraceCase) => ({ nodes: c.nodes, edges: c.edges, input:
 export type ProviderChoice = 'auto' | Provider;
 const preferred = (choice: ProviderChoice) => (choice === 'auto' ? {} : { provider: choice });
 
+export interface ScreenshotCandidate {
+  kind: 'tx' | 'address' | 'ens';
+  value: string;
+  label?: string;
+  chainShown?: string;
+  verified: boolean;
+  chains: string[];
+  note: string;
+}
+
+export function readScreenshot(image: string) {
+  return post<{ provider: Provider; model: string; candidates: ScreenshotCandidate[] }>('/api/extract', { image });
+}
+
+export async function transcribeStatement(wav: Blob, language: RecoveryLanguage) {
+  const res = await fetch(`${API}/api/transcribe?language=${language}`, { method: 'POST', headers: { 'Content-Type': 'audio/wav' }, body: wav });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Transcription failed (${res.status})`);
+  return data as { model: string; transcript: string; durationMs: number };
+}
+
 export function fetchProviders() {
   return get<ProviderInfo[]>('/api/providers');
 }
 
-export function generateRecoveryKit(c: TraceCase, exchange: string, language: RecoveryLanguage, choice: ProviderChoice = 'auto') {
+export function generateRecoveryKit(c: TraceCase, exchange: string, language: RecoveryLanguage, choice: ProviderChoice = 'auto', statement = '') {
   return post<RecoveryDocuments>('/api/recovery-kit', {
     input: c.input,
     chain: c.chain ?? 'auto',
     hops: c.hops ?? 5,
     exchange,
     language,
+    ...(statement.trim() ? { statement: statement.trim() } : {}),
     ...preferred(choice),
   });
 }

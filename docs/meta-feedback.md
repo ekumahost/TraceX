@@ -16,6 +16,8 @@ TraceX's backend contains a Muse Spark integration through the Meta Model API. I
 
 The same features also run on Muse Spark Open (Meta's open-weights model) through Fireworks AI and Baseten; both were configured and tested on 2 Nov 2026. Things you could mention if they match your experience: both partners served `muse-spark-open` but no Llama models on these accounts; Muse Spark models spend reasoning tokens before answering, so a small `max_tokens` budget returned no text at all until it was raised; and response times differed a lot between hosts for the same model (about 8 s on Baseten vs 30 s on Fireworks for the same brief).
 
+Also new on 2 Nov: Muse Spark vision read a wrapped 66-character transaction hash from a phone screenshot exactly, where Muse Spark Open on the partners dropped characters; and Muse Voice Transcribe took a 16 kHz WAV and accepted "Nigerian Pidgin" as a `languageBias` - but the docs do not list supported languages or say whether Igbo, Yoruba and Hausa are supported, and the endpoint only takes WAV, so browser recordings have to be re-encoded first.
+
 ## Optional structure
 
 1. **What I tried:** [Describe the product and task you personally completed.]

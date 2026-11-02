@@ -20,6 +20,15 @@ All three providers use the OpenAI-compatible chat API, so one client covers the
 
 Verified live on 2 Nov 2026 against the real Tornado Cash case in [`demo-cases.md`](demo-cases.md): brief, follow-up question and Igbo Recovery Kit on each provider.
 
+## Other Meta models on the Meta Model API
+
+| Model | Used for | Code |
+|---|---|---|
+| Muse Spark (vision) | Screenshot to trace - reading hashes and addresses from an image, then checking them on-chain | [`extract.ts`](../application/backend/src/services/extract.ts) |
+| `muse-voice-transcribe-1.0` | Voice statement in the Recovery Kit (`POST /v1/asr/transcribe`, 16 kHz mono WAV, `languageBias`, `keywords`) | [`transcribe.ts`](../application/backend/src/services/transcribe.ts) |
+
+Both use `META_API_KEY`. Screenshot reading falls back to Muse Spark Open on Fireworks or Baseten if the Meta Model API fails, but in testing only the Meta Model API read 66-character hashes exactly, which is why the on-chain check exists.
+
 ## Optional Python analysis service
 
 The backend calls `${ANALYSIS_ENGINE_URL}/analyze` when `ANALYSIS_ENGINE_URL` is configured. The service runs the deterministic Python/NetworkX detectors. If it is unset or unavailable, the backend uses its TypeScript detector implementation.

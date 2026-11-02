@@ -49,9 +49,10 @@ Paste a transaction hash, wallet address or ENS name. In seconds TraceX:
 |---|---|
 | **Traces** the money forward in time across **7 EVM chains** - Ethereum, Base, BNB Chain, Arbitrum, Optimism, Polygon and Robinhood Chain. Tx hashes are auto-detected on whichever chain they live on, and canonical bridges are followed to the destination chain. | **Detects** mixer deposits and withdrawals, peel chains, high-velocity movement, exchange cash-outs, exchange hopping and bridge exits - deterministic rules in Python/NetworkX, deployed on **Modal**, each finding citing its transaction. |
 | **Explains** the case with **Muse Spark** via the **Meta Model API** - or Muse Spark Open on **Fireworks AI** or **Baseten**, switching automatically if one is down: a plain-English brief and follow-up Q&A where every claim cites a tx hash - click any citation to jump to that transfer in the graph. | **Recovers**: the **Recovery Kit** drafts a records-preservation request for the exchange and a police incident report - in **English, Nigerian Pidgin, Igbo, Yoruba or Hausa** - and rejects any draft that invents a wallet or skips a transaction. |
+| **Reads screenshots**: drop or paste a screenshot of an exchange withdrawal, a wallet receipt or the scammer's chat - **Muse Spark** reads the tx hashes and addresses out of it, TraceX checks each one on-chain, and one click starts the trace. No need to know what a "tx hash" is. | **Listens**: in the Recovery Kit, the victim can **speak** what happened in their own language - **Muse Voice Transcribe** writes it down, and it goes into the police report as their own, clearly unverified account. |
 | **Protects**: **Poisoning Shield** finds address-poisoning attacks in a wallet's history - look-alike addresses, fake tokens and spoofed zero-value transfers - before you copy the wrong address. | **Proves**: export a printable **evidence report** (score, findings, graph, AI brief, every tx hash) as PDF, or the full case as JSON. |
 
-What wasn't possible before: a victim, in their own language, going from a transaction hash to a cited investigation and ready-to-review recovery documents in about a minute, for free.
+What wasn't possible before: a victim, in their own language, going from a screenshot of their transfer to a cited investigation and ready-to-review recovery documents - with their spoken account included - in about a minute, for free.
 
 ## Demo
 
@@ -78,12 +79,18 @@ These exact checks run as live tests: `npm run test:live`.
 |---|---|
 | ![Report](docs/screenshots/report.png) | ![Evidence](docs/screenshots/workspace-evidence.png) |
 
+| Screenshot to trace (Muse Spark vision) | Voice statement (Muse Voice Transcribe) |
+|---|---|
+| ![Screenshot to trace](docs/screenshots/screenshot-to-trace.png) | ![Voice statement](docs/screenshots/voice-statement.png) |
+
 ## How TraceX uses Meta AI
 
 | Meta product | Where | What it does |
 |---|---|---|
 | **Muse Spark** (`muse-spark-1.3`) via **Meta Model API** | [`providers.ts`](application/backend/src/lib/providers.ts), [`ai-unified.ts`](application/backend/src/lib/ai-unified.ts) | Default model: investigation brief, follow-up Q&A, Recovery Kit drafts in five languages |
 | **Muse Spark Open** (Meta open weights) via **Fireworks AI** and **Baseten** | same | The same three features, chosen in the model picker or used automatically when another provider fails |
+| **Muse Spark** vision via **Meta Model API** | [`extract.ts`](application/backend/src/services/extract.ts) | Screenshot to trace: reads tx hashes, addresses and ENS names from a screenshot; every value is then checked on-chain, so a misread character shows as "not found" instead of tracing the wrong wallet |
+| **Muse Voice Transcribe** (`muse-voice-transcribe-1.0`) via **Meta Model API** | [`transcribe.ts`](application/backend/src/services/transcribe.ts) | Voice statement for the Recovery Kit, with a language hint for English, Nigerian Pidgin, Igbo, Yoruba or Hausa |
 
 Design choices that make the model trustworthy for forensics:
 - **Evidence in, citations out.** The model never sees raw chain data it could misread - it gets the traced graph and the deterministic findings, and must cite a transaction hash for every claim. The UI turns every hash into a clickable citation.
@@ -98,7 +105,7 @@ Design choices that make the model trustworthy for forensics:
 ```mermaid
 flowchart LR
   U[Investigator / victim] --> FE[Next.js 15 frontend<br/>React Flow graph · reports · Shield]
-  FE -->|/api/trace /api/shield<br/>/api/explain /api/ask /api/recovery-kit<br/>/api/providers| BE[Express + TypeScript API<br/>rate-limited, CORS-locked]
+  FE -->|/api/trace /api/shield<br/>/api/explain /api/ask /api/recovery-kit<br/>/api/extract /api/transcribe /api/providers| BE[Express + TypeScript API<br/>rate-limited, CORS-locked]
   BE --> TR[Tracer<br/>BFS forward in time · loop-safe<br/>bridge follow · 40-wallet cap]
   TR -->|transfers, labels| DATA[(Alchemy · Etherscan V2<br/>keyless explorers · public RPC)]
   TR --> CH[7 EVM chains<br/>token lists verified on-chain]
@@ -108,6 +115,8 @@ flowchart LR
   BE -.->|picked or fallback| OPEN[Muse Spark Open<br/>Fireworks AI · Baseten]
   META --> V[Citation validator]
   OPEN --> V
+  BE -->|screenshot| VIS[Muse Spark vision<br/>+ on-chain check]
+  BE -->|voice WAV| ASR[Muse Voice Transcribe]
 ```
 
 | Layer | Stack |
@@ -126,7 +135,7 @@ flowchart LR
 
 | Suite | What it covers | Run |
 |---|---|---|
-| Backend unit + integration (32) | Real HTTP API in-process: validation, error codes, rate limiting, CORS, no-key AI failure, AI provider order and automatic fallback; poisoning look-alike rules; bridge matching; Recovery Kit parsing and citation validation | `cd application/backend && npm test` |
+| Backend unit + integration (39) | Real HTTP API in-process: validation, error codes, rate limiting, CORS, no-key AI failure, AI provider order and automatic fallback, screenshot parsing and input checks, voice-statement checks; poisoning look-alike rules; bridge matching; Recovery Kit parsing and citation validation | `cd application/backend && npm test` |
 | Backend live (4, opt-in) | Real mainnet cases: 600 ETH into Tornado, fake-token refusal, Shield imposters, Robinhood auto-detect | `npm run test:live` |
 | Analysis engine (8) | Detectors, scoring, HTTP endpoint, **parity with the TypeScript detectors** on shared fixtures | `cd application/analysis-engine && .venv/bin/python -m pytest` |
 | Frontend (13) | Scoring (incl. parity with the backend), formatting, sample-case integrity, rule-based brief, layout | `cd application/frontend && npm test` |

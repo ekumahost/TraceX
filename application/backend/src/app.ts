@@ -8,6 +8,8 @@ import { InputError, NotFoundError } from './types';
 import { rateLimit } from './services/limit';
 import { shieldWallet } from './services/poisoning';
 import { generateRecoveryDocuments, RECOVERY_LANGUAGES } from './services/recovery';
+import { checkImage, extractFromScreenshot } from './services/extract';
+import { transcribeStatement } from './services/transcribe';
 import { z } from 'zod';
 
 /** Builds the TraceX API. Reads env at call time so tests can configure it per instance. */
@@ -18,6 +20,7 @@ export function createApp() {
   // ALLOWED_ORIGINS=https://tracex.vercel.app,https://... ; unset = allow all (local dev)
   const origins = process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim()).filter(Boolean);
   app.use(cors(origins?.length ? { origin: origins } : undefined));
+  app.use('/api/extract', express.json({ limit: '12mb' })); // screenshots, before the 1 MB default
   app.use(express.json({ limit: '1mb' }));
 
   const traceLimit = rateLimit('traces', Number(process.env.TRACE_LIMIT_PER_HOUR ?? 30));
@@ -29,6 +32,7 @@ export function createApp() {
     exchange: z.string().trim().max(100).default(''), // optional - mixer cases may never reach an exchange
     language: z.enum(RECOVERY_LANGUAGES),
     provider: z.enum(PROVIDERS as [string, ...string[]]).optional(),
+    statement: z.string().max(4000).default(''), // victim's own account, typed or transcribed
   });
 
 
@@ -106,6 +110,29 @@ export function createApp() {
     }
   });
 
+  // Screenshot to trace: Muse Spark reads tx hashes / addresses from an image, each checked on-chain
+  app.post('/api/extract', aiLimit, async (req, res) => {
+    const { image, provider } = req.body ?? {};
+    if (provider !== undefined && !isProvider(provider)) {
+      return res.status(400).json({ error: 'provider must be meta, fireworks or baseten' });
+    }
+    try {
+      res.json(await extractFromScreenshot(checkImage(image), provider));
+    } catch (e: any) {
+      res.status(e instanceof InputError ? 400 : 502).json({ error: e.message });
+    }
+  });
+
+  // Voice statement: Muse Voice Transcribe turns a spoken account (16 kHz mono WAV) into text
+  app.post('/api/transcribe', aiLimit, express.raw({ type: ['audio/wav', 'audio/x-wav', 'audio/wave'], limit: '20mb' }), async (req, res) => {
+    const language = typeof req.query.language === 'string' ? req.query.language : 'english';
+    try {
+      res.json(await transcribeStatement(req.body, language));
+    } catch (e: any) {
+      res.status(e instanceof InputError ? 400 : 502).json({ error: e.message });
+    }
+  });
+
   app.post('/api/recovery-kit', aiLimit, async (req, res) => {
     const parsed = recoveryRequestSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: 'Invalid recovery-kit request', details: parsed.error.issues.map((issue) => issue.message) });
@@ -117,6 +144,7 @@ export function createApp() {
         parsed.data.exchange,
         parsed.data.language,
         parsed.data.provider as any,
+        parsed.data.statement,
       ));
     } catch (e: any) {
       console.error('Recovery Kit generation failed:', e?.message ?? e);

@@ -27,7 +27,7 @@ The report page uses the browser print dialog; users can choose â€œSave as PDF.â
 
 ## API and chain data
 
-The Express API exposes `/api/chains`, `/api/providers`, `/api/trace`, `/api/shield`, `/api/recovery-kit`, `/api/explain`, and `/api/ask`. API keys are read by the backend and are not sent to the browser. Per-IP request limits are held in memory for a single backend instance.
+The Express API exposes `/api/chains`, `/api/providers`, `/api/extract` (screenshot to trace), `/api/transcribe` (voice statement), `/api/trace`, `/api/shield`, `/api/recovery-kit`, `/api/explain`, and `/api/ask`. API keys are read by the backend and are not sent to the browser. Per-IP request limits are held in memory for a single backend instance.
 
 The chain adapter supports Ethereum, Base, BNB Chain, Arbitrum, Optimism, Polygon, and Robinhood Chain. Alchemy is the recommended source; Etherscan V2 and selected keyless explorers can be used as alternatives for traces. Live traces include native assets and a small set of configured tokens, not every token on each network.
 
@@ -50,6 +50,12 @@ Detectors look for known mixer interactions, peel-chain-shaped movement, rapid m
 Three providers serve Meta's Muse Spark models through one OpenAI-compatible client: Muse Spark on the Meta Model API, and Muse Spark Open on Fireworks AI and Baseten. All three handle the brief, follow-up questions and Recovery Kit with the same prompts. The workspace model picker chooses a provider per request; on Auto the backend starts with `AI_PROVIDER` (default `meta`) and moves to the next configured provider on an error, empty answer or exhausted token budget, reporting the switch in `fellBackFrom`. See [integrations-fireworks-modal-baseten.md](integrations-fireworks-modal-baseten.md).
 
 The model receives the graph and deterministic findings and is instructed to stay grounded in them and cite transactions. This instruction is not an enforcement mechanism. The UI links transaction hashes only when they match an edge in the current case, and users should verify the model's claims in the explorer.
+
+## Screenshot to trace and voice statement
+
+`/api/extract` takes a screenshot as a data URL (up to 8 MB) and asks Muse Spark - the Meta Model API by default, because it reads long hex strings most reliably - for the tx hashes, addresses and ENS names in it. The backend keeps only well-formed values, then checks each on-chain (`findTxChain` for transactions, `addressActivity` for addresses) and returns them with a verified flag and the chain(s) found.
+
+`/api/transcribe` takes a 16 kHz mono WAV body (the browser records with MediaRecorder and re-encodes) and calls Muse Voice Transcribe (`POST /v1/asr/transcribe`, `muse-voice-transcribe-1.0`) with a `languageBias` for the selected Recovery Kit language and keyword biasing for crypto terms; if the language hint is rejected it retries with automatic detection. The transcript is editable and is sent with the Recovery Kit request as `statement`; the prompt puts it in the police report as the victim's unverified account, and the citation validator allows - but does not require - hashes and addresses that appear in it.
 
 ## Local development
 
