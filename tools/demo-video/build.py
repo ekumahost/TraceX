@@ -8,9 +8,10 @@ frames, marks = t["frames"], t["marks"]
 scenes = {s["id"]: s for s in json.load(open("out/audio/durations.json"))}
 # Fast-forward dead air: any stretch longer than GAP seconds with no narration (waiting for the
 # model, the trace) is squeezed to SQUEEZE seconds. remap() is piecewise linear over real time.
-GAP, SQUEEZE, PAD = 2.0, 1.2, 0.5
+# Tuned to keep the cut under the 3-minute limit; results on screen play at full speed for HOLD seconds.
+GAP, SQUEEZE, PAD, HOLD = 0.8, 0.4, 0.2, 1.8
 spoken = sorted([(m["start"] - PAD, m["start"] + scenes[m["id"]]["seconds"] + PAD) for m in marks] +
-                [(h["start"], h["end"]) for h in t.get("holds", [])])
+                [(h["start"], min(h["end"], h["start"] + HOLD)) for h in t.get("holds", [])])
 segments, cursor = [], frames[0]
 for a, b in spoken + [(frames[-1] + 1.0, frames[-1] + 1.0)]:
     if a - cursor > GAP:
@@ -55,7 +56,7 @@ MAIN = "out/main.mp4" if INTRO else OUT
 
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", "out/frames.txt", *inputs,
                 "-filter_complex", video + ";" + mix, "-map", "[vout]", "-map", "[aout]",
-                "-c:v", "libx264", "-preset", "slow", "-crf", "18",
+                "-c:v", "libx264", "-preset", "medium", "-crf", "18",
                 "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-shortest", MAIN], check=True)
 
 offset = 0.0
@@ -64,7 +65,7 @@ if INTRO:
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", INTRO["video"], "-i", MAIN, "-filter_complex",
                     "[0:v]fps=30,format=yuv420p,setsar=1[v0];[1:v]fps=30,format=yuv420p,setsar=1[v1];"
                     "[0:a]aresample=48000[a0];[1:a]aresample=48000[a1];[v0][a0][v1][a1]concat=n=2:v=1:a=1[v][a]",
-                    "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "slow", "-crf", "18",
+                    "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "medium", "-crf", "18",
                     "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", OUT], check=True)
 
 # 3. captions: one cue per sentence, timed in proportion to its length within the scene's clip

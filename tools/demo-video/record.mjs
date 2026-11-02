@@ -95,13 +95,13 @@ async function scene(id, run) {
 await page.goto(APP, { waitUntil: 'networkidle' });
 
 await scene('intro', async () => {
-  await sleep(2600); // the intro loader assembles the logo
-  await glide(500, 380, 1400);
-  await glide(900, 470, 1600);
-  await sleep(2500);
-  await point(page.locator('p:has-text("evidence-backed")').first(), -120, 0, 1500);
-  await sleep(3000);
-  await point(page.getByLabel('Transaction hash, wallet address or ENS name').first(), -200, 0, 1200);
+  await sleep(2000); // the intro loader assembles the logo
+  await glide(500, 380, 1000);
+  await glide(900, 470, 1000);
+  await sleep(1200);
+  await point(page.locator('p:has-text("evidence-backed")').first(), -120, 0, 1000);
+  await sleep(1500);
+  await point(page.getByLabel('Transaction hash, wallet address or ENS name').first(), -200, 0, 900);
 });
 
 await scene('paste', async () => {
@@ -184,16 +184,6 @@ await scene('recovery', async () => {
     await point(page.locator('text=Exchange freeze / preservation request').first(), 0, 120, 900);
     for (let i = 0; i < 5; i++) { await page.mouse.wheel(0, 220); await sleep(900); }
     await sleep(1200);
-  });
-});
-
-await scene('report', async () => {
-  await click(page.getByRole('button', { name: /Report/ }).first(), 800);
-  await page.waitForSelector('text=Investigation report', { timeout: 30_000 });
-  await show(async () => {
-    await sleep(1500);
-    await glide(960, 600, 800);
-    for (let i = 0; i < 7; i++) { await page.mouse.wheel(0, 260); await sleep(650); }
   });
 });
 

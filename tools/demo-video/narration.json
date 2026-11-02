@@ -1,7 +1,7 @@
 [
  {
   "id": "intro",
-  "text": "Every year, crypto scams drain billions from ordinary people. Here in Nigeria, and across Africa, a victim has no affordable way to find out where their money went. TraceX changes that. Built in Enugu for the Meta AI Developer Hackathon, it is A.I. powered blockchain forensics. Follow the money. Prove it."
+  "text": "TraceX changes that. Built in Enugu for the Meta AI Developer Hackathon, it is A.I. powered blockchain forensics. Follow the money. Prove it."
  },
  {
   "id": "paste",
@@ -21,15 +21,11 @@
  },
  {
   "id": "models",
-  "text": "You choose the model: Muse Spark on the Meta Model A.P.I., or Meta Llama on Fireworks and Baseten. All three follow the same rules and cite every claim. If one is unavailable, TraceX switches to the next one automatically."
+  "text": "You choose the model: Muse Spark on the Meta Model A.P.I., or Muse Spark Open on Fireworks and Baseten. If one is down, TraceX switches automatically."
  },
  {
   "id": "recovery",
   "text": "Now, something that was not possible before. A victim can generate a records preservation request for the exchange, and a police incident report, in English, Pidgin, Igbo, Yoruba or Hausa. Muse Spark writes the drafts, and TraceX rejects any draft that invents a wallet, or skips a transaction. Companies pay enterprise prices for reports like this. Here, it takes about thirty seconds, for free."
- },
- {
-  "id": "report",
-  "text": "The whole case exports as an evidence report. Findings, graph, the A.I. brief, and every transaction hash, ready to save as a P D F."
  },
  {
   "id": "shield",
