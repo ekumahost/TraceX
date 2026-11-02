@@ -241,7 +241,7 @@ export default function Home() {
                 { k: 'Fund-flow graph', v: 'BFS, loop-safe, 20 hops' },
                 { k: 'Heuristics', v: 'Python · NetworkX on Modal' },
                 { k: 'Explanation', v: 'Muse Spark · Meta Model API', hi: true },
-                { k: 'Model choice', v: 'Meta Llama · Fireworks & Baseten, auto-switch' },
+                { k: 'Model choice', v: 'Muse Spark Open · Fireworks & Baseten, auto-switch' },
               ].map((s, i) => (
                 <div key={s.k} className={clsx('reveal relative bg-panel p-6', `reveal-d${Math.min(i, 3)}`)} data-reveal>
                   <span className='font-display text-[12px] font-bold tracking-[.2em] text-dim'>0{i + 1}</span>

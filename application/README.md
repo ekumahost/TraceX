@@ -11,7 +11,7 @@
 - AI: Meta AI API
 
 ## Setting AI API Keys
-TraceX explains traces with Meta's models: Muse Spark via the Meta Model API, and Meta Llama via Fireworks AI and Baseten. The backend needs **at least one** provider key; keys are read on the server only and never sent to the browser.
+TraceX explains traces with Meta's models: Muse Spark via the Meta Model API, and Muse Spark Open via Fireworks AI and Baseten. The backend needs **at least one** provider key; keys are read on the server only and never sent to the browser.
 
 1. Create your env file:
    ```bash
@@ -23,8 +23,8 @@ TraceX explains traces with Meta's models: Muse Spark via the Meta Model API, an
    | Variable | Where to get it |
    |---|---|
    | `META_API_KEY` | Meta Model API (Muse Spark) - https://dev.meta.ai → Dashboard → API keys |
-   | `FIREWORKS_API_KEY` | Meta Llama on Fireworks AI serverless - https://fireworks.ai → Account → API Keys |
-   | `BASETEN_API_KEY` | Meta Llama on Baseten Model APIs (no deployment needed) - https://app.baseten.co → API Keys |
+   | `FIREWORKS_API_KEY` | Muse Spark Open on Fireworks AI serverless - https://fireworks.ai → Account → API Keys |
+   | `BASETEN_API_KEY` | Muse Spark Open on Baseten Model APIs (no deployment needed) - https://app.baseten.co → API Keys |
 
 3. Optional:
    - `AI_PROVIDER` = `meta`, `fireworks` or `baseten` picks the default first choice when the UI is on Auto. The others are automatic fallbacks.

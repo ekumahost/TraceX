@@ -1,6 +1,6 @@
 /**
  * TraceX AI - one AI layer over three Meta-model providers: Muse Spark on the Meta Model API,
- * and Meta Llama on Fireworks AI and Baseten. Every provider gets the same evidence-only prompts.
+ * and Muse Spark Open on Fireworks AI and Baseten. Every provider gets the same evidence-only prompts.
  * Built for https://cerebralvalley.ai/e/meta-ai-developer-hackathon
  */
 

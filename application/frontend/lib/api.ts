@@ -80,14 +80,15 @@ export function askCase(question: string, c: TraceCase, choice: ProviderChoice =
 
 export const PROVIDER_LABEL: Record<Provider, { model: string; via: string; short: string }> = {
   meta: { model: 'Muse Spark', via: 'Meta Model API', short: 'Muse Spark' },
-  fireworks: { model: 'Llama', via: 'Fireworks AI', short: 'Fireworks' },
-  baseten: { model: 'Llama', via: 'Baseten', short: 'Baseten' },
+  fireworks: { model: 'Muse Spark Open', via: 'Fireworks AI', short: 'Fireworks' },
+  baseten: { model: 'Muse Spark Open', via: 'Baseten', short: 'Baseten' },
 };
 
-// Human name for the model that answered, e.g. 'meta-llama/Llama-4-Maverick-17B-128E-Instruct' -> 'Llama 4 Maverick'
+// Human name for the model that answered, e.g. 'meta-models/muse-spark-open' -> 'Muse Spark Open', 'llama-v3p3-70b-instruct' -> 'Llama 3.3 70B'
 export function modelName(provider: Provider, model?: string) {
   if (provider === 'meta' || !model) return PROVIDER_LABEL[provider].model;
   const id = model.split('/').pop()!.toLowerCase();
+  if (id.startsWith('muse-spark')) return id.split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
   const v = id.match(/llama[-_ ]?v?(\d)(?:p(\d)|[.-](\d))?/);
   if (!v) return model.split('/').pop()!;
   const version = v[2] ?? v[3] ? `${v[1]}.${v[2] ?? v[3]}` : v[1];

@@ -2,11 +2,11 @@ import OpenAI from 'openai';
 
 /**
  * The three model providers behind TraceX's AI layer. All speak the OpenAI chat-completions
- * protocol, so one client covers them; each serves a Meta model.
+ * protocol, so one client covers them; each serves a Meta Muse Spark model.
  *
- * - meta:      Muse Spark via the Meta Model API          META_API_KEY      (https://dev.meta.ai)
- * - fireworks: Meta Llama via Fireworks AI serverless      FIREWORKS_API_KEY (https://fireworks.ai)
- * - baseten:   Meta Llama via Baseten Model APIs           BASETEN_API_KEY   (https://app.baseten.co)
+ * - meta:      Muse Spark via the Meta Model API            META_API_KEY      (https://dev.meta.ai)
+ * - fireworks: Muse Spark Open via Fireworks AI serverless  FIREWORKS_API_KEY (https://fireworks.ai)
+ * - baseten:   Muse Spark Open via Baseten Model APIs       BASETEN_API_KEY   (https://app.baseten.co)
  *
  * Models and base URLs can be overridden per provider (META_MODEL, FIREWORKS_MODEL, BASETEN_MODEL, ...).
  */
@@ -36,13 +36,13 @@ const SPECS: Record<Provider, Spec> = {
     name: 'Fireworks AI',
     keyEnv: 'FIREWORKS_API_KEY',
     baseURL: () => process.env.FIREWORKS_BASE_URL || 'https://api.fireworks.ai/inference/v1',
-    model: () => process.env.FIREWORKS_MODEL || 'accounts/fireworks/models/llama4-maverick-instruct-basic',
+    model: () => process.env.FIREWORKS_MODEL || 'accounts/fireworks/models/muse-spark-open',
   },
   baseten: {
     name: 'Baseten',
     keyEnv: 'BASETEN_API_KEY',
     baseURL: () => process.env.BASETEN_BASE_URL || 'https://inference.baseten.co/v1',
-    model: () => process.env.BASETEN_MODEL || 'meta-llama/Llama-4-Maverick-17B-128E-Instruct',
+    model: () => process.env.BASETEN_MODEL || 'meta-models/muse-spark-open',
   },
 };
 
@@ -53,8 +53,9 @@ export function providerStatus() {
   return PROVIDERS.map((id) => ({ id, via: SPECS[id].name, model: modelOf(id), configured: isConfigured(id) }));
 }
 
-// Muse Spark reasons before it answers, and reasoning tokens count against max_tokens -
-// so its budget has to cover both. Low effort answers a case in ~10s; medium takes ~2x.
+// Muse Spark (and Muse Spark Open on the partners) reasons before it answers, and reasoning
+// tokens count against max_tokens - so the budget has to cover both. Low effort answers a case
+// in ~10s; medium takes ~2x.
 const META_BUDGET = 12_000;
 const effort = () => (process.env.META_REASONING_EFFORT || 'low') as 'low' | 'medium' | 'high';
 
@@ -72,14 +73,14 @@ export async function chat(
     model: spec.model(),
     messages,
     temperature: 0.1, // low for evidence-backed answers
-    ...(provider === 'meta'
+    ...(/muse-spark/i.test(spec.model())
       ? { max_tokens: Math.max(META_BUDGET, maxTokens), reasoning_effort: effort() }
       : { max_tokens: maxTokens }),
   });
 
   const choice = response.choices[0];
   if (!choice?.message.content && choice?.finish_reason === 'length') {
-    throw new Error(provider === 'meta'
+    throw new Error(/muse-spark/i.test(spec.model())
       ? 'Muse Spark used its whole token budget reasoning - try META_REASONING_EFFORT=low'
       : 'the model ran out of tokens before answering');
   }
