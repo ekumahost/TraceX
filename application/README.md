@@ -11,7 +11,7 @@
 - AI: Meta AI API
 
 ## Setting AI API Keys
-TraceX explains traces with Meta's models: Muse Spark via the Meta Model API, or Llama 3.3 70B via Fireworks / Baseten. The backend needs **at least one** provider key; keys are read on the server only and never sent to the browser.
+TraceX explains traces with Meta's models: Muse Spark via the Meta Model API, and Meta Llama via Fireworks AI and Baseten. The backend needs **at least one** provider key; keys are read on the server only and never sent to the browser.
 
 1. Create your env file:
    ```bash
@@ -23,10 +23,13 @@ TraceX explains traces with Meta's models: Muse Spark via the Meta Model API, or
    | Variable | Where to get it |
    |---|---|
    | `META_API_KEY` | Meta Model API (Muse Spark) - https://dev.meta.ai → Dashboard → API keys |
-   | `FIREWORKS_API_KEY` | Llama 3.3 70B - https://fireworks.ai → Account → API Keys |
-   | `BASETEN_API_KEY` + `BASETEN_MODEL_ID` | Llama 3.3 70B - https://app.baseten.co → deploy Llama 3.3 70B Instruct, then API Keys |
+   | `FIREWORKS_API_KEY` | Meta Llama on Fireworks AI serverless - https://fireworks.ai → Account → API Keys |
+   | `BASETEN_API_KEY` | Meta Llama on Baseten Model APIs (no deployment needed) - https://app.baseten.co → API Keys |
 
-3. Optional: set `AI_PROVIDER` to `meta`, `fireworks` or `baseten` to choose which is tried first. The others are used as fallbacks.
+3. Optional:
+   - `AI_PROVIDER` = `meta`, `fireworks` or `baseten` picks the default first choice when the UI is on Auto. The others are automatic fallbacks.
+   - `META_MODEL`, `FIREWORKS_MODEL`, `BASETEN_MODEL` override each provider's model id (defaults in [`providers.ts`](backend/src/lib/providers.ts)).
+   - `GET /api/providers` shows which providers have a key and which model each uses.
 4. Restart the backend (`npm run dev`). Docker Compose picks up the same `backend/.env` automatically.
 
 Check it works:

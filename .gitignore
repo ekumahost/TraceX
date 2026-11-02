@@ -15,3 +15,8 @@ next-env.d.ts
 
 # rendered demo videos (uploaded to YouTube, too large for git)
 demo-output/
+
+# raw demo recordings (voice, face video) - local only
+tools/demo-video/out/
+*.MOV
+*.mov
