@@ -13,7 +13,9 @@ AI-powered blockchain forensics that traces cryptocurrency flows across seven ch
 ![Chains](https://img.shields.io/badge/EVM%20chains-7-f0b44c?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-2ee6a6?style=for-the-badge)
 
-**[▶ Demo video (2:58)](#demo)** · **[A real case](#a-real-case-traced-end-to-end)** · **[How it works](#architecture)** · **[Run it](#run-it-locally)**
+**[🌐 Try it live](https://trace-x-khaki.vercel.app/)** · **[▶ Demo video (2:58)](#demo)** · **[A real case](#a-real-case-traced-end-to-end)** · **[How it works](#architecture)** · **[Run it](#run-it-locally)**
+
+> Live app: **https://trace-x-khaki.vercel.app** (frontend on Vercel) · API: `https://tracex-backend-d0il.onrender.com` (Render free tier: the first request after ~15 idle minutes takes about 30-50 s while the server wakes up).
 
 ![TraceX workspace on a real Tornado Cash case](docs/screenshots/workspace-tornado.png)
 
