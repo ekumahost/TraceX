@@ -8,6 +8,15 @@
 
 The public event page describes the indie developer track as judging creativity, technical ambition, and whether the project works. The event page lists submissions due November 4, 2026 at 9:00 PM ET. Recheck the event page and submission portal before submitting; schedules can change.
 
+## Problem statement: Build for Your World
+
+> "Bring Meta's models into your domain. Solve a problem you know firsthand, free up time and mental space, and make something possible that wasn't before."
+
+- **A problem known firsthand:** built in Enugu, where people lose money to crypto scams and have no affordable way to find out where it went.
+- **Frees up time and mental space:** hours of explorer work - following wallets one at a time - become a cited graph and a plain-language brief in seconds, and the documents a victim needs are drafted for them.
+- **Something possible that wasn't before:** a free exchange preservation request and police incident-report draft, grounded in the on-chain evidence, in Nigerian Pidgin, Igbo, Yoruba or Hausa.
+- **Meta's models, as listed in the problem statement:** the **Muse Spark series** through the **Meta Model API**, and the open-weights **Muse Spark Open** run on Fireworks AI and Baseten.
+
 ## How TraceX scores on the judging rubric
 
 | Category (weight) | TraceX |

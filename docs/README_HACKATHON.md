@@ -8,7 +8,7 @@ Cross-chain follow-through is implemented for canonical Ethereum L1 Standard Bri
 
 - **Event:** [Meta Global AI Developer Hackathon](https://cerebralvalley.ai/e/meta-ai-developer-hackathon)
 - **Track:** Indie developer
-- **Theme:** Build for Your World
+- **Problem statement:** Build for Your World - a problem known firsthand (crypto scam victims in Enugu), using the Muse Spark series via the Meta Model API and the open-weights Muse Spark Open on Fireworks and Baseten
 - **Public indie-track criteria:** Creativity, technical ambition, and whether the project works.
 - **Partners used:** Modal (Python detectors), Fireworks AI and Baseten (Muse Spark Open), alongside the Meta Model API (Muse Spark).
 - **Live demo:** https://trace-x-khaki.vercel.app
