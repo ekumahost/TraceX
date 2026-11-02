@@ -1,7 +1,13 @@
-import type { AIAnswer, Provider, RecoveryDocuments, RecoveryLanguage, ShieldResult, TraceCase } from './types';
+import type { AIAnswer, Provider, ProviderInfo, RecoveryDocuments, RecoveryLanguage, ShieldResult, TraceCase } from './types';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 const API = API_URL;
+
+async function get<T>(path: string): Promise<T> {
+  const res = await fetch(`${API}${path}`);
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  return res.json() as Promise<T>;
+}
 
 async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API}${path}`, {
@@ -45,26 +51,47 @@ export function scanWallet(address: string, chain: string) {
 
 const graphPayload = (c: TraceCase) => ({ nodes: c.nodes, edges: c.edges, input: c.input, network: c.network });
 
-export function generateRecoveryKit(c: TraceCase, exchange: string, language: RecoveryLanguage) {
+// 'auto' lets the backend pick: Muse Spark first, switching to the next provider if one fails
+export type ProviderChoice = 'auto' | Provider;
+const preferred = (choice: ProviderChoice) => (choice === 'auto' ? {} : { provider: choice });
+
+export function fetchProviders() {
+  return get<ProviderInfo[]>('/api/providers');
+}
+
+export function generateRecoveryKit(c: TraceCase, exchange: string, language: RecoveryLanguage, choice: ProviderChoice = 'auto') {
   return post<RecoveryDocuments>('/api/recovery-kit', {
     input: c.input,
     chain: c.chain ?? 'auto',
     hops: c.hops ?? 5,
     exchange,
     language,
+    ...preferred(choice),
   });
 }
 
-export function explainCase(c: TraceCase) {
-  return post<AIAnswer>('/api/explain', { graph: graphPayload(c), heuristics: c.risks });
+export function explainCase(c: TraceCase, choice: ProviderChoice = 'auto') {
+  return post<AIAnswer>('/api/explain', { graph: graphPayload(c), heuristics: c.risks, ...preferred(choice) });
 }
 
-export function askCase(question: string, c: TraceCase) {
-  return post<AIAnswer>('/api/ask', { question, graph: { ...graphPayload(c), heuristics: c.risks } });
+export function askCase(question: string, c: TraceCase, choice: ProviderChoice = 'auto') {
+  return post<AIAnswer>('/api/ask', { question, graph: { ...graphPayload(c), heuristics: c.risks }, ...preferred(choice) });
 }
 
-export const PROVIDER_LABEL: Record<Provider, { model: string; via: string }> = {
-  meta: { model: 'Muse Spark', via: 'Meta Model API' },
-  fireworks: { model: 'Llama 3.3 70B', via: 'Fireworks AI' },
-  baseten: { model: 'Llama 3.3 70B', via: 'Baseten' },
+export const PROVIDER_LABEL: Record<Provider, { model: string; via: string; short: string }> = {
+  meta: { model: 'Muse Spark', via: 'Meta Model API', short: 'Muse Spark' },
+  fireworks: { model: 'Llama', via: 'Fireworks AI', short: 'Fireworks' },
+  baseten: { model: 'Llama', via: 'Baseten', short: 'Baseten' },
 };
+
+// Human name for the model that answered, e.g. 'meta-llama/Llama-4-Maverick-17B-128E-Instruct' -> 'Llama 4 Maverick'
+export function modelName(provider: Provider, model?: string) {
+  if (provider === 'meta' || !model) return PROVIDER_LABEL[provider].model;
+  const id = model.split('/').pop()!.toLowerCase();
+  const v = id.match(/llama[-_ ]?v?(\d)(?:p(\d)|[.-](\d))?/);
+  if (!v) return model.split('/').pop()!;
+  const version = v[2] ?? v[3] ? `${v[1]}.${v[2] ?? v[3]}` : v[1];
+  const variant = id.match(/maverick|scout|(\d+)b/);
+  const tail = variant ? (variant[1] ? `${variant[1]}B` : variant[0][0].toUpperCase() + variant[0].slice(1)) : '';
+  return `Llama ${version}${tail ? ` ${tail}` : ''}`;
+}

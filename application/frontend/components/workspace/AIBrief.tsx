@@ -2,7 +2,8 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw, Sparkles, TriangleAlert } from 'lucide-react';
 import type { AIAnswer, TraceCase } from '@/lib/types';
-import { PROVIDER_LABEL } from '@/lib/api';
+import { PROVIDER_LABEL, modelName } from '@/lib/api';
+import { FallbackNote } from './ModelPicker';
 import { ruleBrief } from '@/lib/rule-brief';
 import { RichText } from './RichText';
 import type { Selection } from './TraceGraph';
@@ -61,12 +62,12 @@ export function AIBrief({ data, state, onRetry, onCite }: { data: TraceCase; sta
           <p className='mt-2 text-[13px] leading-relaxed text-muted'>
             {/(Failed to fetch|NetworkError|Load failed)/i.test(state.error)
               ? 'The TraceX backend isn’t reachable. Start it with npm run dev in application/backend.'
-              : /key missing|credentials missing/i.test(state.error)
+              : /no key - set|key missing|credentials missing/i.test(state.error)
                 ? 'No AI provider key is set on the backend yet.'
                 : state.error}
           </p>
-          {/key missing|credentials missing/i.test(state.error) && (
-            <p className='mt-2 text-[12.5px] text-dim'>Add META_API_KEY to application/backend/.env to enable Muse Spark.</p>
+          {/no key - set|key missing|credentials missing/i.test(state.error) && (
+            <p className='mt-2 text-[12.5px] text-dim'>Add META_API_KEY, FIREWORKS_API_KEY or BASETEN_API_KEY to application/backend/.env.</p>
           )}
           <button type='button' onClick={onRetry} className='btn btn--ghost btn--sm mt-4'><RefreshCw /> Retry</button>
         </div>
@@ -98,9 +99,10 @@ export function AIBrief({ data, state, onRetry, onCite }: { data: TraceCase; sta
   return (
     <div className='p-5'>
       <div className='mb-5 flex items-center justify-between gap-2'>
-        <span className='chip tone-low'><Sparkles className='h-3 w-3' /> {p.model}</span>
+        <span className='chip tone-low'><Sparkles className='h-3 w-3' /> {modelName(state.answer.provider, state.answer.model)}</span>
         <span className='text-[11.5px] text-dim'>via {p.via}</span>
       </div>
+      <FallbackNote from={state.answer.fellBackFrom} />
       <RichText text={shown} data={data} onCite={onCite} typing={typing} />
       {!typing && (
         <p className='mt-6 border-t border-line pt-4 text-[12px] text-dim'>

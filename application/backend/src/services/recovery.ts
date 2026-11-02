@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { draftRecoveryDocuments } from '../lib/meta';
+import { draftRecoveryDocuments, providerOrder } from '../lib/ai-unified';
+import { modelOf, type Provider } from '../lib/providers';
 
 export const RECOVERY_LANGUAGES = ['english', 'pidgin', 'igbo', 'yoruba', 'hausa'] as const;
 export type RecoveryLanguage = (typeof RECOVERY_LANGUAGES)[number];
@@ -21,7 +22,9 @@ const documentResponse = z.object({
 });
 
 export interface RecoveryDocuments {
-  provider: 'meta';
+  provider: Provider;
+  model: string;
+  fellBackFrom?: Array<{ provider: Provider; error: string }>;
   freezeRequest: string;
   policeReport: string;
 }
@@ -63,6 +66,7 @@ export async function generateRecoveryDocuments(
   heuristics: Array<{ type: string; severity: string; detail?: string; tx?: string }>,
   exchange: string,
   language: RecoveryLanguage,
+  preferred?: Provider,
 ): Promise<RecoveryDocuments> {
   if (!graph.edges.length) throw new Error('A Recovery Kit needs at least one on-chain transfer.');
 
@@ -86,20 +90,26 @@ export async function generateRecoveryDocuments(
     deterministicFindings: heuristics.map(({ type, severity, detail, tx }) => ({ type, severity, detail, tx })),
   });
   // The model sometimes skips a citation; every draft must cite every transaction and nothing
-  // else, so retry a couple of times before showing the user an error.
-  let lastError: Error = new Error('Recovery Kit generation failed.');
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      const raw = await draftRecoveryDocuments(evidence, LANGUAGE_NAMES[language]);
-      if (!raw) throw new Error('The Meta Model API returned an empty recovery draft.');
-      const documents = parseRecoveryDocuments(raw);
-      validateRecoveryCitations(documents.freezeRequest, hashes, addresses);
-      validateRecoveryCitations(documents.policeReport, hashes, addresses);
-      return { provider: 'meta', ...documents };
-    } catch (e) {
-      lastError = e instanceof Error ? e : new Error(String(e));
-      console.warn(`Recovery Kit draft ${attempt}/3 rejected: ${lastError.message}`);
+  // else, so give each provider two tries before switching to the next one.
+  const fellBackFrom: Array<{ provider: Provider; error: string }> = [];
+  for (const provider of providerOrder(preferred)) {
+    let lastError: Error = new Error('Recovery Kit generation failed.');
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const raw = await draftRecoveryDocuments(provider, evidence, LANGUAGE_NAMES[language]);
+        if (!raw) throw new Error('The model returned an empty recovery draft.');
+        const documents = parseRecoveryDocuments(raw);
+        validateRecoveryCitations(documents.freezeRequest, hashes, addresses);
+        validateRecoveryCitations(documents.policeReport, hashes, addresses);
+        return { provider, model: modelOf(provider), ...documents, ...(fellBackFrom.length ? { fellBackFrom } : {}) };
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error(String(e));
+        console.warn(`Recovery Kit draft via ${provider} ${attempt}/2 rejected: ${lastError.message}`);
+        if (/^no key/.test(lastError.message)) break;
+      }
     }
+    fellBackFrom.push({ provider, error: lastError.message });
   }
-  throw lastError;
+  const real = fellBackFrom.filter((f) => !/^no key/.test(f.error));
+  throw new Error((real.at(-1) ?? fellBackFrom.at(-1))?.error ?? 'Recovery Kit generation failed.');
 }

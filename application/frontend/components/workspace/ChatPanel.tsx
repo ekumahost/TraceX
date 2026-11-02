@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { ArrowUp } from 'lucide-react';
 import type { TraceCase } from '@/lib/types';
-import { askCase, PROVIDER_LABEL } from '@/lib/api';
+import { askCase, modelName, PROVIDER_LABEL } from '@/lib/api';
+import { useProviderChoice } from '@/lib/provider-choice';
 import { Adinkra } from '../Adinkra';
 import { RichText } from './RichText';
 import type { Selection } from './TraceGraph';
@@ -37,6 +38,7 @@ export function ChatPanel({ data, onCite }: { data: TraceCase; onCite: (s: Selec
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [q, setQ] = useState('');
   const [busy, setBusy] = useState(false);
+  const model = useProviderChoice();
   const end = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,8 +55,8 @@ export function ChatPanel({ data, onCite }: { data: TraceCase; onCite: (s: Selec
         setMsgs((m) => [...m, { role: 'ai', text: offlineAnswer(question, data), via: 'Offline deterministic reply' }]);
         return;
       }
-      const a = await askCase(question, data);
-      setMsgs((m) => [...m, { role: 'ai', text: a.text, via: PROVIDER_LABEL[a.provider].model }]);
+      const a = await askCase(question, data, model);
+      setMsgs((m) => [...m, { role: 'ai', text: a.text, via: `${modelName(a.provider, a.model)} · ${PROVIDER_LABEL[a.provider].via}` }]);
     } catch (e: any) {
       setMsgs((m) => [...m, { role: 'error', text: e.message }]);
     } finally {

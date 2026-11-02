@@ -58,7 +58,16 @@ export type Provider = 'meta' | 'fireworks' | 'baseten';
 
 export interface AIAnswer {
   provider: Provider;
+  model?: string; // exact model id the backend used
   text: string;
+  fellBackFrom?: Array<{ provider: Provider; error: string }>; // providers that failed first
+}
+
+export interface ProviderInfo {
+  id: Provider;
+  via: string;
+  model: string;
+  configured: boolean;
 }
 
 export type PoisonKind = 'lookalike' | 'fake_token' | 'zero_transfer';
@@ -92,7 +101,9 @@ export interface ShieldResult {
 export type RecoveryLanguage = 'english' | 'pidgin' | 'igbo' | 'yoruba' | 'hausa';
 
 export interface RecoveryDocuments {
-  provider: 'meta';
+  provider: Provider;
+  model?: string;
+  fellBackFrom?: Array<{ provider: Provider; error: string }>;
   freezeRequest: string;
   policeReport: string;
 }

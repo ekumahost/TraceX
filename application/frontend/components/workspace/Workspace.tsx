@@ -19,6 +19,8 @@ import { ChatPanel } from './ChatPanel';
 import { EvidencePanel } from './EvidencePanel';
 import { Timeline } from './Timeline';
 import { RecoveryKit } from './RecoveryKit';
+import { ModelPicker } from './ModelPicker';
+import { useProviderChoice } from '@/lib/provider-choice';
 
 type Tab = 'brief' | 'ask' | 'evidence' | 'timeline' | 'recovery';
 const TABS: { id: Tab; label: string }[] = [
@@ -42,6 +44,7 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
   const [focusNonce, setFocusNonce] = useState(0);
   const [tab, setTab] = useState<Tab>('brief');
   const [brief, setBrief] = useState<BriefState>({ status: 'loading' });
+  const model = useProviderChoice();
   const [mobileSearch, setMobileSearch] = useState(false);
   const run = useRef(0);
 
@@ -78,11 +81,11 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
   const explain = useCallback(async (c: TraceCase) => {
     setBrief({ status: 'loading' });
     try {
-      setBrief({ status: 'done', answer: await explainCase(c) });
+      setBrief({ status: 'done', answer: await explainCase(c, model) });
     } catch (e: any) {
       setBrief({ status: 'error', error: e.message });
     }
-  }, []);
+  }, [model]); // picking another model re-runs the brief
 
   useEffect(() => {
     if (!data) return;
@@ -207,6 +210,7 @@ export function Workspace({ query, chain = 'auto' }: { query: string; chain?: st
               <button key={t.id} role='tab' aria-selected={tab === t.id} onClick={() => setTab(t.id)} className='tab'>{t.label}</button>
             ))}
           </div>
+          {data && !data.sample && !data.demo && (tab === 'brief' || tab === 'ask' || tab === 'recovery') && <ModelPicker />}
           <div className='scroll-thin min-h-0 flex-1 overflow-y-auto'>
             {!data ? (
               <div className='space-y-3 p-5'>{[90, 100, 70].map((w, i) => <div key={i} className='shimmer h-3' style={{ width: `${w}%` }} />)}</div>

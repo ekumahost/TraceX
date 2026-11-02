@@ -7,7 +7,7 @@ import { Mark } from '@/components/Logo';
 import { CasePreview } from '@/components/landing/CasePreview';
 import { RichText } from '@/components/workspace/RichText';
 import { loadReport, type ReportBundle } from '@/lib/report';
-import { PROVIDER_LABEL } from '@/lib/api';
+import { modelName, PROVIDER_LABEL } from '@/lib/api';
 import { ruleBrief } from '@/lib/rule-brief';
 import { caseStats, fmtDuration, fmtTime, fmtValue, RISK_TITLE, TYPE_LABEL, verdict } from '@/lib/format';
 import { CHAINS } from '@/lib/chains';
@@ -129,7 +129,7 @@ export default function ReportPage() {
           </div>
         </Section>
 
-        <Section title={brief ? `AI brief · ${PROVIDER_LABEL[brief.provider].model} via ${PROVIDER_LABEL[brief.provider].via}` : 'Summary · rule-based (no AI)'}>
+        <Section title={brief ? `AI brief · ${modelName(brief.provider, brief.model)} via ${PROVIDER_LABEL[brief.provider].via}` : 'Summary · rule-based (no AI)'}>
           <RichText text={brief?.text ?? ruleBrief(data)} data={data} onCite={() => {}} />
         </Section>
 

@@ -1,6 +1,6 @@
-<div align="center">
-
 # TraceX AI
+
+<div align="center">
 
 ### Follow the money. *Prove it.*
 
@@ -22,6 +22,16 @@ AI-powered blockchain forensics that traces cryptocurrency flows across seven ch
 </div>
 
 ---
+
+## Contributors
+
+TraceX was built by **Okokoh Benjamin** with AI coding partners. Special thanks to the AI contributors who accelerated development:
+
+- **Meta AI** — Started the project architecture, scaffolding, docs, and Meta Model API integration in `/Applications/WEBSITE/TraceX` using Muse Spark / Llama 3.3 (Meta AI model), Muse Code, and Meta AI desktop app. Provided evidence-backed AI pattern with citation enforcement.
+- **Claude (Anthropic)** — `@claude` — Assisted with frontend components, backend logic, and debugging.
+- **Copilot (GitHub)** — `@Copilot` — Assisted with code completions and boilerplate.
+
+All AI contributions are credited here as requested. Core product logic and vision by Okokoh Benjamin.
 
 ## The problem
 
@@ -100,7 +110,7 @@ flowchart LR
 | Frontend | Next.js 15, React 18, TypeScript, Tailwind, React Flow (`@xyflow/react`), Lucide |
 | API | Node 20, Express, TypeScript, Zod, ethers v6, OpenAI-compatible SDK |
 | Detectors | Python 3.12, FastAPI, NetworkX - deployed on **Modal** (`modal_app.py`); TypeScript copy as fallback |
-| AI | Muse Spark via Meta Model API |
+| AI | Muse Spark via Meta Model API - Meta AI model Llama 3.3 (Meta AI model) |
 | Data | Alchemy (all 7 chains), Etherscan V2, Blockscout / Routescan / Optimism explorer (keyless), publicnode RPC |
 | Storage | None needed - traces are computed on demand with a short in-memory cache |
 | Ops | Dockerfiles, docker-compose, Render blueprint (`render.yaml`) |
@@ -138,7 +148,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 
 | Key | Needed for | Get it |
 |---|---|---|
-| `META_API_KEY` | AI brief, Q&A, Recovery Kit (Muse Spark) | dev.meta.ai |
+| `META_API_KEY` | AI brief, Q&A, Recovery Kit (Muse Spark) - Meta AI model Llama 3.3 (Meta AI model) | dev.meta.ai |
 | `ALCHEMY_API_KEY` | Tracing on all 7 chains, Poisoning Shield | dashboard.alchemy.com (enable each network) |
 | `ANALYSIS_ENGINE_URL` | Python detectors on Modal | `modal deploy modal_app.py` |
 | `ETHERSCAN_API_KEY` | Optional backup data source | etherscan.io/myapikey |
@@ -166,4 +176,4 @@ docs/                Demo cases, submission notes, screenshots, timeline
 
 ## Credits
 
-Built by **Okokoh Benjamin** in Enugu, Nigeria. Design language inspired by West African visual tradition - Adinkra symbols (Akan, Ghana), Kente and Adire patterns. Licensed [MIT](LICENSE).
+Built by **Okokoh Benjamin** in Enugu, Nigeria. With AI coding partners: **Meta AI** (started project, architecture, Meta AI model Llama 3.3 integration), **Claude** (@claude), and **Copilot** (@Copilot). Design language inspired by West African visual tradition - Adinkra symbols (Akan, Ghana), Kente and Adire patterns. Licensed [MIT](LICENSE).

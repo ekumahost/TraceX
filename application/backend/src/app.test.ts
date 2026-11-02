@@ -11,7 +11,7 @@ import { createApp } from './app';
  * Live end-to-end checks are in live.test.ts (opt-in).
  */
 
-const KEYS = ['META_API_KEY', 'FIREWORKS_API_KEY', 'BASETEN_API_KEY', 'BASETEN_MODEL_ID', 'ALCHEMY_API_KEY', 'ETHERSCAN_API_KEY', 'ANALYSIS_ENGINE_URL'];
+const KEYS = ['META_API_KEY', 'FIREWORKS_API_KEY', 'BASETEN_API_KEY', 'AI_PROVIDER', 'ALCHEMY_API_KEY', 'ETHERSCAN_API_KEY', 'ANALYSIS_ENGINE_URL'];
 
 function serve(env: Record<string, string>) {
   const saved = new Map(Object.keys(env).map((k) => [k, process.env[k]]));
@@ -87,6 +87,15 @@ describe('AI endpoints without provider keys', () => {
     assert.equal(r.status, 502);
     assert.match(r.json.error, /All AI providers failed/);
     assert.match(r.json.error, /META_API_KEY/);
+    assert.match(r.json.error, /FIREWORKS_API_KEY/);
+    assert.match(r.json.error, /BASETEN_API_KEY/);
+  });
+
+  test('GET /api/providers lists all three Meta-model providers and whether each has a key', async () => {
+    const r = await api.call('/api/providers');
+    assert.equal(r.status, 200);
+    assert.deepEqual(r.json.map((p: any) => [p.id, p.configured]), [['meta', false], ['fireworks', false], ['baseten', false]]);
+    assert.ok(r.json.every((p: any) => p.model && p.via));
   });
 
   test('/api/ask needs a question and a graph', async () => {

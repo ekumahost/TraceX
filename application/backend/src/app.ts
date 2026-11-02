@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { explainTraceUnified, askQuestionUnified, isProvider } from './lib/ai-unified';
+import { PROVIDERS, providerStatus } from './lib/providers';
 import { traceCase } from './services/trace';
 import { CHAINS, CHAIN_ORDER } from './services/chains';
 import { InputError, NotFoundError } from './types';
@@ -27,11 +28,17 @@ export function createApp() {
     hops: z.number().int().min(1).max(20).default(5),
     exchange: z.string().trim().max(100).default(''), // optional - mixer cases may never reach an exchange
     language: z.enum(RECOVERY_LANGUAGES),
+    provider: z.enum(PROVIDERS as [string, ...string[]]).optional(),
   });
 
 
   app.get('/', (req, res) => {
     res.json({ status: 'ok', service: 'tracex-backend', version: '0.1.0' });
+  });
+
+  // Which AI providers have a key on this server, so the UI can offer them
+  app.get('/api/providers', (_req, res) => {
+    res.json(providerStatus());
   });
 
   app.get('/api/chains', (_req, res) => {
@@ -109,6 +116,7 @@ export function createApp() {
         trace.risks,
         parsed.data.exchange,
         parsed.data.language,
+        parsed.data.provider as any,
       ));
     } catch (e: any) {
       console.error('Recovery Kit generation failed:', e?.message ?? e);
